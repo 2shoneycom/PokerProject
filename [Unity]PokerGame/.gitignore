@@ -71,3 +71,6 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# [이승헌]이게 있어야 Resources 폴더 내 파일들을 무시한다고 함
+Assets/Resources/
