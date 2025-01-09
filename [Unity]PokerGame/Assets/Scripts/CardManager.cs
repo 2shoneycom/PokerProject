@@ -23,6 +23,12 @@ public class CardManager : MonoBehaviour
     void Start()
     {
         SetupCard();            // 게임 시작시 카드 덱 셔플
+        TurnManager.OnAddCard += AddCard;
+    }
+
+    void OnDestroy()
+    {
+        TurnManager.OnAddCard -= AddCard;
     }
 
     void SetupCard()
@@ -62,16 +68,14 @@ public class CardManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()           // 테스트용 치트
-    {                       // 1은 최대 2번, 2는 최대 5번만 누를것.
-        if (Input.GetKeyDown(KeyCode.Keypad1))
-            AddCard(true);
-        if (Input.GetKeyDown(KeyCode.Keypad2))
-            AddCard(false);
+    void Update()
+    {
+
     }
 
-    void AddCard(bool isMine)   // 카드 생성 로직
+    void AddCard(int playerIndex)   // 카드 생성 로직
     {
+        bool isMine = playerIndex == 0;
         // 카드 오브젝트 생성
         var cardObject = Instantiate(cardPrefabs, cardSpawnPoint.position, Quaternion.identity);
         // 카드의 Card 스크립트를 가져와 덱의 0번째 카드로 셋업 
