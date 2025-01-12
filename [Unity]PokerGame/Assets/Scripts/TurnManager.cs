@@ -20,13 +20,11 @@ public class TurnManager : MonoBehaviour
     enum ETurnMode { Random, MyTurn, OthersTurn }   //n명의 턴 필요할지도?
     WaitForSeconds delay05 = new WaitForSeconds(0.5f);
     WaitForSeconds delay07 = new WaitForSeconds(0.7f);
-    GameManager gameManager;
 
     public static Action<int> OnAddCard;
 
     void Start()
     {
-        gameManager = GameManager.Inst;
     }
 
     void GameSetup()
@@ -37,16 +35,19 @@ public class TurnManager : MonoBehaviour
         switch (eTurnMode)
         {
             case ETurnMode.Random:
-                gameManager.currentPlayer = Random.Range(0, gameManager.totalPlayer);
-                myTurn = gameManager.currentPlayer == gameManager.mainPlayer;
+                GameManager.Inst.currentPlayerIndex = Random.Range(0, GameManager.Inst.totalPlayer);
+                myTurn = GameManager.Inst.currentPlayerIndex == GameManager.Inst.mainPlayerIndex;
                 break;
             case ETurnMode.MyTurn:
-                gameManager.currentPlayer = gameManager.mainPlayer;
+                GameManager.Inst.currentPlayerIndex = GameManager.Inst.mainPlayerIndex;
                 myTurn = true;
                 break;
             case ETurnMode.OthersTurn:
-                gameManager.currentPlayer = 0; // Random.Range(1, gameManager.totalPlayer);
-                myTurn = true;  //false;
+                do
+                {
+                    GameManager.Inst.currentPlayerIndex = Random.Range(0, GameManager.Inst.totalPlayer);
+                } while (GameManager.Inst.totalPlayer != 1 && GameManager.Inst.currentPlayerIndex == GameManager.Inst.mainPlayerIndex);
+                myTurn = false;
                 break;
         }
     }
@@ -58,9 +59,9 @@ public class TurnManager : MonoBehaviour
 
         for (int j = 0; j < 2; j++)
         {
-            for (int i = 0; i < gameManager.totalPlayer; i++)
+            for (int i = 0; i < GameManager.Inst.totalPlayer; i++)
             {
-                int toPlayer = (gameManager.currentPlayer + i) % gameManager.totalPlayer;
+                int toPlayer = (GameManager.Inst.currentPlayerIndex + i) % GameManager.Inst.totalPlayer;
 
                 yield return delay05;
                 OnAddCard?.Invoke(toPlayer);
@@ -75,7 +76,7 @@ public class TurnManager : MonoBehaviour
         isLoading = true;
 
         yield return delay07;
-        OnAddCard?.Invoke(gameManager.dealerPlayer);
+        OnAddCard?.Invoke(GameManager.Inst.dealerPlayerIndex);
         yield return delay07;
 
         isLoading = false;
@@ -83,8 +84,8 @@ public class TurnManager : MonoBehaviour
 
     public void EndTurn()
     {
-        gameManager.currentPlayer = (gameManager.currentPlayer + 1) % gameManager.totalPlayer;
-        myTurn = gameManager.currentPlayer == gameManager.mainPlayer;
+        GameManager.Inst.currentPlayerIndex = (GameManager.Inst.currentPlayerIndex + 1) % GameManager.Inst.totalPlayer;
+        myTurn = GameManager.Inst.currentPlayerIndex == GameManager.Inst.mainPlayerIndex;
         StartCoroutine(StartTurnCo());
     }
 }

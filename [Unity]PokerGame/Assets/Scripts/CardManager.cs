@@ -10,10 +10,8 @@ public class CardManager : MonoBehaviour
 
     [SerializeField] ItemSO itemSO;
     [SerializeField] GameObject cardPrefabs;        // 생성할 카드 프리펩
-    [SerializeField] List<Card> myCards;            // 현재 나의 카드 리스트
     [SerializeField] List<Card> dealerCards;        // 현재 딜러 카드 리스트
-    [SerializeField] Transform cardSpawnPoint;      // 최초 카트 생성 위치 (시작점)
-    [SerializeField] Transform[] myCardSpawnPos;    // 플레이어의 카드 위치
+    [SerializeField] Transform cardSpawnPoint;      // 최초 카드 생성 위치 (시작점)
     [SerializeField] Transform[] dealerCardSpawnPos;// 딜러의 카드 위치
 
     List<Item> cardBuffer;      // 카드 덱
@@ -75,27 +73,47 @@ public class CardManager : MonoBehaviour
 
     void AddCard(int playerIndex)   // 카드 생성 로직
     {
-        bool isMine = playerIndex == 0;
         // 카드 오브젝트 생성
         var cardObject = Instantiate(cardPrefabs, cardSpawnPoint.position, Quaternion.identity);
         // 카드의 Card 스크립트를 가져와 덱의 0번째 카드로 셋업 
         var card = cardObject.GetComponent<Card>();
-        card.Setup(PopItem(), isMine);
+        card.Setup(PopItem(), playerIndex);
 
         // 카드를 알맞은 리스트에 추가
-        (isMine ? myCards : dealerCards).Add(card);
-        int nowCardIndex = (isMine ? myCards : dealerCards).Count - 1;
+        if(playerIndex == GameManager.Inst.dealerPlayerIndex)
+            dealerCards.Add(card);
+        else
+        {
+            Player nowPlayer = GameManager.Inst.players[playerIndex].GetComponent<Player>();
+            nowPlayer?.myCards.Add(card);
+        }
         // 카드 움직임 함수 호출
-        CardMoveToPos(isMine, nowCardIndex);
+        CardMoveToPos(playerIndex);
     }
 
-    void CardMoveToPos(bool isMine, int cardIndex)  // DOTween을 이용한 카드 움직임 구현
+    void CardMoveToPos(int playerIndex)  // DOTween을 이용한 카드 움직임 구현
     {
-        var targetCards = isMine ? myCards : dealerCards;
-        var targetPos = isMine ? myCardSpawnPos : dealerCardSpawnPos;
-        var targetCard = targetCards[cardIndex];
+        var targetCards = dealerCards;
+        int cardIndex = dealerCards.Count - 1;
+        Card targetCard = cardIndex >= 0 ? dealerCards[cardIndex] : new Card();
+        var targetPos = cardIndex >= 0 ? dealerCardSpawnPos[cardIndex].position : new Vector3();
 
-        targetCard.transform.DOMove(targetPos[cardIndex].position, 0.7f);
+        if(playerIndex != GameManager.Inst.dealerPlayerIndex)
+        {
+            Player nowPlayer = GameManager.Inst.players[playerIndex].GetComponent<Player>();
+
+            targetCards = nowPlayer?.myCards;
+            cardIndex = targetCards.Count - 1;
+            targetCard = targetCards[cardIndex];
+
+            targetPos = GameManager.Inst.players[playerIndex].transform.position;
+            if (cardIndex == 0)
+                targetPos.x += 3f;
+            else
+                targetPos.x -= 3f;
+        }
+
+        targetCard.transform.DOMove(targetPos, 0.7f);
         targetCard.transform.DORotateQuaternion(Quaternion.identity, 0.7f);
         targetCard.transform.DOScale(Vector3.one * 4.5f, 0.7f);
     }

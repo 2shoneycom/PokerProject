@@ -14,10 +14,10 @@ public class Card : MonoBehaviour
     int myCardIndex;                        // 현재 카드의 인덱스, CardManager의 CardShape, CardNum
                                             // 리스트에 접근하여 어떤 카드인지 파악 가능
 
-    public void Setup(Item item, bool isFront)
+    public void Setup(Item item, int playerIndex)
     {
         this.item = item;
-        this.isFront = isFront;
+        this.isFront = playerIndex == GameManager.Inst.mainPlayerIndex;
         myCardIndex = this.item.cardIndex;
 
         if (this.isFront) card.sprite = this.item.sprite;
