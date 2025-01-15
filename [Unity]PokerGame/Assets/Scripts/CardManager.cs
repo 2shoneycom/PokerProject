@@ -95,7 +95,7 @@ public class CardManager : MonoBehaviour
     {
         var targetCards = dealerCards;
         int cardIndex = dealerCards.Count - 1;
-        Card targetCard = cardIndex >= 0 ? dealerCards[cardIndex] : new Card();
+        Card targetCard = cardIndex >= 0 ? dealerCards[cardIndex] : null;
         var targetPos = cardIndex >= 0 ? dealerCardSpawnPos[cardIndex].position : new Vector3();
 
         if(playerIndex != GameManager.Inst.dealerPlayerIndex)

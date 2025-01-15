@@ -95,9 +95,9 @@ public class GameManager : MonoBehaviour
     {                       // 1은 최대 2번, 2는 최대 5번만 누를것.
         if (Input.GetKeyDown(KeyCode.Keypad1))
             TurnManager.OnAddCard?.Invoke(mainPlayerIndex);
-        if (Input.GetKeyDown(KeyCode.Keypad2))
+        if (Input.GetKeyDown(KeyCode.UpArrow))
             TurnManager.OnAddCard?.Invoke(dealerPlayerIndex);
-        if (Input.GetKeyDown(KeyCode.Keypad3))
+        if (Input.GetKeyDown(KeyCode.DownArrow))
             TurnManager.Inst.EndTurn();
     }
 
