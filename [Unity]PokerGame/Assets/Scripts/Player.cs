@@ -6,6 +6,8 @@ public class Player : MonoBehaviour
 {
 
     [SerializeField] public List<Card> myCards;
+    public Transform myCardLeft;
+    public Transform myCardRight;
 
     // Start is called before the first frame update
     void Start()

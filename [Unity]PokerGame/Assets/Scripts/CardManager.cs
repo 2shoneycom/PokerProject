@@ -80,7 +80,7 @@ public class CardManager : MonoBehaviour
         card.Setup(PopItem(), playerIndex);
 
         // 카드를 알맞은 리스트에 추가
-        if(playerIndex == GameManager.Inst.dealerPlayerIndex)
+        if(playerIndex == GameManager.Inst.dealer)
             dealerCards.Add(card);
         else
         {
@@ -98,7 +98,7 @@ public class CardManager : MonoBehaviour
         Card targetCard = cardIndex >= 0 ? dealerCards[cardIndex] : null;
         var targetPos = cardIndex >= 0 ? dealerCardSpawnPos[cardIndex].position : new Vector3();
 
-        if(playerIndex != GameManager.Inst.dealerPlayerIndex)
+        if(playerIndex != GameManager.Inst.dealer)
         {
             Player nowPlayer = GameManager.Inst.players[playerIndex].GetComponent<Player>();
 
@@ -106,11 +106,10 @@ public class CardManager : MonoBehaviour
             cardIndex = targetCards.Count - 1;
             targetCard = targetCards[cardIndex];
 
-            targetPos = GameManager.Inst.players[playerIndex].transform.position;
             if (cardIndex == 0)
-                targetPos.x += 3f;
+                targetPos = nowPlayer.myCardLeft.position;
             else
-                targetPos.x -= 3f;
+                targetPos = nowPlayer.myCardRight.position;
         }
 
         targetCard.transform.DOMove(targetPos, 0.7f);

@@ -17,7 +17,7 @@ public class Card : MonoBehaviour
     public void Setup(Item item, int playerIndex)
     {
         this.item = item;
-        this.isFront = playerIndex == GameManager.Inst.mainPlayerIndex;
+        this.isFront = playerIndex == GameManager.Inst.mainPlayerIndex || playerIndex == GameManager.Inst.dealer;
         myCardIndex = this.item.cardIndex;
 
         if (this.isFront) card.sprite = this.item.sprite;
