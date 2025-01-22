@@ -11,7 +11,7 @@ public class Card : MonoBehaviour
 
     public Item item;
     bool isFront;                           // 뒷면 보여야하는지
-    int myCardIndex;                        // 현재 카드의 인덱스, CardManager의 CardShape, CardNum
+    public int myCardIndex;                        // 현재 카드의 인덱스, CardManager의 CardShape, CardNum
                                             // 리스트에 접근하여 어떤 카드인지 파악 가능
 
     public void Setup(Item item, int playerIndex)

@@ -10,13 +10,13 @@ public class CardManager : MonoBehaviour
 
     [SerializeField] ItemSO itemSO;
     [SerializeField] GameObject cardPrefabs;        // 생성할 카드 프리펩
-    [SerializeField] List<Card> dealerCards;        // 현재 딜러 카드 리스트
+    [SerializeField] public List<Card> dealerCards;        // 현재 딜러 카드 리스트
     [SerializeField] Transform cardSpawnPoint;      // 최초 카드 생성 위치 (시작점)
     [SerializeField] Transform[] dealerCardSpawnPos;// 딜러의 카드 위치
 
     List<Item> cardBuffer;      // 카드 덱
-    List<char> cardShape;       // 0-12 는 클로버, 13-25 는 다이아, 26-38 은 하트, 39-51 은 스페이드
-    List<int> cardNum;          // 0-12 는 1-13이 저장되어, 클로버의 숫자를 나타냄, 이후도 동일하게 작동
+    public List<char> cardShape;       // 0-12 는 클로버, 13-25 는 다이아, 26-38 은 하트, 39-51 은 스페이드
+    public List<int> cardNum;          // 0-12 는 1-13이 저장되어, 클로버의 숫자를 나타냄, 이후도 동일하게 작동
 
     void Start()
     {
