@@ -45,7 +45,7 @@ public class CardManager : MonoBehaviour
                 case 2: cardShape.Add('H'); break;
                 case 3: cardShape.Add('S'); break;
             }
-            cardNum.Add((i + 1) % 14);
+            cardNum.Add((i % 13) + 1);
         }
 
         ShuffleCard();
@@ -95,7 +95,7 @@ public class CardManager : MonoBehaviour
             dealerCards.Add(card);
         else
         {
-            Player nowPlayer = GameManager.Inst.players[playerIndex].GetComponent<Player>();
+            Player nowPlayer = PlayerManager.Inst.players[playerIndex];
             nowPlayer?.myCards.Add(card);
         }
         // 카드 움직임 함수 호출
@@ -111,7 +111,7 @@ public class CardManager : MonoBehaviour
 
         if(playerIndex != GameManager.Inst.dealer)
         {
-            Player nowPlayer = GameManager.Inst.players[playerIndex].GetComponent<Player>();
+            Player nowPlayer = PlayerManager.Inst.players[playerIndex];
 
             targetCards = nowPlayer?.myCards;
             cardIndex = targetCards.Count - 1;

@@ -14,13 +14,6 @@ public class Player : MonoBehaviour
     public Transform myCardLeft;
     public Transform myCardRight;
 
-    [SerializeField] public Button callButton;
-    [SerializeField] public Button doubleButton;
-    [SerializeField] public Button dieButton;
-    [SerializeField] public Button quarterButton;
-    [SerializeField] public Button halfButton;
-    [SerializeField] public Button allInButton;
-
     public void Initialize(string name)
     {
         Name = name;
@@ -29,16 +22,6 @@ public class Player : MonoBehaviour
         IsCall = false;
         SeedMoney = 1000000;
         myCards = new List<Card>();
-        DisableAllButtons();
-    }
-    public void DisableAllButtons()
-    {
-        callButton.interactable = false;
-        doubleButton.interactable = false;
-        dieButton.interactable = false;
-        quarterButton.interactable = false;
-        halfButton.interactable = false;
-        allInButton.interactable = false;
     }
 
     public void PlaceBet(BetType betType)

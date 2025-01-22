@@ -40,7 +40,7 @@ public class TurnManager : MonoBehaviour
         playerD = isFirst ? (playerD + 1) % GameManager.Inst.totalPlayer : Random.Range(0, GameManager.Inst.totalPlayer);
         playerSB = (playerD + 1) % GameManager.Inst.totalPlayer;
         playerBB = (playerSB + 1) % GameManager.Inst.totalPlayer;
-        roundNum = 1;
+        roundNum = 0;
         isFirst = true;
     }
 
@@ -65,14 +65,14 @@ public class TurnManager : MonoBehaviour
     public IEnumerator StartTurnCo()
     {
         isLoading = true;
+        roundNum++;
+
         switch (roundNum)
         {
             case 1:
-                roundNum++;
                 PlayerManager.Inst.StartRound();
                 break;
             case 2:
-                roundNum++;
                 for (int i = 0; i < 3; i++)
                 {
                     yield return delay07;
@@ -82,17 +82,16 @@ public class TurnManager : MonoBehaviour
                 PlayerManager.Inst.StartRound();
                 break;
             case 5:
+                yield return delay07;
                 EndTurn();
                 break;
             default:
-                roundNum++;
                 yield return delay07;
                 OnAddCard?.Invoke(GameManager.Inst.dealer);
                 yield return delay07;
                 PlayerManager.Inst.StartRound();
                 break;
         }
-        // ÅÏ ±¸Çö, ÃßÈÄ¿£ µô -> 3Àå ¹èºÐ -> µô -> 1Àå ¹èºÐ -> µô -> 1Àå ¹èºÐ -> µô -> ÆÇ´Ü
     }
 
     public void EndTurn()

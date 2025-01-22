@@ -9,13 +9,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Inst {  get; private set; }
     void Awake() => Inst = this;
 
-    [SerializeField] Transform[] playerPos;
-    [SerializeField] Transform mainplayerPos;
-    [SerializeField] GameObject playerPrefabs;        // 생성할 카드 프리펩
-
-    GameObject mainPlayer;
-    public List<GameObject> players;
-
+    public GameObject mainPlayer;
     public int totalPlayer;     // 중앙을 기준 플레이어로 하자
     public int mainPlayerIndex = 0;
     public int dealer = 99;
@@ -23,22 +17,8 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SetupPlayer(totalPlayer);
+        PlayerManager.Inst.SetupPlayers(totalPlayer);
         StartGame();        // 추후 버튼 입력으로도 변동
-    }
-
-    void SetupPlayer(int totalPlayer)
-    {
-        players = new List<GameObject>();
-
-        mainPlayerIndex = 0;
-        mainPlayer = Instantiate(playerPrefabs, mainplayerPos.position, Quaternion.identity);
-        players.Add(mainPlayer);
-
-        for(int i = 0; i < totalPlayer - 1; i++)
-        {
-            players.Add(Instantiate(playerPrefabs, playerPos[i].position, Quaternion.identity));
-        }
     }
 
     // Update is called once per frame
@@ -57,6 +37,21 @@ public class GameManager : MonoBehaviour
             TurnManager.OnAddCard?.Invoke(dealer);
         if (Input.GetKeyDown(KeyCode.DownArrow))
             TurnManager.Inst.EndTurn();
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Debug.Log($"{PlayerManager.Inst.currentPlayerIndex} Call");
+            PlayerManager.Inst.OnButtonClicked("Call");
+        }
+        if (Input.GetKeyDown(KeyCode.W))
+            PlayerManager.Inst.OnButtonClicked("Double");
+        if (Input.GetKeyDown(KeyCode.E))
+            PlayerManager.Inst.OnButtonClicked("Die");
+        if (Input.GetKeyDown(KeyCode.R))
+            PlayerManager.Inst.OnButtonClicked("Quarter");
+        if (Input.GetKeyDown(KeyCode.T))
+            PlayerManager.Inst.OnButtonClicked("Half");
+        if (Input.GetKeyDown(KeyCode.Y))
+            PlayerManager.Inst.OnButtonClicked("AllIn");
     }
 
     public void StartGame()
@@ -67,9 +62,9 @@ public class GameManager : MonoBehaviour
     public void SetupNewGame()
     {
         CardManager.Inst.RemoveDealerCard();
-        for(int i=0; i<players.Count; i++)
+        for (int i = 0; i < PlayerManager.Inst.players.Count; i++) 
         {
-            players[i].GetComponent<Player>()?.RemoveCard();
+            PlayerManager.Inst.players[i]?.RemoveCard();
         }
         CardManager.Inst.ShuffleCard();
         StartCoroutine(TurnManager.Inst.StartGameCo());

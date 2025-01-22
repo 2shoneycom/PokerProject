@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DG.Tweening.Core.Easing;
 using UnityEditor.Build.Content;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,15 +18,25 @@ public class PlayerManager : MonoBehaviour
 {
     public static PlayerManager Inst { get; private set; }
 
+    [SerializeField] Transform[] playerPos;
+    [SerializeField] Transform mainplayerPos;
+    [SerializeField] GameObject playerPrefabs;
+
     public List<Player> players;
-    private int currentPlayerIndex = 0;
-    public GameObject playerPrefab;
+    public int currentPlayerIndex = 0;
     public int totalMoney = 0;
     public int canCallMoney = 0;
     public int canBetMoney = 0;
     public int diePlayer = 0;
     public int roundCount = 0;
     private Coroutine turnTimerCoroutine;
+
+    [SerializeField] public Button callButton;
+    [SerializeField] public Button doubleButton;
+    [SerializeField] public Button dieButton;
+    [SerializeField] public Button quarterButton;
+    [SerializeField] public Button halfButton;
+    [SerializeField] public Button allInButton;
 
     private void Awake()
     {
@@ -36,42 +45,65 @@ public class PlayerManager : MonoBehaviour
 
     void Start()
     {
-        SetupPlayers(7); // 7���� �÷��̾� ����
+       
     }
-    void SetupPlayers(int totalPlayers)
+
+    public void DisableAllButtons()
+    {
+        callButton.interactable = false;
+        doubleButton.interactable = false;
+        dieButton.interactable = false;
+        quarterButton.interactable = false;
+        halfButton.interactable = false;
+        allInButton.interactable = false;
+    }
+
+    public void SetupPlayers(int totalPlayers)
     {
         players = new List<Player>();
-        for (int i = 1; i <= totalPlayers; i++)
-        {
-            GameObject playerObject = Instantiate(playerPrefab);
-            Player player = playerObject.GetComponent<Player>();
 
-            player.Initialize($"Player {i}");
-            players.Add(player);
+        GameManager.Inst.mainPlayerIndex = 0;
+        GameManager.Inst.mainPlayer = Instantiate(playerPrefabs, mainplayerPos.position, Quaternion.identity);
+        players.Add(GameManager.Inst.mainPlayer.GetComponent<Player>());
+        players[0].Initialize("Player 0");
+
+        for (int i = 0; i < totalPlayers - 1; i++)
+        {
+            var curPlayerInst = Instantiate(playerPrefabs, playerPos[i].position, Quaternion.identity);
+            Player curPlayer = curPlayerInst.GetComponent<Player>();
+            players.Add(curPlayer);
+            curPlayer.Initialize($"Player {i + 1}");
         }
     }
-    void StartRound()
+    public void StartRound()
     {
         if (TurnManager.Inst.roundNum == 1) {
-            currentPlayerIndex = (GameManager.Inst.playerSB + 2) % players.Count;
+            currentPlayerIndex = (TurnManager.Inst.playerSB + 2) % players.Count;
             InitializePlayer();
         }
         else {
-            currentPlayerIndex = GameManager.Inst.playerSB;
+            currentPlayerIndex = TurnManager.Inst.playerSB;
             MakeIsCallFalse();
         }
-        StartBet(currentPlayerIndex);
+        StartBetting(currentPlayerIndex);
     }
-    void StartBet(int currentPlayerIndex) {
+    void StartBetting(int currentPlayerIndex) {
+        if(currentPlayerIndex != GameManager.Inst.mainPlayerIndex)
+        {
+            DisableAllButtons();
+        }
+
         Player currentPlayer = players[currentPlayerIndex];
 
         if (diePlayer == players.Count - 1)
         {
-            return StartCoroutine(TurnManager.Inst.StartTurnCo());
+            StartCoroutine(TurnManager.Inst.StartTurnCo());
+            return;
         }
         if (currentPlayer.CurrentBet == canCallMoney && currentPlayer.IsCall)
         {
-            return StartCoroutine(TurnManager.Inst.StartTurnCo());
+            StartCoroutine(TurnManager.Inst.StartTurnCo());
+            return;
         }
         // ��Ȱ��ȭ�� �÷��̾�� �� ��ŵ
         if (!currentPlayer.IsActive)
@@ -124,7 +156,7 @@ public class PlayerManager : MonoBehaviour
     void EndTurn()
     {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.Count; // ���� �÷��̾�� �̵�
-        StartBet(currentPlayerIndex);
+        StartBetting(currentPlayerIndex);
     }
 
     void UpdateButtonStates()
@@ -132,12 +164,12 @@ public class PlayerManager : MonoBehaviour
         Player currentPlayer = players[currentPlayerIndex];
 
         // ��ư Ȱ��ȭ/��Ȱ��ȭ (���� �÷��̾� ���¿� ����)
-        currentPlayer.callButton.interactable = currentPlayer.IsActive;
-        currentPlayer.doubleButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
-        currentPlayer.dieButton.interactable = true;
-        currentPlayer.quarterButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
-        currentPlayer.halfButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
-        currentPlayer.allInButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
+        callButton.interactable = currentPlayer.IsActive;
+        doubleButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
+        dieButton.interactable = true;
+        quarterButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
+        halfButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
+        allInButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
     }
 
     public int LeastMoney()
