@@ -20,4 +20,15 @@ public class Player : MonoBehaviour
     {
         
     }
+
+    public void RemoveCard()
+    {
+        for (int i = 0; i < myCards.Count; i++)
+        {
+            var card = myCards[i];
+            var cardObject = card.transform.gameObject;
+            Destroy(cardObject);
+        }
+        myCards.Clear();
+    }
 }

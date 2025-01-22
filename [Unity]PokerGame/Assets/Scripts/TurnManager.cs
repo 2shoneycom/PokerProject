@@ -19,6 +19,12 @@ public class TurnManager : MonoBehaviour
     WaitForSeconds delay05 = new WaitForSeconds(0.5f);
     WaitForSeconds delay07 = new WaitForSeconds(0.7f);
 
+    public int roundNum;
+    public bool isFirst;
+    public int playerBB;
+    public int playerSB;
+    public int playerD;
+
     public static Action<int> OnAddCard;
 
     void Start()
@@ -31,11 +37,11 @@ public class TurnManager : MonoBehaviour
         if (fastMode)
             delay05 = new WaitForSeconds(0.05f);
 
-        GameManager.Inst.playerD = Random.Range(0, GameManager.Inst.totalPlayer);
-        GameManager.Inst.playerSB = (GameManager.Inst.playerD + 1) % GameManager.Inst.totalPlayer;
-        GameManager.Inst.playerBB = (GameManager.Inst.playerSB + 1) % GameManager.Inst.totalPlayer;
-        GameManager.Inst.currentPlayerIndex = (GameManager.Inst.playerBB + 1) % GameManager.Inst.totalPlayer;
-        myTurn = GameManager.Inst.currentPlayerIndex == GameManager.Inst.mainPlayerIndex;
+        playerD = isFirst ? (playerD + 1) % GameManager.Inst.totalPlayer : Random.Range(0, GameManager.Inst.totalPlayer);
+        playerSB = (playerD + 1) % GameManager.Inst.totalPlayer;
+        playerBB = (playerSB + 1) % GameManager.Inst.totalPlayer;
+        roundNum = 1;
+        isFirst = true;
     }
 
     public IEnumerator StartGameCo()
@@ -47,7 +53,7 @@ public class TurnManager : MonoBehaviour
         {
             for (int i = 0; i < GameManager.Inst.totalPlayer; i++)
             {
-                int toPlayer = (GameManager.Inst.playerSB + i) % GameManager.Inst.totalPlayer;
+                int toPlayer = (playerSB + i) % GameManager.Inst.totalPlayer;
 
                 yield return delay05;
                 OnAddCard?.Invoke(toPlayer);
@@ -56,22 +62,47 @@ public class TurnManager : MonoBehaviour
         StartCoroutine(StartTurnCo());
     }
 
-    IEnumerator StartTurnCo()
+    public IEnumerator StartTurnCo()
     {
-        // ÅÏ ±¸Çö, ÃßÈÄ¿£ µô -> 3Àå ¹èºÐ -> µô -> 1Àå ¹èºÐ -> µô -> 1Àå ¹èºÐ -> µô -> ÆÇ´Ü
         isLoading = true;
-
-        yield return delay07;
-        OnAddCard?.Invoke(GameManager.Inst.dealer);
-        yield return delay07;
-
-        isLoading = false;
+        switch (roundNum)
+        {
+            case 1:
+                roundNum++;
+                PlayerManager.Inst.StartRound();
+                break;
+            case 2:
+                roundNum++;
+                for (int i = 0; i < 3; i++)
+                {
+                    yield return delay07;
+                    OnAddCard?.Invoke(GameManager.Inst.dealer);
+                    yield return delay07;
+                }
+                PlayerManager.Inst.StartRound();
+                break;
+            case 5:
+                EndTurn();
+                break;
+            default:
+                roundNum++;
+                yield return delay07;
+                OnAddCard?.Invoke(GameManager.Inst.dealer);
+                yield return delay07;
+                PlayerManager.Inst.StartRound();
+                break;
+        }
+        // ÅÏ ±¸Çö, ÃßÈÄ¿£ µô -> 3Àå ¹èºÐ -> µô -> 1Àå ¹èºÐ -> µô -> 1Àå ¹èºÐ -> µô -> ÆÇ´Ü
     }
 
     public void EndTurn()
     {
-        GameManager.Inst.currentPlayerIndex = (GameManager.Inst.currentPlayerIndex + 1) % GameManager.Inst.totalPlayer;
-        myTurn = GameManager.Inst.currentPlayerIndex == GameManager.Inst.mainPlayerIndex;
-        StartCoroutine(StartTurnCo());
+        List<Player> winnerList = ResultManager.Inst.GetWinner();
+        for (int i = 0; i < winnerList.Count; i++)
+        {
+            Debug.Log($"Player {winnerList[i]}");
+        }
+        // ½ÂÆÐ È­¸é ¶ç¿ì±â
+        GameManager.Inst.SetupNewGame();
     }
 }

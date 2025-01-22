@@ -46,10 +46,21 @@ public class CardManager : MonoBehaviour
                 case 3: cardShape.Add('S'); break;
             }
             cardNum.Add((i + 1) % 14);
+        }
+
+        ShuffleCard();
+    }
+
+    public void ShuffleCard()
+    {
+        cardBuffer.Clear();
+
+        for (int i = 0; i < 52; i++)
+        {
             cardBuffer.Add(itemSO.items[i]);
         }
 
-        for(int i = 0; i < cardBuffer.Count; i++)       // µ¦ ¼ÅÇÃ ·ÎÁ÷
+        for (int i = 0; i < cardBuffer.Count; i++)       // µ¦ ¼ÅÇÃ ·ÎÁ÷
         {
             int rand = Random.Range(i, cardBuffer.Count);
             Item temp = cardBuffer[i];
@@ -115,5 +126,16 @@ public class CardManager : MonoBehaviour
         targetCard.transform.DOMove(targetPos, 0.7f);
         targetCard.transform.DORotateQuaternion(Quaternion.identity, 0.7f);
         targetCard.transform.DOScale(Vector3.one * 4.5f, 0.7f);
+    }
+
+    public void RemoveDealerCard()
+    {
+        for (int i = 0; i < dealerCards.Count; i++)
+        {
+            var card = dealerCards[i];
+            var cardObject = card.transform.gameObject;
+            Destroy(cardObject);
+        }
+        dealerCards.Clear();
     }
 }

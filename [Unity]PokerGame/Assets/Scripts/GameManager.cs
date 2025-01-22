@@ -19,10 +19,6 @@ public class GameManager : MonoBehaviour
     public int totalPlayer;     // 중앙을 기준 플레이어로 하자
     public int mainPlayerIndex = 0;
     public int dealer = 99;
-    public int currentPlayerIndex;
-    public int playerBB;
-    public int playerSB;
-    public int playerD;
 
     // Start is called before the first frame update
     void Start()
@@ -65,6 +61,17 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        StartCoroutine(TurnManager.Inst.StartGameCo());
+    }
+
+    public void SetupNewGame()
+    {
+        CardManager.Inst.RemoveDealerCard();
+        for(int i=0; i<players.Count; i++)
+        {
+            players[i].GetComponent<Player>()?.RemoveCard();
+        }
+        CardManager.Inst.ShuffleCard();
         StartCoroutine(TurnManager.Inst.StartGameCo());
     }
 }
