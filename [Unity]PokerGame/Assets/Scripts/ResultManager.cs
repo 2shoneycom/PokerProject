@@ -1,12 +1,18 @@
+<<<<<<< HEAD
 using System;
 using System.Collections.Generic;
 using System.Linq;
+=======
+using System.Collections;
+using System.Collections.Generic;
+>>>>>>> feature/card_managementAddGameManager
 using UnityEngine;
 
 public class ResultManager : MonoBehaviour
 {
     public static ResultManager Inst { get; private set; }
     void Awake() => Inst = this;
+<<<<<<< HEAD
     
     public List<Player> GetWinner ()
     {
@@ -75,3 +81,23 @@ public class ResultManager : MonoBehaviour
 
 
 }
+=======
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    public List<Player> GetWinner()
+    {
+        return new List<Player>();
+    }
+}
+>>>>>>> feature/card_managementAddGameManager
