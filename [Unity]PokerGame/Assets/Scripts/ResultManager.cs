@@ -5,13 +5,16 @@ using UnityEngine;
 
 public class ResultManager : MonoBehaviour
 {
+    public static ResultManager Inst { get; private set; }
+    void Awake() => Inst = this;
+    
     public List<Player> GetWinner ()
     {
         List<Player> winners = new List<Player>();  // 승자 리스트
         int maxRank = -1;           
         int maxScore = -1;          
 
-        List<int> dealerCardIdx = CardManager.dealers.Select(card => card.CardIdx).ToList();  // 딜러 카드 5장의 인덱스
+        List<int> dealerCardIdx = CardManager.Inst.dealerCards.Select(card => card.CardIdx).ToList();  // 딜러 카드 5장의 인덱스
 
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
         foreach (var curplayer in PlayerManager.players)
