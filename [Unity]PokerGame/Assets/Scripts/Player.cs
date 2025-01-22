@@ -1,23 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public enum BetType
-{
-    Call,
-    Double,
-    Die,
-    Quarter,
-    Half,
-    AllIn
-}
 public class Player : MonoBehaviour
 {
-    public string Name { get; private set; } // 각 플레이어 이름
-    public int CurrentBet { get; set; } // 각 플레이어의 현재 베팅액
-    public int SeedMoney { get; set; } // 각 플레이어의 전체 자산
-    public bool IsActive { get; set; } // 현재 플레이어의 상태가 Die면 false 나머지는 true
-    public bool IsCall { get; set; } // 현재 플레이어의 상태가 Call이면 true 나머지는 false
+    public string Name; // 각 플레이어 이름
+    public int CurrentBet; // 각 플레이어의 현재 베팅액
+    public int SeedMoney; // 각 플레이어의 전체 자산
+    public bool IsActive; // 현재 플레이어의 상태가 Die면 false 나머지는 true
+    public bool IsCall; // 현재 플레이어의 상태가 Call이면 true 나머지는 false
+    public List<int> cards;
+
+    [SerializeField] public Button callButton;
+    [SerializeField] public Button doubleButton;
+    [SerializeField] public Button dieButton;
+    [SerializeField] public Button quarterButton;
+    [SerializeField] public Button halfButton;
+    [SerializeField] public Button allInButton;
 
     public void Initialize(string name)
     {
@@ -26,6 +26,17 @@ public class Player : MonoBehaviour
         IsActive = true;
         IsCall = false;
         SeedMoney = 1000000;
+        cards = new List<int>();
+        DisableAllButtons();
+    }
+    public void DisableAllButtons()
+    {
+        callButton.interactable = false;
+        doubleButton.interactable = false;
+        dieButton.interactable = false;
+        quarterButton.interactable = false;
+        halfButton.interactable = false;
+        allInButton.interactable = false;
     }
 
     public void PlaceBet(BetType betType)
@@ -116,3 +127,9 @@ public class Player : MonoBehaviour
         }
     }
 }
+
+// player 안에 card 변수 2개 추가 round는 총 4번이고
+// playermanager에 placebet 함수 옮기기
+// playermanager에서 start 안에 setupplayer랑 round 시작 함수 두고 round 함수 하나 만들어서 각 플레이어가 행동하는 함수 만들기
+// 그리고 round 4번째가 끝나거나 게임 승패를 가릴 타이밍에 끝났다고 return 해주기
+// rule 수정하기 
