@@ -17,9 +17,11 @@ public class PokerHandEvaluator : MonoBehaviour
     
     public Tuple<int,int> EvalueateHand ()
     {
-        /*
-        Start에서 Card System 쪽에 있는 숫자를 보고 무늬, 숫자 판단하는 거 가져오는 코드
-        */
+        // Start에서 Card System 쪽에 있는 숫자를 보고 무늬, 숫자 판단하는 거 가져오는 코드
+        for (int i = 0; i < 5; i++) {
+            nums[i] = cardNum[myCard[i].myCardIndex];
+            shapes[i] = cardShape[myCard[i].myCardIndex];
+        }
 
         handRank = -1;
         handScore = 0;
