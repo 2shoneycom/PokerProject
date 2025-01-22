@@ -15,7 +15,7 @@ public class PokerHandEvaluator : MonoBehaviour
     private bool is_flush;
     private bool is_straight;
     
-    void Start()
+    public Tuple<int,int> EvalueateHand ()
     {
         /*
         Start에서 Card System 쪽에 있는 숫자를 보고 무늬, 숫자 판단하는 거 가져오는 코드
@@ -57,6 +57,7 @@ public class PokerHandEvaluator : MonoBehaviour
             Debug.Log("handRank: " + handRank + ", handScore: " + handScore);
         }
 
+        return Tuple.Create(handRank, handScore);
     }
 
     private void SetFlush ()
