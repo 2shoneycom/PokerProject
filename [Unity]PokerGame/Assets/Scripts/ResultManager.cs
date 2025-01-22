@@ -10,14 +10,16 @@ public class ResultManager : MonoBehaviour
     
     public List<Player> GetWinner ()
     {
+        var evaluator = new PokerHandEvaluator();
+
         List<Player> winners = new List<Player>();  // 승자 리스트
         int maxRank = -1;           
         int maxScore = -1;          
 
-        List<int> dealerCardIdx = CardManager.Inst.dealerCards.Select(card => card.CardIdx).ToList();  // 딜러 카드 5장의 인덱스
+        List<int> dealerCardIdx = CardManager.Inst.dealerCards.Select(card => card.myCardIndex).ToList();  // 딜러 카드 5장의 인덱스
 
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
-        foreach (var curplayer in PlayerManager.players)
+        foreach (var curplayer in PlayerManager.Inst.players)
         {
             if (curplayer.IsActive) 
             {
@@ -32,8 +34,8 @@ public class ResultManager : MonoBehaviour
                 foreach (var comb in combinations) 
                 {
                     // 각 경우에서 점수를 얻고 현재 최대 점수 저장
-                    PokerHandEvaluator.idxs = comb.ToList();
-                    var (curRank,curScore) = PokerHandEvaluator.EvaluateHand();
+                    evaluator.idxs = comb.ToArray();
+                    var (curRank,curScore) = evaluator.EvaluateHand();
 
                     if (curRank > maxRank || (curRank == maxRank && curScore > maxScore))
                     {

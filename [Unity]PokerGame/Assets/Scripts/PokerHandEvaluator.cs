@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PokerHandEvaluator : MonoBehaviour
+public class PokerHandEvaluator
 {
     public int[] idxs = new int[5];         // 이 코드를 호출 할 때, 여기에 카드 5장의 인덱스를 줄거임. 그래야함.
     [SerializeField]
@@ -15,12 +15,12 @@ public class PokerHandEvaluator : MonoBehaviour
     private bool is_flush;
     private bool is_straight;
     
-    public Tuple<int,int> EvalueateHand ()
+    public Tuple<int,int> EvaluateHand ()
     {
         // Start에서 Card System 쪽에 있는 숫자를 보고 무늬, 숫자 판단하는 거 가져오는 코드
         for (int i = 0; i < 5; i++) {
-            nums[i] = cardNum[myCard[i].myCardIndex];
-            shapes[i] = cardShape[myCard[i].myCardIndex];
+            nums[i] = CardManager.Inst.cardNum[idxs[i]];
+            shapes[i] = CardManager.Inst.cardShape[idxs[i]];
         }
 
         handRank = -1;
