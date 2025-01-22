@@ -56,7 +56,7 @@ public class PokerHandEvaluator
             }
             handRank = Math.Max(handRank, curRank);
 
-            Debug.Log("handRank: " + handRank + ", handScore: " + handScore);
+            // Debug.Log("handRank: " + handRank + ", handScore: " + handScore);
         }
 
         return Tuple.Create(handRank, handScore);
@@ -89,54 +89,54 @@ public class PokerHandEvaluator
 
         scr = IsStraightFlush();
         if (scr > 0) {
-            Debug.Log("스트레이트 플러쉬입니다.");
+            // Debug.Log("스트레이트 플러쉬입니다.");
             return Tuple.Create(8,scr);
         }
         
         scr = IsFourCard();
         if (scr > 0) {
-            Debug.Log("포카드입니다.");
+            // Debug.Log("포카드입니다.");
             return Tuple.Create(7,scr);
         }
 
         scr = IsFullHouse();
         if (scr > 0) {
-            Debug.Log("풀하우스입니다.");
+            // Debug.Log("풀하우스입니다.");
             return Tuple.Create(6,scr);
         }
 
         scr = IsFlush();
         if (scr > 0) {
-            Debug.Log("플러쉬입니다.");
+            // Debug.Log("플러쉬입니다.");
             return Tuple.Create(5,scr);
         }
 
         scr = IsStraight();
         if (scr > 0) {
-            Debug.Log("스트레이트입니다.");
+            // Debug.Log("스트레이트입니다.");
             return Tuple.Create(4,scr);
         }
 
         scr = IsTriple();
         if (scr > 0) {
-            Debug.Log("트리플입니다.");
+            // Debug.Log("트리플입니다.");
             return Tuple.Create(3,scr);
         }
 
         scr = IsTwoPair();
         if (scr > 0) {
-            Debug.Log("투페어입니다.");
+            // Debug.Log("투페어입니다.");
             return Tuple.Create(2,scr);
         }
 
         scr = IsOnePair();
         if (scr > 0) {
-            Debug.Log("원페어입니다.");
+            // Debug.Log("원페어입니다.");
             return Tuple.Create(1,scr);
         }
 
         // 하이 카드
-        Debug.Log("하이카드입니다.");
+        // Debug.Log("하이카드입니다.");
         scr = 0;
         for (int i = 0; i < 5; i++) {
             scr *= 100;

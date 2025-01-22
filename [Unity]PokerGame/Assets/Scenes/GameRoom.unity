@@ -355,7 +355,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -99
-  m_Sprite: {fileID: 21300000, guid: dbe83f7ae03d70c4daf2decc201348c7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 307c91e22ae3341f397bd591d66ea6a0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -451,6 +451,8 @@ MonoBehaviour:
   - {fileID: 1860650793}
   - {fileID: 1591144149}
   - {fileID: 1810088823}
+  cardShape: 
+  cardNum: 
 --- !u!4 &849537830
 Transform:
   m_ObjectHideFlags: 0
@@ -524,7 +526,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -100
-  m_Sprite: {fileID: 21300000, guid: 0ab585cab5763b041a34f44d96da21ad, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ae52179a754bc4309b8d3f5c39386763, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -563,11 +565,19 @@ PrefabInstance:
     - target: {fileID: 246080049861598203, guid: 05202de179d2d3941a4b4a926ee52d28, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 14127f26d5f8b3f4482c0407bf17958d, type: 3}
+      objectReference: {fileID: 21300000, guid: a5e0ca190bad645cdbadcc3b48ddcd2c, type: 3}
     - target: {fileID: 246080049861598203, guid: 05202de179d2d3941a4b4a926ee52d28, type: 3}
       propertyPath: m_SortingOrder
       value: -1
       objectReference: {fileID: 0}
+    - target: {fileID: 246080049861598203, guid: 05202de179d2d3941a4b4a926ee52d28, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6107965064125363190, guid: 05202de179d2d3941a4b4a926ee52d28, type: 3}
+      propertyPath: cardBack
+      value: 
+      objectReference: {fileID: 21300000, guid: a5e0ca190bad645cdbadcc3b48ddcd2c, type: 3}
     - target: {fileID: 7384364759078495407, guid: 05202de179d2d3941a4b4a926ee52d28, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.45000002
@@ -746,7 +756,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1060200383}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbc8214ddd426304198b83e9e48e13da, type: 3}
+  m_Script: {fileID: 11500000, guid: 72ef318dcf3aa4260b5cde7f1577da82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1060200385

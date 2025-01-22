@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
 
     [SerializeField] public List<Card> myCards;
+    [SerializeField] public int pIdx;
     public Transform myCardLeft;
     public Transform myCardRight;
     public bool isActive = true;

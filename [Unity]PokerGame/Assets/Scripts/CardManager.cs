@@ -9,18 +9,18 @@ public class CardManager : MonoBehaviour
     void Awake() => Inst = this;
 
     [SerializeField] ItemSO itemSO;
-    [SerializeField] GameObject cardPrefabs;        // »ý¼ºÇÒ Ä«µå ÇÁ¸®Æé
-    [SerializeField] public List<Card> dealerCards;        // ÇöÀç µô·¯ Ä«µå ¸®½ºÆ®
-    [SerializeField] Transform cardSpawnPoint;      // ÃÖÃÊ Ä«µå »ý¼º À§Ä¡ (½ÃÀÛÁ¡)
-    [SerializeField] Transform[] dealerCardSpawnPos;// µô·¯ÀÇ Ä«µå À§Ä¡
+    [SerializeField] GameObject cardPrefabs;        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    [SerializeField] public List<Card> dealerCards;        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
+    [SerializeField] Transform cardSpawnPoint;      // ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+    [SerializeField] Transform[] dealerCardSpawnPos;// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ ï¿½ï¿½Ä¡
 
-    List<Item> cardBuffer;      // Ä«µå µ¦
-    public List<char> cardShape;       // 0-12 ´Â Å¬·Î¹ö, 13-25 ´Â ´ÙÀÌ¾Æ, 26-38 Àº ÇÏÆ®, 39-51 Àº ½ºÆäÀÌµå
-    public List<int> cardNum;          // 0-12 ´Â 1-13ÀÌ ÀúÀåµÇ¾î, Å¬·Î¹öÀÇ ¼ýÀÚ¸¦ ³ªÅ¸³¿, ÀÌÈÄµµ µ¿ÀÏÇÏ°Ô ÀÛµ¿
+    List<Item> cardBuffer;      // Ä«ï¿½ï¿½ ï¿½ï¿½
+    public List<char> cardShape;       // 0-12 ï¿½ï¿½ Å¬ï¿½Î¹ï¿½, 13-25 ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¾ï¿½, 26-38 ï¿½ï¿½ ï¿½ï¿½Æ®, 39-51 ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½
+    public List<int> cardNum;          // 0-12 ï¿½ï¿½ 1-13ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½, Å¬ï¿½Î¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½, ï¿½ï¿½ï¿½Äµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½Ûµï¿½
 
     void Start()
     {
-        SetupCard();            // °ÔÀÓ ½ÃÀÛ½Ã Ä«µå µ¦ ¼ÅÇÃ
+        SetupCard();            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Û½ï¿½ Ä«ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         TurnManager.OnAddCard += AddCard;
     }
 
@@ -45,7 +45,7 @@ public class CardManager : MonoBehaviour
                 case 2: cardShape.Add('H'); break;
                 case 3: cardShape.Add('S'); break;
             }
-            cardNum.Add((i + 1) % 14);
+            cardNum.Add(i%13+1);
         }
 
         ShuffleCard();
@@ -60,7 +60,7 @@ public class CardManager : MonoBehaviour
             cardBuffer.Add(itemSO.items[i]);
         }
 
-        for (int i = 0; i < cardBuffer.Count; i++)       // µ¦ ¼ÅÇÃ ·ÎÁ÷
+        for (int i = 0; i < cardBuffer.Count; i++)       // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         {
             int rand = Random.Range(i, cardBuffer.Count);
             Item temp = cardBuffer[i];
@@ -69,7 +69,7 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    public Item PopItem()           // 0¹øÂ° Ä«µåµ¦ pop
+    public Item PopItem()           // 0ï¿½ï¿½Â° Ä«ï¿½åµ¦ pop
     {
         Item item = cardBuffer[0];
         cardBuffer.RemoveAt(0);
@@ -82,15 +82,15 @@ public class CardManager : MonoBehaviour
 
     }
 
-    void AddCard(int playerIndex)   // Ä«µå »ý¼º ·ÎÁ÷
+    void AddCard(int playerIndex)   // Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     {
-        // Ä«µå ¿ÀºêÁ§Æ® »ý¼º
+        // Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
         var cardObject = Instantiate(cardPrefabs, cardSpawnPoint.position, Quaternion.identity);
-        // Ä«µåÀÇ Card ½ºÅ©¸³Æ®¸¦ °¡Á®¿Í µ¦ÀÇ 0¹øÂ° Ä«µå·Î ¼Â¾÷ 
+        // Ä«ï¿½ï¿½ï¿½ï¿½ Card ï¿½ï¿½Å©ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½Â° Ä«ï¿½ï¿½ï¿½ ï¿½Â¾ï¿½ 
         var card = cardObject.GetComponent<Card>();
         card.Setup(PopItem(), playerIndex);
 
-        // Ä«µå¸¦ ¾Ë¸ÂÀº ¸®½ºÆ®¿¡ Ãß°¡
+        // Ä«ï¿½å¸¦ ï¿½Ë¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ß°ï¿½
         if(playerIndex == GameManager.Inst.dealer)
             dealerCards.Add(card);
         else
@@ -98,11 +98,11 @@ public class CardManager : MonoBehaviour
             Player nowPlayer = GameManager.Inst.players[playerIndex].GetComponent<Player>();
             nowPlayer?.myCards.Add(card);
         }
-        // Ä«µå ¿òÁ÷ÀÓ ÇÔ¼ö È£Ãâ
+        // Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ È£ï¿½ï¿½
         CardMoveToPos(playerIndex);
     }
 
-    void CardMoveToPos(int playerIndex)  // DOTweenÀ» ÀÌ¿ëÇÑ Ä«µå ¿òÁ÷ÀÓ ±¸Çö
+    void CardMoveToPos(int playerIndex)  // DOTweenï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     {
         var targetCards = dealerCards;
         int cardIndex = dealerCards.Count - 1;

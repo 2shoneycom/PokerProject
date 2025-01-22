@@ -1,18 +1,13 @@
-<<<<<<< HEAD
 using System;
-using System.Collections.Generic;
-using System.Linq;
-=======
 using System.Collections;
 using System.Collections.Generic;
->>>>>>> feature/card_managementAddGameManager
+using System.Linq;
 using UnityEngine;
 
 public class ResultManager : MonoBehaviour
 {
     public static ResultManager Inst { get; private set; }
     void Awake() => Inst = this;
-<<<<<<< HEAD
     
     public List<Player> GetWinner ()
     {
@@ -25,14 +20,16 @@ public class ResultManager : MonoBehaviour
         List<int> dealerCardIdx = CardManager.Inst.dealerCards.Select(card => card.myCardIndex).ToList();  // 딜러 카드 5장의 인덱스
 
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
-        foreach (var curplayer in PlayerManager.Inst.players)
+        foreach (var curplayerObject in GameManager.Inst.players)
         {
-            if (curplayer.IsActive) 
+            var curplayer = curplayerObject.GetComponent<Player>();
+
+            if (curplayer.isActive) 
             {
                 // 해당 플레이어의 카드는 딜러 카드 5장 + 본인 카드 2장, 총 7장
                 List<int> cardIdx = new List<int>(dealerCardIdx);
-                cardIdx.Add(curplayer.Cards[0].CardIdx);
-                cardIdx.Add(curplayer.Cards[1].CardIdx);
+                cardIdx.Add(curplayer.myCards[0].myCardIndex);
+                cardIdx.Add(curplayer.myCards[1].myCardIndex);
 
                 // 7C5의 조합을 얻어내기
                 var combinations = GetCombinations(cardIdx, 5);
@@ -59,6 +56,10 @@ public class ResultManager : MonoBehaviour
             }
         }
 
+        winners = winners.Distinct().ToList();
+
+        DebugLog(maxRank);
+
         return winners;
     }
 
@@ -79,25 +80,37 @@ public class ResultManager : MonoBehaviour
         return include.Concat(exclude);
     }
 
-
+    private void DebugLog (int rank)
+    {
+        if (rank == 0) {
+            Debug.Log("하이카드 입니다.");
+        }
+        else if (rank == 1) {
+            Debug.Log("원페어 입니다.");
+        }
+        else if (rank == 2) {
+            Debug.Log("투페어 입니다.");
+        }
+        else if (rank == 3) {
+            Debug.Log("트리플 입니다.");
+        }
+        else if (rank == 4) {
+            Debug.Log("스트레이트 입니다.");
+        }
+        else if (rank == 5) {
+            Debug.Log("플러쉬 입니다.");
+        }
+        else if (rank == 6) {
+            Debug.Log("풀하우스 입니다.");
+        }
+        else if (rank == 7) {
+            Debug.Log("포카드 입니다.");
+        }
+        else if (rank == 8) {
+            Debug.Log("스트레이트 플러쉬 입니다.");
+        }
+        else {
+            Debug.Log("승패 판단 오류");
+        }
+    }
 }
-=======
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public List<Player> GetWinner()
-    {
-        return new List<Player>();
-    }
-}
->>>>>>> feature/card_managementAddGameManager

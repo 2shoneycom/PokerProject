@@ -11,12 +11,12 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] Transform[] playerPos;
     [SerializeField] Transform mainplayerPos;
-    [SerializeField] GameObject playerPrefabs;        // »ı¼ºÇÒ Ä«µå ÇÁ¸®Æé
+    [SerializeField] GameObject playerPrefabs;        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     GameObject mainPlayer;
     public List<GameObject> players;
 
-    public int totalPlayer;     // Áß¾ÓÀ» ±âÁØ ÇÃ·¹ÀÌ¾î·Î ÇÏÀÚ
+    public int totalPlayer;     // ï¿½ß¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     public int mainPlayerIndex = 0;
     public int dealer = 99;
 
@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         SetupPlayer(totalPlayer);
-        StartGame();        // ÃßÈÄ ¹öÆ° ÀÔ·ÂÀ¸·Îµµ º¯µ¿
+        StartGame();        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½Ô·ï¿½ï¿½ï¿½ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 
     void SetupPlayer(int totalPlayer)
@@ -39,18 +39,24 @@ public class GameManager : MonoBehaviour
         {
             players.Add(Instantiate(playerPrefabs, playerPos[i].position, Quaternion.identity));
         }
+
+        // (ì´ìŠ¹í—Œ) ì„ì‹œ ë°©í¸ ì½”ë“œ
+        int pidx = 0;
+        foreach (var p in players) {
+            p.GetComponent<Player>().pIdx = pidx++;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-#if UNITY_EDITOR            // À¯´ÏÆ¼ ¿¡µğÅÍ¿¡¼­¸¸ Ä¡Æ® Àû¿ë
+#if UNITY_EDITOR            // ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ï¿½ï¿½ Ä¡Æ® ï¿½ï¿½ï¿½ï¿½
         InputCheatKey();
 #endif
     }
 
-    void InputCheatKey()    // Å×½ºÆ®¿ë Ä¡Æ®
-    {                       // 1Àº ÃÖ´ë 2¹ø, 2´Â ÃÖ´ë 5¹ø¸¸ ´©¸¦°Í.
+    void InputCheatKey()    // ï¿½×½ï¿½Æ®ï¿½ï¿½ Ä¡Æ®
+    {                       // 1ï¿½ï¿½ ï¿½Ö´ï¿½ 2ï¿½ï¿½, 2ï¿½ï¿½ ï¿½Ö´ï¿½ 5ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
         if (Input.GetKeyDown(KeyCode.Keypad1))
             TurnManager.OnAddCard?.Invoke(mainPlayerIndex);
         if (Input.GetKeyDown(KeyCode.UpArrow))
