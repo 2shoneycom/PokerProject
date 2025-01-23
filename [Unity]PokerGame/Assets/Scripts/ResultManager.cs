@@ -80,7 +80,7 @@ public class ResultManager : MonoBehaviour
         return include.Concat(exclude);
     }
 
-    private void DebugLog (int rank)
+    /*private void DebugLog (int rank)
     {
         if (rank == 0) {
             Debug.Log("하이카드 입니다.");
@@ -112,5 +112,5 @@ public class ResultManager : MonoBehaviour
         else {
             Debug.Log("승패 판단 오류");
         }
-    }
+    }*/
 }
