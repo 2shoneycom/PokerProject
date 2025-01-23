@@ -23,18 +23,12 @@ public class GameManager : MonoBehaviour
     void Update()
     {
 #if UNITY_EDITOR            // ����Ƽ �����Ϳ����� ġƮ ����
-        InputCheatKey();
+        if (!TurnManager.Inst.isLoading) InputCheatKey();   // (희준) Loading 아닐 경우만 키 입력 가능
 #endif
     }
 
     void InputCheatKey()    // �׽�Ʈ�� ġƮ
     {                       // 1�� �ִ� 2��, 2�� �ִ� 5���� ������.
-        if (Input.GetKeyDown(KeyCode.Keypad1))
-            TurnManager.OnAddCard?.Invoke(mainPlayerIndex);
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-            TurnManager.OnAddCard?.Invoke(dealer);
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-            TurnManager.Inst.EndTurn();
         if (Input.GetKeyDown(KeyCode.Q))
         {
             Debug.Log($"{PlayerManager.Inst.currentPlayerIndex} Call");
