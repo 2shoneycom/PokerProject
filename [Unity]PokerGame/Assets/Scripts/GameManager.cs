@@ -14,14 +14,12 @@ public class GameManager : MonoBehaviour
     public int mainPlayerIndex = 0;
     public int dealer = 99;
 
-    // Start is called before the first frame update
     void Start()
     {
         PlayerManager.Inst.SetupPlayers(totalPlayer);
         StartGame();        // ���� ��ư �Է����ε� ����
     }
 
-    // Update is called once per frame
     void Update()
     {
 #if UNITY_EDITOR            // ����Ƽ �����Ϳ����� ġƮ ����

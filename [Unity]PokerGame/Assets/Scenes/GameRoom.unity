@@ -186,7 +186,7 @@ MonoBehaviour:
   isLoading: 0
   myTurn: 0
   roundNum: 0
-  isFirst: 0
+  isFirst: 1
   playerBB: 0
   playerSB: 0
   playerD: 0
