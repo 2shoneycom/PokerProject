@@ -10,10 +10,10 @@ public class TurnManager : MonoBehaviour
     void Awake() => Inst = this;
 
     [Header("Develop")]
-    [SerializeField][Tooltip("µğ¹ö±ë¿ë °¡¼Ó ¸ğµå")] bool fastMode;
+    [SerializeField][Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½")] bool fastMode;
 
     [Header("Properties")]
-    public bool isLoading;      // Ä«µå ¹èºĞ°ú »ó´ë ÇÃ·¹ÀÌ¾î ÅÏÀÏ¶§ Å¬¸¯ ¹æÁö¿ë
+    public bool isLoading;      // Ä«ï¿½ï¿½ ï¿½ï¿½Ğ°ï¿½ ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½Ï¶ï¿½ Å¬ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     public bool myTurn;
 
     WaitForSeconds delay05 = new WaitForSeconds(0.5f);
@@ -94,14 +94,21 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    public void EndTurn()
+    public IEnumerator EndTurn()
     {
+        // ìš°ìŠ¹ì ë¦¬ìŠ¤íŠ¸ ê°€ì ¸ì˜¤ê¸°
         List<Player> winnerList = ResultManager.Inst.GetWinner();
         for (int i = 0; i < winnerList.Count; i++)
         {
-            Debug.Log($"Player {winnerList[i]}");
+            foreach (var winner in winnerList) {
+                Debug.Log("ìš°ìŠ¹ì: " + winner.pIdx);
+            }
         }
-        // ½ÂÆĞ È­¸é ¶ç¿ì±â
+
+        // 3ì´ˆ ëŒ€ê¸°
+        yield return new WaitForSeconds(3f);
+
+        // ìƒˆë¡œìš´ ê²Œì„ ì„¤ì •
         GameManager.Inst.SetupNewGame();
     }
 }

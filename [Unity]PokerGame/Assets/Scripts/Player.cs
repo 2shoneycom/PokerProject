@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     public bool IsActive; // ���� �÷��̾��� ���°� Die�� false �������� true
     public bool IsCall; // ���� �÷��̾��� ���°� Call�̸� true �������� false
     [SerializeField] public List<Card> myCards;
+    [SerializeField] public int pIdx;
     public Transform myCardLeft;
     public Transform myCardRight;
 

@@ -7,19 +7,19 @@ using UnityEngine.TextCore.Text;
 public class Card : MonoBehaviour
 {
     [SerializeField] SpriteRenderer card;
-    [SerializeField] Sprite cardBack;       // »ó´ë ÇÃ·¹ÀÌ¾î¿Í µô·¯ÀÇ Ä«µå´Â Ä«µå µÞ¸é º¸¿©¾ßÇÔ
+    [SerializeField] Sprite cardBack;       // ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ ï¿½Þ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     public Item item;
-    bool isFront;                           // µÞ¸é º¸¿©¾ßÇÏ´ÂÁö
-    public int myCardIndex;                        // ÇöÀç Ä«µåÀÇ ÀÎµ¦½º, CardManagerÀÇ CardShape, CardNum
-                                            // ¸®½ºÆ®¿¡ Á¢±ÙÇÏ¿© ¾î¶² Ä«µåÀÎÁö ÆÄ¾Ç °¡´É
+    bool isFront;                           // ï¿½Þ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ï¿½ï¿½
+    public int myCardIndex;                        // ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½, CardManagerï¿½ï¿½ CardShape, CardNum
+                                            // ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½î¶² Ä«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ä¾ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     public void Setup(Item item, int playerIndex)
     {
         this.item = item;
         this.isFront = playerIndex == GameManager.Inst.mainPlayerIndex || playerIndex == GameManager.Inst.dealer;
         myCardIndex = this.item.cardIndex;
-
+        this.isFront = true;
         if (this.isFront) card.sprite = this.item.sprite;
         else card.sprite = cardBack;
     }
