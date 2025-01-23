@@ -1158,9 +1158,9 @@ MonoBehaviour:
   - {fileID: 1848120166}
   - {fileID: 778063874}
   - {fileID: 1802827780}
-  - {fileID: 1752540297}
-  - {fileID: 1065348855}
   - {fileID: 1976164703}
+  - {fileID: 1065348855}
+  - {fileID: 1752540297}
   mainplayerPos: {fileID: 1798122082}
   playerPrefabs: {fileID: 4723083671338966920, guid: 6a29d133054800e4da31b6733885b93d, type: 3}
   players: []

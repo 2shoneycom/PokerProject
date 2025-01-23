@@ -65,12 +65,14 @@ public class PlayerManager : MonoBehaviour
         GameManager.Inst.mainPlayerIndex = 0;
         GameManager.Inst.mainPlayer = Instantiate(playerPrefabs, mainplayerPos.position, Quaternion.identity);
         players.Add(GameManager.Inst.mainPlayer.GetComponent<Player>());
+        players[0].pIdx = 0;
         players[0].Initialize("Player 0");
 
         for (int i = 0; i < totalPlayers - 1; i++)
         {
             var curPlayerInst = Instantiate(playerPrefabs, playerPos[i].position, Quaternion.identity);
             Player curPlayer = curPlayerInst.GetComponent<Player>();
+            curPlayer.pIdx = i+1;
             players.Add(curPlayer);
             curPlayer.Initialize($"Player {i + 1}");
         }

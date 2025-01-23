@@ -20,11 +20,11 @@ public class ResultManager : MonoBehaviour
         List<int> dealerCardIdx = CardManager.Inst.dealerCards.Select(card => card.myCardIndex).ToList();  // 딜러 카드 5장의 인덱스
 
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
-        foreach (var curplayerObject in GameManager.Inst.players)
+        foreach (var curplayerObject in PlayerManager.Inst.players)
         {
             var curplayer = curplayerObject.GetComponent<Player>();
 
-            if (curplayer.isActive) 
+            if (curplayer.IsActive) 
             {
                 // 해당 플레이어의 카드는 딜러 카드 5장 + 본인 카드 2장, 총 7장
                 List<int> cardIdx = new List<int>(dealerCardIdx);
