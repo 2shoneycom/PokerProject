@@ -128,9 +128,3 @@ public class Player : MonoBehaviour
         myCards.Clear();
     }
 }
-
-// player 안에 card 변수 2개 추가 round는 총 4번이고
-// playermanager에 placebet 함수 옮기기
-// playermanager에서 start 안에 setupplayer랑 round 시작 함수 두고 round 함수 하나 만들어서 각 플레이어가 행동하는 함수 만들기
-// 그리고 round 4번째가 끝나거나 게임 승패를 가릴 타이밍에 끝났다고 return 해주기
-// rule 수정하기 

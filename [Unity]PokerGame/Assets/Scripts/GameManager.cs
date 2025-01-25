@@ -33,7 +33,6 @@ public class GameManager : MonoBehaviour
     {                       
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Debug.Log($"{PlayerManager.Inst.currentPlayerIndex} Call");
             PlayerManager.Inst.OnButtonClicked("Call");
         }
         if (Input.GetKeyDown(KeyCode.W))

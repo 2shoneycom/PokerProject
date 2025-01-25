@@ -28,7 +28,6 @@ public class PlayerManager : MonoBehaviour
     public int canCallMoney = 0;    // 콜을 하기위해서 내야하는 돈
     public int canBetMoney = 0;     // 최대로 베팅할 수 있는 돈
     public int diePlayer = 0;
-    public int roundCount = 0;
     private Coroutine turnTimerCoroutine;
 
     [SerializeField] public Button callButton;
@@ -78,6 +77,14 @@ public class PlayerManager : MonoBehaviour
         if (TurnManager.Inst.roundNum == 1) {
             currentPlayerIndex = (TurnManager.Inst.playerSB + 2) % players.Count;
             InitializePlayer();
+            Player SBPlayer = players[TurnManager.Inst.playerSB];
+            SBPlayer.CurrentBet = 5000;
+            SBPlayer.SeedMoney -= 5000;
+            Player BBPlayer = players[TurnManager.Inst.playerBB];
+            BBPlayer.CurrentBet = 10000;
+            BBPlayer.SeedMoney -= 10000;
+            totalMoney = 15000;
+            canCallMoney = 10000;
         }
         else {
             currentPlayerIndex = TurnManager.Inst.playerSB;
@@ -164,14 +171,13 @@ public class PlayerManager : MonoBehaviour
     void UpdateButtonStates()
     {
         Player currentPlayer = players[currentPlayerIndex];
-
         // 버튼 활성화/비활성화 (현재 플레이어 상태에 따라)
-        callButton.interactable = currentPlayer.IsActive;
-        doubleButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
+        callButton.interactable = true;
+        doubleButton.interactable = currentPlayer.IsCall == false;
         dieButton.interactable = true;
-        quarterButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
-        halfButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
-        allInButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
+        quarterButton.interactable = currentPlayer.IsCall == false;
+        halfButton.interactable = currentPlayer.IsCall == false;
+        allInButton.interactable = currentPlayer.IsCall == false;
     }
 
     public int LeastMoney()
@@ -223,6 +229,5 @@ public class PlayerManager : MonoBehaviour
         totalMoney = 0;
         canCallMoney = 0;
         diePlayer = 0;
-        roundCount = 0;
     }
 }
