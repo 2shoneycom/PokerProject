@@ -17,11 +17,12 @@ public class PlayerUIManager : MonoBehaviour
 
     void Start ()
     {
-        isLinked = false;
+        isLinked = true;
     }
 
     void Update ()
     {
+        // Debug.Log(isLinked);
         if (isLinked)
         {
             for (int i = 0; i < 7; i++) {
