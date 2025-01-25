@@ -15,14 +15,16 @@ public class ResultManager : MonoBehaviour
 
         List<Player> winners = new List<Player>();  // 승자 리스트
         int maxRank = -1;           
-        int maxScore = -1;          
+        int maxScore = -1;
 
         List<int> dealerCardIdx = CardManager.Inst.dealerCards.Select(card => card.myCardIndex).ToList();  // 딜러 카드 5장의 인덱스
 
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
-        foreach (var curplayerObject in PlayerManager.Inst.players)
+        foreach (var curplayer in PlayerManager.Inst.players)
         {
-            var curplayer = curplayerObject.GetComponent<Player>();
+            // 족보 판단 디버그용!!!!!!
+            int myRank = -1;
+            int myScore = -1;
 
             if (curplayer.IsActive) 
             {
@@ -52,12 +54,25 @@ public class ResultManager : MonoBehaviour
                         // 동점자 발생
                         winners.Add(curplayer);
                     }
+
+                    // 족보 판단 디버그용!!!!!!
+                    if (curRank > myRank || (curRank == myRank && curScore > myScore))
+                    {
+                        myRank = curRank;
+                        myScore = curScore;
+                    }
                 }
+
+                // 족보 판단 디버그용!!!!!!!
+                Debug.Log(curplayer.pIdx+"P의 족보");
+                DebugLog(myRank);
+                Debug.Log("Score: "+myScore);
             }
         }
 
         winners = winners.Distinct().ToList();
 
+        Debug.Log("우승자의 족보는");
         DebugLog(maxRank);
 
         return winners;
@@ -80,6 +95,7 @@ public class ResultManager : MonoBehaviour
         return include.Concat(exclude);
     }
 
+    // 디버그용
     private void DebugLog (int rank)
     {
         if (rank == 0) {

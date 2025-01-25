@@ -6,9 +6,7 @@ using UnityEngine;
 public class PokerHandEvaluator
 {
     public int[] idxs = new int[5];         // 이 코드를 호출 할 때, 여기에 카드 5장의 인덱스를 줄거임. 그래야함.
-    [SerializeField]
     private char[] shapes = new char[5];    // idxs 배열을 Card System 쪽에 있는 무늬 판별기에 넣고 무늬를 얻어옴.
-    [SerializeField]
     private int[] nums = new int[5];        // idx 배열을 Card System 쪽에 있는 숫자 판별기에 넣고 숫자를 얻어옴.
     private int handRank;   // 이 5장의 족보 순위 ex) 0: highcard, 1: onepair ... 8: straight flush
     private int handScore; // 해당 족보안에서의 카드 점수 (동점 판별용)
@@ -192,6 +190,7 @@ public class PokerHandEvaluator
     {
         int scr = -1;
         if (is_flush) {
+            scr = 0;
             for (int i = 0; i < 5; i++) {
                 // 플러쉬끼리는 하이카드 방식으로 비교해야함
                 scr *= 100;
@@ -267,8 +266,8 @@ public class PokerHandEvaluator
             scr = 1000000*nums[2]+10000*nums[0]+100*nums[1]+nums[4];
         }
         else if (nums[3]==nums[4]) {
-            // ex) 7,5,3,1,1
-            scr = 100000000*nums[3]+10000*nums[0]+100*nums[1]+nums[2];
+            // ex) 13,10,9,5,5
+            scr = 1000000*nums[3]+10000*nums[0]+100*nums[1]+nums[2];
         }
 
         return scr;

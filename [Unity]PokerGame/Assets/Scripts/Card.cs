@@ -7,12 +7,12 @@ using UnityEngine.TextCore.Text;
 public class Card : MonoBehaviour
 {
     [SerializeField] SpriteRenderer card;
-    [SerializeField] Sprite cardBack;       // ��� �÷��̾�� ������ ī��� ī�� �޸� ��������
+    [SerializeField] Sprite cardBack;       // 상대 플레이어와 딜러의 카드는 카드 뒷면 보여야함
 
     public Item item;
-    bool isFront;                           // �޸� �������ϴ���
-    public int myCardIndex;                        // ���� ī���� �ε���, CardManager�� CardShape, CardNum
-                                            // ����Ʈ�� �����Ͽ� � ī������ �ľ� ����
+    bool isFront;                           // 뒷면 보여야하는지
+    public int myCardIndex;                        // 현재 카드의 인덱스, CardManager의 CardShape, CardNum
+                                            // 리스트에 접근하여 어떤 카드인지 파악 가능
 
     public void Setup(Item item, int playerIndex)
     {

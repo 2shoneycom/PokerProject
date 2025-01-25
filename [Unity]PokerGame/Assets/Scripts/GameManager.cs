@@ -10,25 +10,25 @@ public class GameManager : MonoBehaviour
     void Awake() => Inst = this;
 
     public GameObject mainPlayer;
-    public int totalPlayer;     // �߾��� ���� �÷��̾�� ����
+    public int totalPlayer;     // 중앙을 기준 플레이어로 하자
     public int mainPlayerIndex = 0;
     public int dealer = 99;
 
     void Start()
     {
         PlayerManager.Inst.SetupPlayers(totalPlayer);
-        StartGame();        // ���� ��ư �Է����ε� ����
+        StartGame();        // 추후 버튼 입력으로도 변동
     }
 
     void Update()
     {
-#if UNITY_EDITOR            // ����Ƽ �����Ϳ����� ġƮ ����
+#if UNITY_EDITOR            // 유니티 에디터에서만 치트 적용
         InputCheatKey();
 #endif
     }
 
-    void InputCheatKey()    // �׽�Ʈ�� ġƮ
-    {                       // 1�� �ִ� 2��, 2�� �ִ� 5���� ������.
+    void InputCheatKey()    // 테스트용 치트
+    {                       // 1은 최대 2번, 2는 최대 5번만 누를것.
         if (Input.GetKeyDown(KeyCode.Keypad1))
             TurnManager.OnAddCard?.Invoke(mainPlayerIndex);
         if (Input.GetKeyDown(KeyCode.UpArrow))
