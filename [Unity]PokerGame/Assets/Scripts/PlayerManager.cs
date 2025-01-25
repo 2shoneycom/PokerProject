@@ -25,8 +25,8 @@ public class PlayerManager : MonoBehaviour
     public List<Player> players;
     public int currentPlayerIndex = 0;
     public int totalMoney = 0;
-    public int canCallMoney = 0;
-    public int canBetMoney = 0;
+    public int canCallMoney = 0;    // 콜을 하기위해서 내야하는 돈
+    public int canBetMoney = 0;     // 최대로 베팅할 수 있는 돈
     public int diePlayer = 0;
     public int roundCount = 0;
     private Coroutine turnTimerCoroutine;
@@ -41,11 +41,6 @@ public class PlayerManager : MonoBehaviour
     private void Awake()
     {
         Inst = this;
-    }
-
-    void Start()
-    {
-       
     }
 
     public void DisableAllButtons()
@@ -77,6 +72,7 @@ public class PlayerManager : MonoBehaviour
             curPlayer.Initialize($"Player {i + 1}");
         }
     }
+
     public void StartRound()
     {
         if (TurnManager.Inst.roundNum == 1) {
@@ -89,6 +85,7 @@ public class PlayerManager : MonoBehaviour
         }
         StartBetting(currentPlayerIndex);
     }
+
     void StartBetting(int currentPlayerIndex) {
         if(currentPlayerIndex != GameManager.Inst.mainPlayerIndex)
         {
@@ -107,7 +104,7 @@ public class PlayerManager : MonoBehaviour
             StartCoroutine(TurnManager.Inst.StartTurnCo());
             return;
         }
-        // ��Ȱ��ȭ�� �÷��̾�� �� ��ŵ
+        // 비활성화된 플레이어면 턴 스킵
         if (!currentPlayer.IsActive)
         {
             Debug.Log($"Player {currentPlayerIndex + 1} is inactive. Skipping turn.");
@@ -121,6 +118,7 @@ public class PlayerManager : MonoBehaviour
             StopCoroutine(turnTimerCoroutine);
         turnTimerCoroutine = StartCoroutine(AutoDieTimer(7f));
     }
+
     public void OnButtonClicked(string betType)
     {
         if (turnTimerCoroutine != null)
@@ -157,7 +155,7 @@ public class PlayerManager : MonoBehaviour
 
     void EndTurn()
     {
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.Count; // ���� �÷��̾�� �̵�
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.Count; // 다음 플레이어로 이동
         StartBetting(currentPlayerIndex);
     }
 
@@ -165,7 +163,7 @@ public class PlayerManager : MonoBehaviour
     {
         Player currentPlayer = players[currentPlayerIndex];
 
-        // ��ư Ȱ��ȭ/��Ȱ��ȭ (���� �÷��̾� ���¿� ����)
+        // 버튼 활성화/비활성화 (현재 플레이어 상태에 따라)
         callButton.interactable = currentPlayer.IsActive;
         doubleButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
         dieButton.interactable = true;
@@ -178,9 +176,10 @@ public class PlayerManager : MonoBehaviour
     {
         int minMoney = int.MaxValue;
 
-        // ���� �ּҰ� ��� (LINQ �ּ�ȭ)
+        // 직접 최소값 계산 (LINQ 최소화)
         foreach (var player in players)
         {
+            // (승헌) 살아있는 플레이어들 중 보유금액의 최솟값 구하기
             if (player.IsActive && player.SeedMoney < minMoney)
             {
                 minMoney = player.SeedMoney;
@@ -189,6 +188,7 @@ public class PlayerManager : MonoBehaviour
 
         return minMoney;
     }
+
     void MakeIsCallFalse()
     {
         foreach (var player in players)
@@ -199,14 +199,16 @@ public class PlayerManager : MonoBehaviour
             }
         }
     }
+
     IEnumerator AutoDieTimer(float duration)
     {
         yield return new WaitForSeconds(duration);
 
-        // ���� �÷��̾ 7�� ���� ��ư�� ������ �ʾ��� ��� Die ó��
+        // 현재 플레이어가 7초 동안 버튼을 누르지 않았을 경우 Die 처리
         Debug.Log($"Player {players[currentPlayerIndex].Name} didn't respond. Automatically choosing Die.");
         OnButtonClicked("Die");
     }
+
     void InitializePlayer()
     {
         foreach (var player in players)

@@ -19,7 +19,7 @@ public class Card : MonoBehaviour
         this.item = item;
         this.isFront = playerIndex == GameManager.Inst.mainPlayerIndex || playerIndex == GameManager.Inst.dealer;
         myCardIndex = this.item.cardIndex;
-        this.isFront = true;    // (희준) 디버깅용 앞면 보이기, 추후엔 삭제
+        this.isFront = true;    // 디버깅용 앞면 보이기, 추후엔 삭제
         if (this.isFront) card.sprite = this.item.sprite;
         else card.sprite = cardBack;
     }

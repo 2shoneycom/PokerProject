@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public string Name; // �� �÷��̾� �̸�
-    public int CurrentBet; // �� �÷��̾��� ���� ���þ�
-    public int SeedMoney; // �� �÷��̾��� ��ü �ڻ�
-    public bool IsActive; // ���� �÷��̾��� ���°� Die�� false �������� true
-    public bool IsCall; // ���� �÷��̾��� ���°� Call�̸� true �������� false
+    public string Name; // 각 플레이어 이름
+    public int CurrentBet; // 각 플레이어의 현재 베팅액
+    public int SeedMoney; // 각 플레이어의 전체 자산
+    public bool IsActive; // 현재 플레이어의 상태가 Die면 false 나머지는 true
+    public bool IsCall; // 현재 플레이어의 상태가 Call이면 true 나머지는 false
     [SerializeField] public List<Card> myCards;
     [SerializeField] public int pIdx;
     public Transform myCardLeft;
@@ -40,6 +40,7 @@ public class Player : MonoBehaviour
             case BetType.Double:
                 if (PlayerManager.Inst.canBetMoney < 2 * PlayerManager.Inst.canCallMoney - CurrentBet)
                 {
+                    // 더블을 하면 최대 베팅 가능 금액을 초과할 때
                     SeedMoney -= (PlayerManager.Inst.canBetMoney - CurrentBet);
                     PlayerManager.Inst.totalMoney += (PlayerManager.Inst.canBetMoney - CurrentBet);
                     CurrentBet = PlayerManager.Inst.canBetMoney;
@@ -57,6 +58,7 @@ public class Player : MonoBehaviour
             case BetType.Quarter:
                 if (PlayerManager.Inst.canBetMoney < PlayerManager.Inst.totalMoney / 4)
                 {
+                    // 쿼터를 하면 최대 베팅 가능 금액을 초과할 때
                     SeedMoney -= (PlayerManager.Inst.canBetMoney - CurrentBet);
                     PlayerManager.Inst.totalMoney += (PlayerManager.Inst.canBetMoney - CurrentBet);
                     CurrentBet = PlayerManager.Inst.canBetMoney;
@@ -74,6 +76,7 @@ public class Player : MonoBehaviour
             case BetType.Half:
                 if (PlayerManager.Inst.canBetMoney < PlayerManager.Inst.totalMoney / 2)
                 {
+                    // 하프를 하면 최대 베팅 가능 금액을 초과할 때
                     SeedMoney -= (PlayerManager.Inst.canBetMoney - CurrentBet);
                     PlayerManager.Inst.totalMoney += (PlayerManager.Inst.canBetMoney - CurrentBet);
                     CurrentBet = PlayerManager.Inst.canBetMoney;
@@ -91,6 +94,7 @@ public class Player : MonoBehaviour
             case BetType.AllIn:
                 if (PlayerManager.Inst.canBetMoney < PlayerManager.Inst.totalMoney)
                 {
+                    // 올인을 하면 베팅 최대 가능 금액을 초과할 때
                     SeedMoney -= (PlayerManager.Inst.canBetMoney - CurrentBet);
                     PlayerManager.Inst.totalMoney += (PlayerManager.Inst.canBetMoney - CurrentBet);
                     CurrentBet = PlayerManager.Inst.canBetMoney;
@@ -125,8 +129,8 @@ public class Player : MonoBehaviour
     }
 }
 
-// player �ȿ� card ���� 2�� �߰� round�� �� 4���̰�
-// playermanager�� placebet �Լ� �ű��
-// playermanager���� start �ȿ� setupplayer�� round ���� �Լ� �ΰ� round �Լ� �ϳ� ���� �� �÷��̾ �ൿ�ϴ� �Լ� �����
-// �׸��� round 4��°�� �����ų� ���� ���и� ���� Ÿ�ֿ̹� �����ٰ� return ���ֱ�
-// rule �����ϱ� 
+// player 안에 card 변수 2개 추가 round는 총 4번이고
+// playermanager에 placebet 함수 옮기기
+// playermanager에서 start 안에 setupplayer랑 round 시작 함수 두고 round 함수 하나 만들어서 각 플레이어가 행동하는 함수 만들기
+// 그리고 round 4번째가 끝나거나 게임 승패를 가릴 타이밍에 끝났다고 return 해주기
+// rule 수정하기 

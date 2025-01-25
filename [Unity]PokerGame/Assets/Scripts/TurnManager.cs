@@ -38,9 +38,7 @@ public class TurnManager : MonoBehaviour
         playerSB = (playerD + 1) % GameManager.Inst.totalPlayer;
         playerBB = (playerSB + 1) % GameManager.Inst.totalPlayer;
         roundNum = 0;
-        isFirst = true;     // (승헌)이게 여기 있어도 되는건가? playerD 위에 있어야 하는거 아닌가
-                            // (희준)아래에 있어야함. 가장 처음의 게임은 딜러가 랜덤으로 정해지고,
-                            // 이후는 이전 딜러의 다음 순서부터 딜러가 됨.
+        isFirst = true;     // 가장 처음의 게임은 딜러가 랜덤으로 정해지고, 이후는 이전 딜러의 다음 순서부터 딜러가 됨
     }
 
     public IEnumerator StartGameCo()
@@ -48,7 +46,7 @@ public class TurnManager : MonoBehaviour
         GameSetup();
         isLoading = true;
 
-        // (승헌)SB부터 시계방향으로 카드 2장씩 나눠주기
+        // SB부터 시계방향으로 카드 2장씩 나눠주기
         for (int j = 0; j < 2; j++)
         {
             for (int i = 0; i < GameManager.Inst.totalPlayer; i++)
@@ -56,9 +54,7 @@ public class TurnManager : MonoBehaviour
                 int toPlayer = (playerSB + i) % GameManager.Inst.totalPlayer;
 
                 yield return delay05;
-                OnAddCard?.Invoke(toPlayer);    // (승헌)이거 동작 원리 궁금
-                                                // (희준)OnAddCard를 호출하는 건데, OnAddCard엔 플레이어의 인덱스를 전달하여서
-                                                // 인덱스에 맞는 플레이어의 덱에 카드를 넣음
+                OnAddCard?.Invoke(toPlayer);    // == CardManager.AddCard(toPlayer)
             }
         }
         StartCoroutine(StartTurnCo());
@@ -72,11 +68,11 @@ public class TurnManager : MonoBehaviour
         switch (roundNum)
         {
             case 1:
-                // (승헌)1번째 베팅 라운드
+                // 1번째 베팅 라운드
                 PlayerManager.Inst.StartRound();
                 break;
             case 2:
-                // (승헌)2번째 베팅 라운드
+                // 2번째 베팅 라운드
                 for (int i = 0; i < 3; i++)
                 {
                     yield return delay07;
@@ -86,12 +82,12 @@ public class TurnManager : MonoBehaviour
                 PlayerManager.Inst.StartRound();
                 break;
             case 5:
-                // (승헌)베팅 끝, 승리 판단
+                // 베팅 끝, 승리 판단
                 yield return delay07;
                 StartCoroutine(EndTurn());
                 break;
             default:
-                // (승헌)3,4번째 베팅 라운드
+                // 3,4번째 베팅 라운드
                 yield return delay07;
                 OnAddCard?.Invoke(GameManager.Inst.dealer);
                 yield return delay07;
@@ -99,7 +95,7 @@ public class TurnManager : MonoBehaviour
                 break;
         }
 
-        if (roundNum != 5) isLoading = false;   // (희준) 베팅 종료시엔 계속 로딩
+        if (roundNum != 5) isLoading = false;   // 베팅 종료시엔 계속 로딩
     }
 
     public IEnumerator EndTurn()

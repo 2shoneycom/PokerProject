@@ -22,7 +22,11 @@ public class CardManager : MonoBehaviour
     {
         SetupCard();            // 게임 시작시 카드 덱 셔플
         ShuffleCard();
-        TurnManager.OnAddCard += AddCard;
+        TurnManager.OnAddCard += AddCard;   // (승헌) 이 코드가 CardManager에 있어야 하는 이유는?
+                                            // OnAddCard라는 변수자체는 TurnManager에 선언되어있음
+                                            // 근데 OnAddCard에 어떤 메소드가 연결되는지는 여기에 있음
+                                            // 그래서 난 처음에 OnAddCard가 어디서 연결되는 건지 찾기 어려웠는데
+                                            // 꼭 여기에 있어야 하는 이유가 따로 있는 건가
     }
 
     void OnDestroy()
@@ -97,11 +101,13 @@ public class CardManager : MonoBehaviour
 
     void CardMoveToPos(int playerIndex)  // DOTween을 이용한 카드 움직임 구현
     {
+        // 딜러한테 줄 때
         var targetCards = dealerCards;
-        int cardIndex = dealerCards.Count - 1;
+        int cardIndex = dealerCards.Count - 1;  // 주려는 카드가 몇 번째 카드인지 (0~4 번째)
         Card targetCard = cardIndex >= 0 ? dealerCards[cardIndex] : null;
-        var targetPos = cardIndex >= 0 ? dealerCardSpawnPos[cardIndex].position : new Vector3();
+        var targetPos = cardIndex >= 0 ? dealerCardSpawnPos[cardIndex].position : new Vector3();    // 몇 번째 카드인지에 따라 tragetPos가 달라짐
 
+        // 플레이어한테 줄 때
         if(playerIndex != GameManager.Inst.dealer)
         {
             Player nowPlayer = PlayerManager.Inst.players[playerIndex];
