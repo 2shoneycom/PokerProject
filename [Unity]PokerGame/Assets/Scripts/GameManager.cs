@@ -23,18 +23,12 @@ public class GameManager : MonoBehaviour
     void Update()
     {
 #if UNITY_EDITOR            // 유니티 에디터에서만 치트 적용
-        InputCheatKey();
+        if (!TurnManager.Inst.isLoading) InputCheatKey();   // (희준) Loading 아닐 경우만 키 입력 가능
 #endif
     }
 
     void InputCheatKey()    // 테스트용 치트
     {                       // 1은 최대 2번, 2는 최대 5번만 누를것.
-        if (Input.GetKeyDown(KeyCode.Keypad1))
-            TurnManager.OnAddCard?.Invoke(mainPlayerIndex);
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-            TurnManager.OnAddCard?.Invoke(dealer);
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-            TurnManager.Inst.EndTurn();
         if (Input.GetKeyDown(KeyCode.Q))
         {
             Debug.Log($"{PlayerManager.Inst.currentPlayerIndex} Call");

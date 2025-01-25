@@ -21,6 +21,7 @@ public class CardManager : MonoBehaviour
     void Start()
     {
         SetupCard();            // 게임 시작시 카드 덱 셔플
+        ShuffleCard();
         TurnManager.OnAddCard += AddCard;
     }
 
@@ -47,8 +48,6 @@ public class CardManager : MonoBehaviour
             }
             cardNum.Add(i%13+1);
         }
-
-        ShuffleCard();
     }
 
     public void ShuffleCard()

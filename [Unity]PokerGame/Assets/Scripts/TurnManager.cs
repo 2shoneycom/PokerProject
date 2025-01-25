@@ -14,6 +14,7 @@ public class TurnManager : MonoBehaviour
 
     [Header("Properties")]
     public bool isLoading;      // 카드 배분과 상대 플레이어 턴일때 클릭 방지용 // (승헌)이게 true이면 카드를 나눠주는 중인건가?
+                                // (희준) 아직까지 사용을 안했어서 이번에 입력 방지용으로 사용됨.
     public bool myTurn;
 
     WaitForSeconds delay05 = new WaitForSeconds(0.5f);
@@ -38,6 +39,8 @@ public class TurnManager : MonoBehaviour
         playerBB = (playerSB + 1) % GameManager.Inst.totalPlayer;
         roundNum = 0;
         isFirst = true;     // (승헌)이게 여기 있어도 되는건가? playerD 위에 있어야 하는거 아닌가
+                            // (희준)아래에 있어야함. 가장 처음의 게임은 딜러가 랜덤으로 정해지고,
+                            // 이후는 이전 딜러의 다음 순서부터 딜러가 됨.
     }
 
     public IEnumerator StartGameCo()
@@ -54,6 +57,8 @@ public class TurnManager : MonoBehaviour
 
                 yield return delay05;
                 OnAddCard?.Invoke(toPlayer);    // (승헌)이거 동작 원리 궁금
+                                                // (희준)OnAddCard를 호출하는 건데, OnAddCard엔 플레이어의 인덱스를 전달하여서
+                                                // 인덱스에 맞는 플레이어의 덱에 카드를 넣음
             }
         }
         StartCoroutine(StartTurnCo());
@@ -93,10 +98,13 @@ public class TurnManager : MonoBehaviour
                 PlayerManager.Inst.StartRound();
                 break;
         }
+
+        if (roundNum != 5) isLoading = false;   // (희준) 베팅 종료시엔 계속 로딩
     }
 
     public IEnumerator EndTurn()
     {
+        isLoading = true;
         // 우승자 리스트 가져오기
         List<Player> winnerList = ResultManager.Inst.GetWinner();
         for (int i = 0; i < winnerList.Count; i++)
