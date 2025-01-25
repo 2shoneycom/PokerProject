@@ -96,17 +96,19 @@ public class PlayerManager : MonoBehaviour
 
         if (diePlayer == players.Count - 1)
         {
+            // 1명만 남았을 때
             StartCoroutine(TurnManager.Inst.StartTurnCo());
             return;
         }
         if (currentPlayer.CurrentBet == canCallMoney && currentPlayer.IsCall)
         {
+            // 정상적으로 한 바퀴 돌았을 때
             StartCoroutine(TurnManager.Inst.StartTurnCo());
             return;
         }
-        // 비활성화된 플레이어면 턴 스킵
         if (!currentPlayer.IsActive)
         {
+            // 비활성화된 플레이어면 턴 스킵
             Debug.Log($"Player {currentPlayerIndex + 1} is inactive. Skipping turn.");
             EndTurn();
             return;

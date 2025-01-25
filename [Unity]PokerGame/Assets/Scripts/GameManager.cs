@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         PlayerManager.Inst.SetupPlayers(totalPlayer);
+        PlayerUIManager.Inst.LinkPlayerUI();
         StartGame();        // 추후 버튼 입력으로도 변동
     }
 
