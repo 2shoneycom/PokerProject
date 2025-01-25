@@ -28,7 +28,6 @@ public class PlayerManager : MonoBehaviour
     public int canCallMoney = 0;
     public int canBetMoney = 0;
     public int diePlayer = 0;
-    public int roundCount = 0;
     private Coroutine turnTimerCoroutine;
 
     [SerializeField] public Button callButton;
@@ -82,6 +81,14 @@ public class PlayerManager : MonoBehaviour
         if (TurnManager.Inst.roundNum == 1) {
             currentPlayerIndex = (TurnManager.Inst.playerSB + 2) % players.Count;
             InitializePlayer();
+            Player SBPlayer = players[TurnManager.Inst.playerSB];
+            SBPlayer.CurrentBet = 5000;
+            SBPlayer.SeedMoney -= 5000;
+            Player BBPlayer = players[TurnManager.Inst.playerBB];
+            BBPlayer.CurrentBet = 10000;
+            BBPlayer.SeedMoney -= 10000;
+            totalMoney = 15000;
+            canCallMoney = 10000;
         }
         else {
             currentPlayerIndex = TurnManager.Inst.playerSB;
@@ -107,10 +114,10 @@ public class PlayerManager : MonoBehaviour
             StartCoroutine(TurnManager.Inst.StartTurnCo());
             return;
         }
-        // ��Ȱ��ȭ�� �÷��̾�� �� ��ŵ
+
         if (!currentPlayer.IsActive)
         {
-            Debug.Log($"Player {currentPlayerIndex + 1} is inactive. Skipping turn.");
+            Debug.Log($"Player {currentPlayerIndex} is inactive. Skipping turn.");
             EndTurn();
             return;
         }
@@ -157,7 +164,7 @@ public class PlayerManager : MonoBehaviour
 
     void EndTurn()
     {
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.Count; // ���� �÷��̾�� �̵�
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
         StartBetting(currentPlayerIndex);
     }
 
@@ -165,20 +172,18 @@ public class PlayerManager : MonoBehaviour
     {
         Player currentPlayer = players[currentPlayerIndex];
 
-        // ��ư Ȱ��ȭ/��Ȱ��ȭ (���� �÷��̾� ���¿� ����)
-        callButton.interactable = currentPlayer.IsActive;
-        doubleButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
+        callButton.interactable = true;
+        doubleButton.interactable = currentPlayer.IsCall == false;
         dieButton.interactable = true;
-        quarterButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
-        halfButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
-        allInButton.interactable = currentPlayer.IsActive && currentPlayer.IsCall == false;
+        quarterButton.interactable = currentPlayer.IsCall == false;
+        halfButton.interactable = currentPlayer.IsCall == false;
+        allInButton.interactable = currentPlayer.IsCall == false;
     }
 
     public int LeastMoney()
     {
         int minMoney = int.MaxValue;
 
-        // ���� �ּҰ� ��� (LINQ �ּ�ȭ)
         foreach (var player in players)
         {
             if (player.IsActive && player.SeedMoney < minMoney)
@@ -203,7 +208,6 @@ public class PlayerManager : MonoBehaviour
     {
         yield return new WaitForSeconds(duration);
 
-        // ���� �÷��̾ 7�� ���� ��ư�� ������ �ʾ��� ��� Die ó��
         Debug.Log($"Player {players[currentPlayerIndex].Name} didn't respond. Automatically choosing Die.");
         OnButtonClicked("Die");
     }
@@ -219,6 +223,5 @@ public class PlayerManager : MonoBehaviour
         totalMoney = 0;
         canCallMoney = 0;
         diePlayer = 0;
-        roundCount = 0;
     }
 }

@@ -7,12 +7,11 @@ using UnityEngine.TextCore.Text;
 public class Card : MonoBehaviour
 {
     [SerializeField] SpriteRenderer card;
-    [SerializeField] Sprite cardBack;       // ��� �÷��̾�� ������ ī��� ī�� �޸� ��������
+    [SerializeField] Sprite cardBack;
 
     public Item item;
-    bool isFront;                           // �޸� �������ϴ���
-    public int myCardIndex;                        // ���� ī���� �ε���, CardManager�� CardShape, CardNum
-                                            // ����Ʈ�� �����Ͽ� � ī������ �ľ� ����
+    bool isFront;
+    public int myCardIndex;
 
     public void Setup(Item item, int playerIndex)
     {

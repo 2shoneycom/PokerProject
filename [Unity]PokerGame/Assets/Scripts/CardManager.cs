@@ -9,18 +9,18 @@ public class CardManager : MonoBehaviour
     void Awake() => Inst = this;
 
     [SerializeField] ItemSO itemSO;
-    [SerializeField] GameObject cardPrefabs;        // ������ ī�� ������
-    [SerializeField] public List<Card> dealerCards;        // ���� ���� ī�� ����Ʈ
-    [SerializeField] Transform cardSpawnPoint;      // ���� ī�� ���� ��ġ (������)
-    [SerializeField] Transform[] dealerCardSpawnPos;// ������ ī�� ��ġ
+    [SerializeField] GameObject cardPrefabs;
+    [SerializeField] public List<Card> dealerCards;
+    [SerializeField] Transform cardSpawnPoint;
+    [SerializeField] Transform[] dealerCardSpawnPos;
 
-    List<Item> cardBuffer;      // ī�� ��
-    public List<char> cardShape;       // 0-12 �� Ŭ�ι�, 13-25 �� ���̾�, 26-38 �� ��Ʈ, 39-51 �� �����̵�
-    public List<int> cardNum;          // 0-12 �� 1-13�� ����Ǿ�, Ŭ�ι��� ���ڸ� ��Ÿ��, ���ĵ� �����ϰ� �۵�
+    List<Item> cardBuffer;
+    public List<char> cardShape;
+    public List<int> cardNum;
 
     void Start()
     {
-        SetupCard();            // ���� ���۽� ī�� �� ����
+        SetupCard();
         TurnManager.OnAddCard += AddCard;
     }
 
@@ -60,7 +60,7 @@ public class CardManager : MonoBehaviour
             cardBuffer.Add(itemSO.items[i]);
         }
 
-        for (int i = 0; i < cardBuffer.Count; i++)       // �� ���� ����
+        for (int i = 0; i < cardBuffer.Count; i++)
         {
             int rand = Random.Range(i, cardBuffer.Count);
             Item temp = cardBuffer[i];
@@ -69,7 +69,7 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    public Item PopItem()           // 0��° ī�嵦 pop
+    public Item PopItem()
     {
         Item item = cardBuffer[0];
         cardBuffer.RemoveAt(0);
@@ -82,15 +82,12 @@ public class CardManager : MonoBehaviour
 
     }
 
-    void AddCard(int playerIndex)   // ī�� ���� ����
+    void AddCard(int playerIndex)
     {
-        // ī�� ������Ʈ ����
         var cardObject = Instantiate(cardPrefabs, cardSpawnPoint.position, Quaternion.identity);
-        // ī���� Card ��ũ��Ʈ�� ������ ���� 0��° ī��� �¾� 
         var card = cardObject.GetComponent<Card>();
         card.Setup(PopItem(), playerIndex);
 
-        // ī�带 �˸��� ����Ʈ�� �߰�
         if(playerIndex == GameManager.Inst.dealer)
             dealerCards.Add(card);
         else
@@ -98,11 +95,11 @@ public class CardManager : MonoBehaviour
             Player nowPlayer = PlayerManager.Inst.players[playerIndex];
             nowPlayer?.myCards.Add(card);
         }
-        // ī�� ������ �Լ� ȣ��
+
         CardMoveToPos(playerIndex);
     }
 
-    void CardMoveToPos(int playerIndex)  // DOTween�� �̿��� ī�� ������ ����
+    void CardMoveToPos(int playerIndex)
     {
         var targetCards = dealerCards;
         int cardIndex = dealerCards.Count - 1;

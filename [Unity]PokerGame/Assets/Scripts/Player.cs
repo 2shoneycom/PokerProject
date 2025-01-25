@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public string Name; // �� �÷��̾� �̸�
-    public int CurrentBet; // �� �÷��̾��� ���� ���þ�
-    public int SeedMoney; // �� �÷��̾��� ��ü �ڻ�
-    public bool IsActive; // ���� �÷��̾��� ���°� Die�� false �������� true
-    public bool IsCall; // ���� �÷��̾��� ���°� Call�̸� true �������� false
+    public string Name;
+    public int CurrentBet;
+    public int SeedMoney;
+    public bool IsActive;
+    public bool IsCall;
     [SerializeField] public List<Card> myCards;
     [SerializeField] public int pIdx;
     public Transform myCardLeft;
@@ -124,9 +124,3 @@ public class Player : MonoBehaviour
         myCards.Clear();
     }
 }
-
-// player �ȿ� card ���� 2�� �߰� round�� �� 4���̰�
-// playermanager�� placebet �Լ� �ű��
-// playermanager���� start �ȿ� setupplayer�� round ���� �Լ� �ΰ� round �Լ� �ϳ� ���� �� �÷��̾ �ൿ�ϴ� �Լ� �����
-// �׸��� round 4��°�� �����ų� ���� ���и� ���� Ÿ�ֿ̹� �����ٰ� return ���ֱ�
-// rule �����ϱ� 

@@ -10,25 +10,25 @@ public class GameManager : MonoBehaviour
     void Awake() => Inst = this;
 
     public GameObject mainPlayer;
-    public int totalPlayer;     // �߾��� ���� �÷��̾�� ����
+    public int totalPlayer;
     public int mainPlayerIndex = 0;
     public int dealer = 99;
 
     void Start()
     {
         PlayerManager.Inst.SetupPlayers(totalPlayer);
-        StartGame();        // ���� ��ư �Է����ε� ����
+        StartGame();
     }
 
     void Update()
     {
-#if UNITY_EDITOR            // ����Ƽ �����Ϳ����� ġƮ ����
+#if UNITY_EDITOR
         InputCheatKey();
 #endif
     }
 
-    void InputCheatKey()    // �׽�Ʈ�� ġƮ
-    {                       // 1�� �ִ� 2��, 2�� �ִ� 5���� ������.
+    void InputCheatKey()
+    {
         if (Input.GetKeyDown(KeyCode.Keypad1))
             TurnManager.OnAddCard?.Invoke(mainPlayerIndex);
         if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour
             TurnManager.Inst.EndTurn();
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Debug.Log($"{PlayerManager.Inst.currentPlayerIndex} Call");
             PlayerManager.Inst.OnButtonClicked("Call");
         }
         if (Input.GetKeyDown(KeyCode.W))
