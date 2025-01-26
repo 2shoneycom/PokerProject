@@ -22,6 +22,7 @@ public class PlayerUIManager : MonoBehaviour
 
     void Update ()
     {
+        // Debug.Log(isLinked);
         if (isLinked)
         {
             for (int i = 0; i < 7; i++) {
