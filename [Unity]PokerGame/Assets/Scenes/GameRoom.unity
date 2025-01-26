@@ -257,7 +257,7 @@ MonoBehaviour:
   isLoading: 0
   myTurn: 0
   roundNum: 0
-  isFirst: 1
+  isFirst: 0
   playerBB: 0
   playerSB: 0
   playerD: 0
@@ -823,7 +823,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 312, y: 160}
+  m_AnchoredPosition: {x: 312, y: -60}
   m_SizeDelta: {x: 300, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &677244702
@@ -1568,9 +1568,9 @@ MonoBehaviour:
   - {fileID: 1848120166}
   - {fileID: 778063874}
   - {fileID: 1802827780}
-  - {fileID: 1976164703}
-  - {fileID: 1065348855}
   - {fileID: 1752540297}
+  - {fileID: 1065348855}
+  - {fileID: 1976164703}
   mainplayerPos: {fileID: 1798122082}
   playerPrefabs: {fileID: 4723083671338966920, guid: 6a29d133054800e4da31b6733885b93d, type: 3}
   players: []
@@ -2191,7 +2191,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 312, y: -60}
+  m_AnchoredPosition: {x: 312, y: 160}
   m_SizeDelta: {x: 300, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1179644791

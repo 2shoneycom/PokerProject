@@ -26,7 +26,27 @@ public class PlayerUIManager : MonoBehaviour
         if (isLinked)
         {
             for (int i = 0; i < 7; i++) {
-                playerMoneyTexts[i].text = $"P{i}: {PlayerManager.Inst.players[i].seedMoney} Bet: {PlayerManager.Inst.players[i].currentBet}";
+                Player curplayer = PlayerManager.Inst.players[i];
+                playerMoneyTexts[i].text = $"P{i}: {curplayer.seedMoney} Bet: {curplayer.currentBet}";
+
+                if (curplayer.isActive) 
+                {
+                    if (i == PlayerManager.Inst.currentPlayerIndex) 
+                    {
+                        // 살아있는 사람 중 현재 차례면 빨간색으로 표시
+                        playerMoneyTexts[i].color = Color.red;
+                    }
+                    else 
+                    {
+                        // 그냥 살아있는 사람은 하얀색
+                        playerMoneyTexts[i].color = Color.white;
+                    }
+                }
+                else 
+                {
+                    // 죽은 사람은 회색
+                    playerMoneyTexts[i].color = Color.gray;
+                }
             }
             potMoneyText.text = $"{PlayerManager.Inst.totalMoney}";
         }
