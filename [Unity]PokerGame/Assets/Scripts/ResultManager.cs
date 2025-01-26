@@ -11,71 +11,87 @@ public class ResultManager : MonoBehaviour
     
     public List<Player> GetWinner ()
     {
-        var evaluator = new PokerHandEvaluator();
-
-        List<Player> winners = new List<Player>();  // 승자 리스트
-        int maxRank = -1;           
-        int maxScore = -1;
-
-        List<int> dealerCardIdx = CardManager.Inst.dealerCards.Select(card => card.myCardIndex).ToList();  // 딜러 카드 5장의 인덱스
-
-        // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
-        foreach (var curplayer in PlayerManager.Inst.players)
+        if (PlayerManager.Inst.oneLeft)
         {
-            // 족보 판단 디버그용!!!!!!
-            int myRank = -1;
-            int myScore = -1;
-
-            if (curplayer.isActive) 
+            List<Player> winners = new List<Player>();
+            foreach (var player in PlayerManager.Inst.players)
             {
-                // 해당 플레이어의 카드는 딜러 카드 5장 + 본인 카드 2장, 총 7장
-                List<int> cardIdx = new List<int>(dealerCardIdx);
-                cardIdx.Add(curplayer.myCards[0].myCardIndex);
-                cardIdx.Add(curplayer.myCards[1].myCardIndex);
-
-                // 7C5의 조합을 얻어내기
-                var combinations = GetCombinations(cardIdx, 5);
-
-                foreach (var comb in combinations) 
+                if (player.isActive)
                 {
-                    // 각 경우에서 점수를 얻고 현재 최대 점수 저장
-                    evaluator.idxs = comb.ToArray();
-                    var (curRank,curScore) = evaluator.EvaluateHand();
-
-                    if (curRank > maxRank || (curRank == maxRank && curScore > maxScore))
-                    {
-                        maxRank = curRank;
-                        maxScore = curScore;
-                        winners.Clear();
-                        winners.Add(curplayer);
-                    }
-                    else if (curRank == maxRank && curScore == maxScore)
-                    {
-                        // 동점자 발생
-                        winners.Add(curplayer);
-                    }
-
-                    // 족보 판단 디버그용!!!!!!
-                    if (curRank > myRank || (curRank == myRank && curScore > myScore))
-                    {
-                        myRank = curRank;
-                        myScore = curScore;
-                    }
+                    Debug.Log("one player left");
+                    winners.Add(player);
                 }
-
-                // 족보 판단 디버그용!!!!!!!
-                Debug.Log(curplayer.pIdx+"P의 족보");
-                DebugLog(myRank);
-                Debug.Log("Score: "+myScore);
             }
+            return winners;
         }
+        else 
+        {
+            var evaluator = new PokerHandEvaluator();
 
-        winners = winners.Distinct().ToList();
+            List<Player> winners = new List<Player>();  // 승자 리스트
+            int maxRank = -1;
+            int maxScore = -1;
 
-        Debug.Log("우승자의 족보는");
-        DebugLog(maxRank);
+            List<int> dealerCardIdx = CardManager.Inst.dealerCards.Select(card => card.myCardIndex).ToList();  // 딜러 카드 5장의 인덱스
 
-        return winners;
+            // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
+            foreach (var curplayer in PlayerManager.Inst.players)
+            {
+                // 족보 판단 디버그용!!!!!!
+                int myRank = -1;
+                int myScore = -1;
+
+                if (curplayer.isActive)
+                {
+                    // 해당 플레이어의 카드는 딜러 카드 5장 + 본인 카드 2장, 총 7장
+                    List<int> cardIdx = new List<int>(dealerCardIdx);
+                    cardIdx.Add(curplayer.myCards[0].myCardIndex);
+                    cardIdx.Add(curplayer.myCards[1].myCardIndex);
+
+                    // 7C5의 조합을 얻어내기
+                    var combinations = GetCombinations(cardIdx, 5);
+
+                    foreach (var comb in combinations)
+                    {
+                        // 각 경우에서 점수를 얻고 현재 최대 점수 저장
+                        evaluator.idxs = comb.ToArray();
+                        var (curRank, curScore) = evaluator.EvaluateHand();
+
+                        if (curRank > maxRank || (curRank == maxRank && curScore > maxScore))
+                        {
+                            maxRank = curRank;
+                            maxScore = curScore;
+                            winners.Clear();
+                            winners.Add(curplayer);
+                        }
+                        else if (curRank == maxRank && curScore == maxScore)
+                        {
+                            // 동점자 발생
+                            winners.Add(curplayer);
+                        }
+
+                        // 족보 판단 디버그용!!!!!!
+                        if (curRank > myRank || (curRank == myRank && curScore > myScore))
+                        {
+                            myRank = curRank;
+                            myScore = curScore;
+                        }
+                    }
+
+                    // 족보 판단 디버그용!!!!!!!
+                    Debug.Log(curplayer.pIdx + "P의 족보");
+                    DebugLog(myRank);
+                    Debug.Log("Score: " + myScore);
+                }
+            }
+
+            winners = winners.Distinct().ToList();
+
+            Debug.Log("우승자의 족보는");
+            DebugLog(maxRank);
+
+            return winners;
+        }
     }
 
     public static IEnumerable<IEnumerable<T>> GetCombinations<T>(List<T> list, int choose)
