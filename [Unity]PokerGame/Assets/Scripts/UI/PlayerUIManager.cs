@@ -17,7 +17,7 @@ public class PlayerUIManager : MonoBehaviour
 
     void Start ()
     {
-        isLinked = false;
+        isLinked = true;
     }
 
     void Update ()
@@ -25,7 +25,7 @@ public class PlayerUIManager : MonoBehaviour
         if (isLinked)
         {
             for (int i = 0; i < 7; i++) {
-                playerMoneyTexts[i].text = $"P{i}: {PlayerManager.Inst.players[i].SeedMoney} Bet: {PlayerManager.Inst.players[i].CurrentBet}";
+                playerMoneyTexts[i].text = $"P{i}: {PlayerManager.Inst.players[i].seedMoney} Bet: {PlayerManager.Inst.players[i].currentBet}";
             }
             potMoneyText.text = $"{PlayerManager.Inst.totalMoney}";
         }

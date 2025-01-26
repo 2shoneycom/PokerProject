@@ -26,7 +26,7 @@ public class ResultManager : MonoBehaviour
             int myRank = -1;
             int myScore = -1;
 
-            if (curplayer.IsActive) 
+            if (curplayer.isActive) 
             {
                 // 해당 플레이어의 카드는 딜러 카드 5장 + 본인 카드 2장, 총 7장
                 List<int> cardIdx = new List<int>(dealerCardIdx);

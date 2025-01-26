@@ -106,6 +106,7 @@ public class TurnManager : MonoBehaviour
         for (int i = 0; i < winnerList.Count; i++)
         {
             foreach (var winner in winnerList) {
+                winner.seedMoney += PlayerManager.Inst.totalMoney / winnerList.Count; // (정현) 우승자에게 돈 나눠주기
                 Debug.Log("우승자: " + winner.pIdx);
             }
         }

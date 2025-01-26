@@ -1579,7 +1579,6 @@ MonoBehaviour:
   canCallMoney: 0
   canBetMoney: 0
   diePlayer: 0
-  roundCount: 0
   callButton: {fileID: 530868473}
   doubleButton: {fileID: 1832938333}
   dieButton: {fileID: 1525142544}
@@ -2817,7 +2816,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Quarter
+          m_StringArgument: Half
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1442440000

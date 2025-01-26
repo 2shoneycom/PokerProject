@@ -74,21 +74,23 @@ public class PlayerManager : MonoBehaviour
 
     public void StartRound()
     {
-        if (TurnManager.Inst.roundNum == 1) {
+        if (TurnManager.Inst.roundNum == 1) 
+        {
             currentPlayerIndex = (TurnManager.Inst.playerSB + 2) % players.Count;
             InitializePlayer();
             Player SBPlayer = players[TurnManager.Inst.playerSB];
-            SBPlayer.CurrentBet = 5000;
-            SBPlayer.SeedMoney -= 5000;
+            SBPlayer.currentBet = 5000;
+            SBPlayer.seedMoney -= 5000;
             Player BBPlayer = players[TurnManager.Inst.playerBB];
-            BBPlayer.CurrentBet = 10000;
-            BBPlayer.SeedMoney -= 10000;
-            totalMoney = 15000;
+            BBPlayer.currentBet = 10000;
+            BBPlayer.seedMoney -= 10000;
             canCallMoney = 10000;
         }
-        else {
+        else 
+        {
             currentPlayerIndex = TurnManager.Inst.playerSB;
-            MakeIsCallFalse();
+            canCallMoney = 0;
+            OptionsChange();
         }
         StartBetting(currentPlayerIndex);
     }
@@ -107,20 +109,22 @@ public class PlayerManager : MonoBehaviour
             StartCoroutine(TurnManager.Inst.StartTurnCo());
             return;
         }
-        if (currentPlayer.CurrentBet == canCallMoney && currentPlayer.IsCall)
+        if (currentPlayer.currentBet == canCallMoney && currentPlayer.isBet)
         {
             // 정상적으로 한 바퀴 돌았을 때
+            UpdateTotalMoney();
             StartCoroutine(TurnManager.Inst.StartTurnCo());
             return;
         }
-        if (!currentPlayer.IsActive)
+        if (!currentPlayer.isActive)
         {
             // 비활성화된 플레이어면 턴 스킵
-            Debug.Log($"Player {currentPlayerIndex + 1} is inactive. Skipping turn.");
+            Debug.Log($"Player {currentPlayerIndex} is inactive. Skipping turn.");
             EndTurn();
             return;
         }
-        if (currentPlayerIndex == 0) {
+        if (currentPlayerIndex == 0) 
+        {
             UpdateButtonStates();
         }
         if (turnTimerCoroutine != null)
@@ -173,11 +177,11 @@ public class PlayerManager : MonoBehaviour
         Player currentPlayer = players[currentPlayerIndex];
         // 버튼 활성화/비활성화 (현재 플레이어 상태에 따라)
         callButton.interactable = true;
-        doubleButton.interactable = currentPlayer.IsCall == false;
+        doubleButton.interactable = currentPlayer.isCall == false;
         dieButton.interactable = true;
-        quarterButton.interactable = currentPlayer.IsCall == false;
-        halfButton.interactable = currentPlayer.IsCall == false;
-        allInButton.interactable = currentPlayer.IsCall == false;
+        quarterButton.interactable = currentPlayer.isCall == false;
+        halfButton.interactable = currentPlayer.isCall == false;
+        allInButton.interactable = currentPlayer.isCall == false;
     }
 
     public int LeastMoney()
@@ -188,24 +192,42 @@ public class PlayerManager : MonoBehaviour
         foreach (var player in players)
         {
             // (승헌) 살아있는 플레이어들 중 보유금액의 최솟값 구하기
-            if (player.IsActive && player.SeedMoney < minMoney)
+            if (player.isActive && (player.seedMoney + player.currentBet) < minMoney)
             {
-                minMoney = player.SeedMoney;
+                minMoney = player.seedMoney + player.currentBet;
             }
         }
 
         return minMoney;
     }
 
-    void MakeIsCallFalse()
+    void OptionsChange() // 한 라운드가 끝나면 IsCall false로 초기화 해주기
     {
         foreach (var player in players)
         {
-            if (player.IsCall)
+            if (player.isActive)
             {
-                player.IsCall = false;
+                player.isCall = false;
+                player.isBet = false;
+                player.currentBet = 0;
             }
         }
+    }
+    void UpdateTotalMoney() // 한 라운드가 끝나면 totalMoney 업데이트 해주기
+    { 
+        foreach (var player in players)
+        {
+            totalMoney += player.currentBet;
+        }
+    }
+    public int CalculateCurrentBets() // 쿼터, 하프 계산을 위한 현재 플레이어가 베팅한 금액들 합
+    {
+        int currentBets = 0;
+        foreach (var player in players) 
+        {
+            currentBets += player.currentBet;
+        }
+        return currentBets;
     }
 
     IEnumerator AutoDieTimer(float duration)
@@ -221,12 +243,13 @@ public class PlayerManager : MonoBehaviour
     {
         foreach (var player in players)
         {
-            player.IsActive = true;
-            player.IsCall = false;
-            player.CurrentBet = 0;
+            player.isActive = true;
+            player.isCall = false;
+            player.isBet = false;
+            player.currentBet = 0;
         }
         canBetMoney = LeastMoney();
-        totalMoney = 0;
+        totalMoney = players.Count * 5000; // notion 사진 분석 결과 SB와 BB의 기본 베팅 말고 처음 팟에 (플레이어수) * (SB가 내는 돈) 만큼 존재하던데?
         canCallMoney = 0;
         diePlayer = 0;
     }

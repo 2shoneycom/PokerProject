@@ -6,10 +6,11 @@ using UnityEngine.UI;
 public class Player : MonoBehaviour
 {
     public string Name; // 각 플레이어 이름
-    public int CurrentBet; // 각 플레이어의 현재 베팅액
-    public int SeedMoney; // 각 플레이어의 전체 자산
-    public bool IsActive; // 현재 플레이어의 상태가 Die면 false 나머지는 true
-    public bool IsCall; // 현재 플레이어의 상태가 Call이면 true 나머지는 false
+    public int currentBet; // 각 플레이어의 현재 베팅액
+    public int seedMoney; // 각 플레이어의 전체 자산
+    public bool isActive; // 현재 플레이어의 상태가 Die면 false 나머지는 true
+    public bool isCall; // 현재 플레이어의 상태가 Call이면 true 나머지는 false
+    public bool isBet; // 현재 플레이어의 차례가 와서 베팅에 참여를 했으면 true 나머지는 false
     [SerializeField] public List<Card> myCards;
     [SerializeField] public int pIdx;
     public Transform myCardLeft;
@@ -18,99 +19,146 @@ public class Player : MonoBehaviour
     public void Initialize(string name)
     {
         Name = name;
-        CurrentBet = 0;
-        IsActive = true;
-        IsCall = false;
-        SeedMoney = 1000000;
+        currentBet = 0;
+        isActive = true;
+        isCall = false;
+        isBet = false;
+        seedMoney = 1000000;
         myCards = new List<Card>();
     }
 
     public void PlaceBet(BetType betType)
     {
-        if (!IsActive) return;
+        if (!isActive) return;
 
         switch (betType)
         {
             case BetType.Call:
-                SeedMoney -= (PlayerManager.Inst.canCallMoney - CurrentBet);
-                PlayerManager.Inst.totalMoney += (PlayerManager.Inst.canCallMoney - CurrentBet);
-                CurrentBet = PlayerManager.Inst.canCallMoney;
-                IsCall = true;
-                break;
-            case BetType.Double:
-                if (PlayerManager.Inst.canBetMoney < 2 * PlayerManager.Inst.canCallMoney - CurrentBet)
+                if (PlayerManager.Inst.canCallMoney == currentBet) 
                 {
-                    // 더블을 하면 최대 베팅 가능 금액을 초과할 때
-                    SeedMoney -= (PlayerManager.Inst.canBetMoney - CurrentBet);
-                    PlayerManager.Inst.totalMoney += (PlayerManager.Inst.canBetMoney - CurrentBet);
-                    CurrentBet = PlayerManager.Inst.canBetMoney;
-                    PlayerManager.Inst.canCallMoney = CurrentBet;
+                    // 체크
+                    Debug.Log("It is check, not call");
+                    isCall = true;
+                    isBet = true;
                     break;
                 }
-                else
+                else 
                 {
-                    SeedMoney -= (2 * PlayerManager.Inst.canCallMoney - CurrentBet);
-                    PlayerManager.Inst.totalMoney += (2 * PlayerManager.Inst.canCallMoney - CurrentBet);
-                    CurrentBet = 2 * PlayerManager.Inst.canCallMoney;
-                    PlayerManager.Inst.canCallMoney = CurrentBet;
+                    // 콜
+                    seedMoney -= (PlayerManager.Inst.canCallMoney - currentBet);
+                    currentBet = PlayerManager.Inst.canCallMoney;
+                    isCall = true;
+                    isBet = true;
                     break;
+                }
+            case BetType.Double:
+                if (PlayerManager.Inst.canCallMoney == 0)
+                {
+                    if (PlayerManager.Inst.canBetMoney < 10000)
+                    {
+                        // 삥 못하는 상황 -> 삥 단위인 10000원이 베팅 최대 가능 금액을 초과하는 경우
+                        seedMoney -= (PlayerManager.Inst.canBetMoney - currentBet);
+                        currentBet = PlayerManager.Inst.canBetMoney;
+                        PlayerManager.Inst.canCallMoney = currentBet;
+                        isBet = true;
+                        break;
+                    }
+                    else
+                    {
+                        // 삥
+                        seedMoney -= 10000;
+                        currentBet = 10000;
+                        PlayerManager.Inst.canCallMoney = 10000;
+                        isBet = true;
+                        break;
+                    }
+                }
+                else 
+                {
+                    if (PlayerManager.Inst.canBetMoney < 2 * (PlayerManager.Inst.canCallMoney - currentBet))
+                    {
+                        // 더블 못하는 상황 -> 플레이어의 더블 금액이 베팅 최대 가능 금액을 초과하는 경우
+                        seedMoney -= (PlayerManager.Inst.canBetMoney - currentBet);
+                        currentBet = PlayerManager.Inst.canBetMoney;
+                        PlayerManager.Inst.canCallMoney = currentBet;
+                        isBet = true;
+                        break;
+                    }
+                    else 
+                    {
+                        // 더블
+                        seedMoney -= 2 * (PlayerManager.Inst.canCallMoney - currentBet);
+                        currentBet += 2 * (PlayerManager.Inst.canCallMoney - currentBet);
+                        PlayerManager.Inst.canCallMoney = currentBet;
+                        isBet = true;
+                        break;
+                    }
                 }
             case BetType.Quarter:
-                if (PlayerManager.Inst.canBetMoney < PlayerManager.Inst.totalMoney / 4)
                 {
-                    // 쿼터를 하면 최대 베팅 가능 금액을 초과할 때
-                    SeedMoney -= (PlayerManager.Inst.canBetMoney - CurrentBet);
-                    PlayerManager.Inst.totalMoney += (PlayerManager.Inst.canBetMoney - CurrentBet);
-                    CurrentBet = PlayerManager.Inst.canBetMoney;
-                    PlayerManager.Inst.canCallMoney = CurrentBet;
-                    break;
-                }
-                else
-                {
-                    SeedMoney -= PlayerManager.Inst.totalMoney / 4;
-                    PlayerManager.Inst.totalMoney += PlayerManager.Inst.totalMoney / 4;
-                    CurrentBet += PlayerManager.Inst.totalMoney / 4;
-                    PlayerManager.Inst.canCallMoney = CurrentBet;
-                    break;
+                    int totalPot = PlayerManager.Inst.canCallMoney - currentBet + PlayerManager.Inst.CalculateCurrentBets() + PlayerManager.Inst.totalMoney;
+                    if (PlayerManager.Inst.canBetMoney < totalPot / 4 + PlayerManager.Inst.canCallMoney - currentBet)
+                    {
+                        // 쿼터 못하는 상황 -> 플레이어의 쿼터 금액이 베팅 최대 가능 금액을 초과하는 경우
+                        seedMoney -= (PlayerManager.Inst.canBetMoney - currentBet);
+                        currentBet = PlayerManager.Inst.canBetMoney;
+                        PlayerManager.Inst.canCallMoney = currentBet;
+                        isBet = true;
+                        break;
+                    }
+                    else
+                    {
+                        // 쿼터
+                        seedMoney -= (totalPot / 4 + PlayerManager.Inst.canCallMoney - currentBet);
+                        currentBet += (totalPot / 4 + PlayerManager.Inst.canCallMoney - currentBet);
+                        PlayerManager.Inst.canCallMoney = currentBet;
+                        isBet = true;
+                        break;
+                    }
                 }
             case BetType.Half:
-                if (PlayerManager.Inst.canBetMoney < PlayerManager.Inst.totalMoney / 2)
                 {
-                    // 하프를 하면 최대 베팅 가능 금액을 초과할 때
-                    SeedMoney -= (PlayerManager.Inst.canBetMoney - CurrentBet);
-                    PlayerManager.Inst.totalMoney += (PlayerManager.Inst.canBetMoney - CurrentBet);
-                    CurrentBet = PlayerManager.Inst.canBetMoney;
-                    PlayerManager.Inst.canCallMoney = CurrentBet;
-                    break;
-                }
-                else
-                {
-                    SeedMoney -= PlayerManager.Inst.totalMoney / 2;
-                    PlayerManager.Inst.totalMoney += PlayerManager.Inst.totalMoney / 2;
-                    CurrentBet += PlayerManager.Inst.totalMoney / 2;
-                    PlayerManager.Inst.canCallMoney = CurrentBet;
-                    break;
+                    int totalPot = PlayerManager.Inst.canCallMoney - currentBet + PlayerManager.Inst.CalculateCurrentBets() + PlayerManager.Inst.totalMoney;
+                    if (PlayerManager.Inst.canBetMoney < totalPot / 2 + PlayerManager.Inst.canCallMoney - currentBet)
+                    {
+                        // 하프 못하는 상황 -> 플레이어의 하프 금액이 베팅 최대 가능 금액을 초과하는 경우
+                        seedMoney -= (PlayerManager.Inst.canBetMoney - currentBet);
+                        currentBet = PlayerManager.Inst.canBetMoney;
+                        PlayerManager.Inst.canCallMoney = currentBet;
+                        isBet = true;
+                        break;
+                    }
+                    else
+                    {
+                        // 하프
+                        seedMoney -= (totalPot / 2 + PlayerManager.Inst.canCallMoney - currentBet);
+                        currentBet += (totalPot / 2 + PlayerManager.Inst.canCallMoney - currentBet);
+                        PlayerManager.Inst.canCallMoney = currentBet;
+                        isBet = true;
+                        break;
+                    }
                 }
             case BetType.AllIn:
-                if (PlayerManager.Inst.canBetMoney < PlayerManager.Inst.totalMoney)
+                if (PlayerManager.Inst.canBetMoney < seedMoney)
                 {
-                    // 올인을 하면 베팅 최대 가능 금액을 초과할 때
-                    SeedMoney -= (PlayerManager.Inst.canBetMoney - CurrentBet);
-                    PlayerManager.Inst.totalMoney += (PlayerManager.Inst.canBetMoney - CurrentBet);
-                    CurrentBet = PlayerManager.Inst.canBetMoney;
-                    PlayerManager.Inst.canCallMoney = CurrentBet;
+                    // 올인 못하는 상황 -> 플레이어의 올인 금액이 베팅 최대 가능 금액을 초과하는 경우
+                    seedMoney -= (PlayerManager.Inst.canBetMoney - currentBet);
+                    currentBet = PlayerManager.Inst.canBetMoney;
+                    PlayerManager.Inst.canCallMoney = currentBet;
+                    isBet = true;
                     break;
                 }
                 else
                 {
-                    SeedMoney -= PlayerManager.Inst.totalMoney;
-                    PlayerManager.Inst.totalMoney += PlayerManager.Inst.totalMoney;
-                    CurrentBet += PlayerManager.Inst.totalMoney;
-                    PlayerManager.Inst.canCallMoney = CurrentBet;
+                    // 올인
+                    seedMoney -= PlayerManager.Inst.totalMoney;
+                    currentBet += PlayerManager.Inst.totalMoney;
+                    PlayerManager.Inst.canCallMoney = currentBet;
+                    isBet = true;
                     break;
                 }
             case BetType.Die:
-                IsActive = false;
+                isActive = false;
                 PlayerManager.Inst.diePlayer += 1;
                 PlayerManager.Inst.canBetMoney = Mathf.Min(PlayerManager.Inst.canBetMoney, PlayerManager.Inst.LeastMoney());
                 break;
@@ -128,3 +176,6 @@ public class Player : MonoBehaviour
         myCards.Clear();
     }
 }
+
+// 만약 저번 게임에서 올인을 하는 등, SeedMoney가 최소 콜 금액인 10000원보다 아래가 되는 경우?
+// 게임 시작하면 BB와 SB 고정인거 같은데?
