@@ -2,6 +2,7 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
+.utmp/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -71,3 +72,29 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# (Photon) 폴더 및 파일들
+/[Aa]ssets/Photon/
+
+# (Photon) 메타 파일
+/[Aa]ssets/Photon.meta
+
+# (로그인 관련) 안드로이드 파일
+/[Aa]ssets/google-services.json
+
+# (로그인 관련) 안드로이드 파일
+/[Aa]ssets/GoogleService-Info.plist
+
+# (Firebase) 폴더 및 파일들
+/[Aa]ssets/Editor Default Resources/
+/[Aa]ssets/ExternalDependencyManager/
+/[Aa]ssets/Firebase/
+/[Aa]ssets/Plugins/
+/[Aa]ssets/StreamingAssets/
+
+# (Firebase) 메타 파일까지 무시
+/[Aa]ssets/Editor Default Resources.meta
+/[Aa]ssets/ExternalDependencyManager.meta
+/[Aa]ssets/Firebase.meta
+/[Aa]ssets/Plugins.meta
+/[Aa]ssets/StreamingAssets.meta
