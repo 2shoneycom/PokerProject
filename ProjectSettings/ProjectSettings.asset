@@ -896,7 +896,13 @@ PlayerSettings:
   XboxOneOverrideIdentityName: 
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
-  cloudServicesEnabled: {}
+  cloudServicesEnabled:
+    Build: 0
+    Game Performance: 0
+    Legacy Analytics: 0
+    Purchasing: 0
+    UDP: 0
+    Unity Ads: 0
   luminIcon:
     m_Name: 
     m_ModelFolderPath: 
@@ -916,11 +922,11 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 0
   windowsGamepadBackendHint: 0
-  cloudProjectId: 30ea4320-7351-4e35-a4b0-d8268eedd64e
+  cloudProjectId: 1f5ac2b3-0f7d-470d-9e73-4c6fc54c1093
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: '[Unity]PokerGame 2025-01-01_21-34-47'
-  organizationId: seungheonorg
+  projectName: '[Unity]PokerGame'
+  organizationId: hj010410
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
