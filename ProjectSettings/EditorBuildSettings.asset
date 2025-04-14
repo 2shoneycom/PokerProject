@@ -6,6 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/HoldemRoom Scene.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
+    path: Assets/Scenes/Login Scene.unity
+    guid: c34383d9d6b95904791a7761bc411f67
+  - enabled: 1
+    path: Assets/Scenes/Lobby Scene.unity
+    guid: e9a64a8e00216084c85cea28cc57b7ca
+  - enabled: 1
+    path: Assets/Scenes/PlayerInfo Scene.unity
+    guid: 639cf78d51e938d42bbe54b91936d936
+  - enabled: 1
+    path: Assets/Scenes/FriendRoom Scene.unity
+    guid: b45845fee5c742b44bdc3d7d01355898
   m_configObjects: {}
