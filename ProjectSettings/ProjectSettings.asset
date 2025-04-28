@@ -267,8 +267,8 @@ PlayerSettings:
   AndroidTargetDevices: 0
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
-  AndroidKeystoreName: C:/Users/USER/pokerproject/user.keystore
-  AndroidKeyaliasName: user
+  AndroidKeystoreName: '{inproject}: Assets/Resources/Data/FirebaseKey.keystore'
+  AndroidKeyaliasName: firebasekey
   AndroidEnableArmv9SecurityFeatures: 0
   AndroidBuildApkPerCpuArchitecture: 0
   AndroidTVCompatibility: 0

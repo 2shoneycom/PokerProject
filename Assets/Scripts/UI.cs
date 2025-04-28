@@ -19,10 +19,9 @@ public class UI : MonoBehaviour
         userSeedMoney.text = User.Instance.seedMoney.ToString();
     }
 
-    public void RequestUserInfoFromDB()
+    public void Logout()
     {
-        User.Instance.SetUserInfo();
+        LoginManager.Instance.LogOut();
     }
 
-    
 }
