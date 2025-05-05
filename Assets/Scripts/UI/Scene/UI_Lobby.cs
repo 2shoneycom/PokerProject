@@ -44,10 +44,14 @@ public class UI_Lobby : UI_Scene
         Bind<TextMeshProUGUI>(typeof(Texts));
         Bind<Image>(typeof(Images));
 
+        GetText((int)Texts.UI_Profile_Text).text = Managers.User.nickName;
+        GetText((int)Texts.UI_Money_Text).text = Managers.User.seedMoney.ToString();
+
         BindEvent(GetButton((int)Buttons.UI_ButtonHoldem).gameObject, HoldemClicked);
         BindEvent(GetImage((int)Images.UI_Profile).gameObject, MoveToPlayerInfoScene);
         BindEvent(GetImage((int)Images.UI_IconFriend).gameObject, MoveToFriendScene);
         BindEvent(GetImage((int)Images.UI_IconSetting).gameObject, SettingClicked);
+        BindEvent(GetButton((int)Buttons.UI_ButtonBlackJack).gameObject, LoginManager.Instance.LogOut);
     }
 
     void HoldemClicked(PointerEventData data)
@@ -76,6 +80,7 @@ public class UI_Lobby : UI_Scene
     {
         Managers.Scene.LoadScene(Define.Scene.Friend);
     }
+
 
     // Update is called once per frame
     void Update()

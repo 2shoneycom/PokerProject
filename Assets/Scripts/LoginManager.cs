@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Firebase.Auth;
 using Firebase.Extensions;
 using Google;
+using UnityEngine.EventSystems;
 
 public class LoginManager : MonoBehaviour
 {
@@ -34,7 +35,7 @@ public class LoginManager : MonoBehaviour
 
     private bool isGoogleSignInInitialized = false;
     private bool isFirebaseInitialized = false;
-    private Button loginButton;
+    private UI_Login _loginUI;
 
     private void Awake()
     {
@@ -49,36 +50,9 @@ public class LoginManager : MonoBehaviour
         }
     }
 
-    //private void OnEnable()
-    //{
-    //    SceneManager.sceneLoaded += OnSceneLoaded;
-    //}
-
-    //private void OnDisable()
-    //{
-    //    SceneManager.sceneLoaded -= OnSceneLoaded;
-    //}
-
-    public void OnSceneLoaded()
+    public void LoginSceneLoaded(UI_Login login)
     {
-        Debug.Log("sceneload start");
-        Debug.Log("login scene");
-        loginButton = GameObject.Find("UI_GoogleLoginButton")?.GetComponent<Button>();
-        if (loginButton != null)
-        {
-            loginButton.onClick.RemoveAllListeners();
-            loginButton.onClick.AddListener(() =>
-            {
-                Debug.Log("button clicked");
-                LogIn();
-            });
-            Debug.Log("Login button connected!");
-        }
-        else
-        {
-            Debug.LogError("Login button not found!");
-        }
-
+        _loginUI = login;
         if (!isGoogleSignInInitialized) InitGoogleSignIn();
         if (!isFirebaseInitialized) InitFirebase();
     }
@@ -111,30 +85,29 @@ public class LoginManager : MonoBehaviour
             if (user != null)
             {
                 userId = user.UserId;
-                Debug.Log("Firebase login success: " + user.DisplayName);
+                _loginUI.SetConnectionInfoText("자동 로그인 성공!");
                 DBManager.Instance.GetUserInfo();
-                SceneManager.LoadScene("Lobby");
+                Managers.Photon.ConnectToPhoton(_loginUI);
             }
         }
     }
 
     public void LogIn()
     {
-
-        Debug.Log("Attempting Google Sign-In...");
+        _loginUI.SetConnectionInfoText("로그인 중...");
 
         GoogleSignIn.DefaultInstance.SignIn().ContinueWith(task =>
         {
             if (task.IsCanceled)
             {
-                Debug.LogError("Google Sign-In was canceled by the user.");
+                _loginUI.SetConnectionInfoText("로그인 실패...");
                 return;
             }
             if (task.IsFaulted)
             {
                 foreach (var e in task.Exception.InnerExceptions)
                 {
-                    Debug.LogError("Google Sign-In error: " + e.Message);
+                    _loginUI.SetConnectionInfoText("Google Sign-In error: " + e.Message);
                 }
                 return;
             }
@@ -158,7 +131,7 @@ public class LoginManager : MonoBehaviour
         });
     }
 
-    public void LogOut()
+    public void LogOut(PointerEventData data)
     {
         Debug.Log("Logout process started.");
 
@@ -168,7 +141,7 @@ public class LoginManager : MonoBehaviour
                 auth.StateChanged -= AuthStateChanged;
 
             auth?.SignOut();
-            GoogleSignIn.DefaultInstance.SignOut();
+            GoogleSignIn.DefaultInstance.Disconnect();
             user = null;
 
             isFirebaseInitialized = false;
@@ -176,7 +149,8 @@ public class LoginManager : MonoBehaviour
 
             Debug.Log("Logout success.");
 
-            SceneManager.LoadScene("Login");
+            Managers.Photon.DisconnectPhoton();
+            Managers.Scene.LoadScene(Define.Scene.Login);
         }
         catch (Exception e)
         {
