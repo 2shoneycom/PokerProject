@@ -45,6 +45,6 @@ public class HoldemScene : BaseScene
 
     public override void Clear()
     {
-
+        Debug.Log("Holdem Scene Clear");
     }
 }

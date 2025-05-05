@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Scripts/UI/Scene/UI_Scene.cs.meta
-guid: 017f33cf565d1e245bc83be096ec0b59
-========
-guid: 5624aa90a343a814a927dc7d7e0bac2d
->>>>>>>> login-jh:Assets/Scripts/UI.cs.meta
+guid: d879d48abffb3364f92afa49220428d0
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

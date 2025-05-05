@@ -9,6 +9,9 @@ public class Define
         Unknown,
         Login,
         Holdem,
+        Lobby,
+        Friend,
+        PlayerInfo,
     }
 
     public enum UIEvent

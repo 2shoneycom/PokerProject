@@ -120,4 +120,9 @@ public class UIManager      // Canvas의 sort order을 관리하기위해
         while (_popupStack.Count > 0)
             ClosePopupUI();
     }
+
+    public void Clear()
+    {
+        CloseAllPopupUI();
+    }
 }

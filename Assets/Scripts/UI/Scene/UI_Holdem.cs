@@ -65,6 +65,15 @@ public class UI_Holdem : UI_Scene
             Camera.main.ViewportToWorldPoint(new Vector3(1, 1, Camera.main.nearClipPlane));
 
         SeatBind();
+        ButtonOff();
+    }
+
+    void ButtonOff()
+    {
+        foreach (int idx in Enum.GetValues(typeof(Buttons)))
+        {
+            GetButton(idx).gameObject.SetActive(false);
+        }
     }
 
     public void UpdatePlayerName(int index, string str)

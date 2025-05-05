@@ -12,16 +12,23 @@ public class Managers : MonoBehaviour
     SceneManagerEx _scene = new SceneManagerEx();
     SeatManager _seat = new SeatManager();
     UIManager _ui = new UIManager();
+    PhotonManager _photon;
 
     public static ResourceManager Resource { get { return Instance._resource; } }
     public static SceneManagerEx Scene { get { return Instance._scene; } }
     public static SeatManager Seat { get { return Instance._seat; } }
     public static UIManager UI { get { return Instance._ui; } }
+    public static PhotonManager Photon { get { return Instance._photon; } }
+
+    User _user = new User();
+    public static User User { get { return Instance._user; } }
+
 
     // Start is called before the first frame update
     void Start()
     {
         Init();
+        _photon = FindAnyObjectByType<PhotonManager>();
     }
 
     // Update is called once per frame
@@ -49,5 +56,6 @@ public class Managers : MonoBehaviour
     static public void Clear()
     {
         Scene.Clear();
+        UI.Clear();
     }
 }

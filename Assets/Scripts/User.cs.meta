@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Scripts/UI/Popup/UI_Popup.cs.meta
-guid: d8f88f52d08fd7b43860769ffc497979
-========
-guid: c83dff5cd37ba79458c8eac0426f42ca
->>>>>>>> login-jh:Assets/Scripts/User.cs.meta
+guid: 129089403fbb8734b928e317af60517e
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

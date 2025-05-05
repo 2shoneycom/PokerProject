@@ -40,7 +40,8 @@ public class UI_Login : UI_Scene        // Lobbyæ¿¿« SceneUI
 
         _lobbyButton = GetButton((int)Buttons.UI_GoogleLoginButton);
         BindEvent(_lobbyButton.gameObject, OnButtonClicked);
-        ButtonInteractive(false);
+//        ButtonInteractive(false);
+        LoginManager.Instance.OnSceneLoaded();
     }
 
     public void SetConnectionInfoText(string info)
@@ -62,7 +63,7 @@ public class UI_Login : UI_Scene        // Lobbyæ¿¿« SceneUI
         GetButton((int)Buttons.UI_KakaoLoginButton).gameObject.SetActive(false);
 
         BaseScene scene = Managers.Scene.CurrentScene;
-        scene.GetOrAddComponent<LoginScene>().JoinRoom();
+//        scene.GetOrAddComponent<LoginScene>().JoinRoom();
     }
 
     // Update is called once per frame

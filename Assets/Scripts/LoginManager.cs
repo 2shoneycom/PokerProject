@@ -49,40 +49,38 @@ public class LoginManager : MonoBehaviour
         }
     }
 
-    private void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
+    //private void OnEnable()
+    //{
+    //    SceneManager.sceneLoaded += OnSceneLoaded;
+    //}
 
-    private void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
+    //private void OnDisable()
+    //{
+    //    SceneManager.sceneLoaded -= OnSceneLoaded;
+    //}
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    public void OnSceneLoaded()
     {
         Debug.Log("sceneload start");
-        if (scene.name == "Login Scene")
+        Debug.Log("login scene");
+        loginButton = GameObject.Find("UI_GoogleLoginButton")?.GetComponent<Button>();
+        if (loginButton != null)
         {
-            Debug.Log("login scene");
-            loginButton = GameObject.Find("UI_GoogleLoginButton")?.GetComponent<Button>();
-            if (loginButton != null)
+            loginButton.onClick.RemoveAllListeners();
+            loginButton.onClick.AddListener(() =>
             {
-                loginButton.onClick.RemoveAllListeners();
-                loginButton.onClick.AddListener(() => {
-                    Debug.Log("button clicked");
-                    LogIn();
-                });
-                Debug.Log("Login button connected!");
-            }
-            else
-            {
-                Debug.LogError("Login button not found!");
-            }
-
-            if (!isGoogleSignInInitialized) InitGoogleSignIn();
-            if (!isFirebaseInitialized) InitFirebase();
+                Debug.Log("button clicked");
+                LogIn();
+            });
+            Debug.Log("Login button connected!");
         }
+        else
+        {
+            Debug.LogError("Login button not found!");
+        }
+
+        if (!isGoogleSignInInitialized) InitGoogleSignIn();
+        if (!isFirebaseInitialized) InitFirebase();
     }
 
     private void InitGoogleSignIn()
@@ -115,7 +113,7 @@ public class LoginManager : MonoBehaviour
                 userId = user.UserId;
                 Debug.Log("Firebase login success: " + user.DisplayName);
                 DBManager.Instance.GetUserInfo();
-                SceneManager.LoadScene("Lobby Scene");
+                SceneManager.LoadScene("Lobby");
             }
         }
     }
@@ -127,9 +125,17 @@ public class LoginManager : MonoBehaviour
 
         GoogleSignIn.DefaultInstance.SignIn().ContinueWith(task =>
         {
-            if (task.IsCanceled || task.IsFaulted)
+            if (task.IsCanceled)
             {
-                Debug.LogError($"Google Sign-In failed: {task.Exception}");
+                Debug.LogError("Google Sign-In was canceled by the user.");
+                return;
+            }
+            if (task.IsFaulted)
+            {
+                foreach (var e in task.Exception.InnerExceptions)
+                {
+                    Debug.LogError("Google Sign-In error: " + e.Message);
+                }
                 return;
             }
 
@@ -146,7 +152,7 @@ public class LoginManager : MonoBehaviour
 
                 Debug.Log("Firebase auth success");
 
-                if (User.Instance == null)
+                if (Managers.User == null)
                     Debug.LogError("User.Instance is null after login!!");
             });
         });
@@ -170,7 +176,7 @@ public class LoginManager : MonoBehaviour
 
             Debug.Log("Logout success.");
 
-            SceneManager.LoadScene("Login Scene");
+            SceneManager.LoadScene("Login");
         }
         catch (Exception e)
         {

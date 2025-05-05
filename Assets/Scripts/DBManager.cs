@@ -86,8 +86,8 @@ public class DBManager : MonoBehaviour
                     DataToSave loadedData = JsonUtility.FromJson<DataToSave>(jsonData);
 
                     // 데이터 적용
-                    User.Instance.nickName = loadedData.nickName;
-                    User.Instance.seedMoney = loadedData.seedMoney;
+                    Managers.User.nickName = loadedData.nickName;
+                    Managers.User.seedMoney = loadedData.seedMoney;
                     Debug.Log("user data load success");
                 }
                 // 새로운 사용자인 경우
@@ -95,8 +95,8 @@ public class DBManager : MonoBehaviour
                 {
                     DataSetting(); // 초기 데이터 생성
                     SaveNewUserData(); // 데이터베이스에 저장
-                    User.Instance.nickName = dts.nickName;
-                    User.Instance.seedMoney = dts.seedMoney;
+                    Managers.User.nickName = dts.nickName;
+                    Managers.User.seedMoney = dts.seedMoney;
                     Debug.Log("new user data create success");
                 }
             });
