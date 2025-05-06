@@ -145,7 +145,6 @@ public class LoginManager : MonoBehaviour
             user = null;
 
             isFirebaseInitialized = false;
-            isGoogleSignInInitialized = false;
 
             Debug.Log("Logout success.");
 
