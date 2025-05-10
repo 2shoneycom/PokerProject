@@ -20,5 +20,10 @@ public class Define
         Drag,
     }
 
-
+    public enum Status
+    {
+        Offline,
+        Online,
+        Playing,
+    }
 }

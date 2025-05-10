@@ -61,4 +61,18 @@ public abstract class UI_Base : MonoBehaviour   // ¸ðµç UIÀÇ super class
                 break;
         }
     }
+
+    public static void DisBindEvent(GameObject go, Action<PointerEventData> action, Define.UIEvent type = Define.UIEvent.Click)
+    {
+        UI_EventHandler evt = Util.GetOrAddComponent<UI_EventHandler>(go);
+        switch (type)
+        {
+            case Define.UIEvent.Click:
+                evt.OnClickHandler -= action;
+                break;
+            case Define.UIEvent.Drag:
+                evt.OnDragHandler -= action;
+                break;
+        }
+    }
 }

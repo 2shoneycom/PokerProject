@@ -33,8 +33,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public override void OnDisconnected(DisconnectCause cause)
     {   // 마스터 서버 접속 실패 || 서버 접속 상태에서 접속이 끊긴 경우
-//        Reconnect();
         // UI 띄우면서 재접속 창 뜨게 하기
+        _loginUI.ShowReconnectButton();
     }
 
     public void DisconnectPhoton()
@@ -42,7 +42,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         PhotonNetwork.Disconnect();
     }
 
-    void Reconnect()
+    public void Reconnect()
     {
         // 연결 재시도
         PhotonNetwork.ConnectUsingSettings();

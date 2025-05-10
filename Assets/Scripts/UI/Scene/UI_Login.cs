@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -12,6 +13,7 @@ public class UI_Login : UI_Scene        // Lobbyæ¿¿« SceneUI
     {
         UI_GoogleLoginButton,
         UI_KakaoLoginButton,
+        UI_ReconnectButton,
     }
 
     enum Texts
@@ -40,7 +42,10 @@ public class UI_Login : UI_Scene        // Lobbyæ¿¿« SceneUI
 
         _lobbyButton = GetButton((int)Buttons.UI_GoogleLoginButton);
         BindEvent(_lobbyButton.gameObject, OnButtonClicked);
-        LoginManager.Instance.LoginSceneLoaded(this);
+
+        GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(false);
+        BindEvent(GetButton((int)Buttons.UI_ReconnectButton).gameObject, ReconnectButtonClicked);
+//        LoginManager.Instance.LoginSceneLoaded(this);
     }
 
     public void SetConnectionInfoText(string info)
@@ -58,15 +63,27 @@ public class UI_Login : UI_Scene        // Lobbyæ¿¿« SceneUI
         if (!_lobbyButton.interactable)
             return;
 
-        _lobbyButton.gameObject.SetActive(false);
-        GetButton((int)Buttons.UI_KakaoLoginButton).gameObject.SetActive(false);
-
-        LoginManager.Instance.LogIn();
+        DisableAllButton();
+        Managers.Photon.ConnectToPhoton(this);
+//        LoginManager.Instance.LogIn();
     }
 
-    // Update is called once per frame
-    void Update()
+    void DisableAllButton()
     {
+        for (int i = 0; i < Enum.GetValues(typeof(Buttons)).Length; i++)
+        {
+            GetButton(i).gameObject.SetActive(false);
+        }
+    }
 
+    public void ShowReconnectButton()
+    {
+        GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(true);
+    }
+
+    void ReconnectButtonClicked(PointerEventData data)
+    {
+        DisableAllButton();
+        Managers.Photon.Reconnect();
     }
 }
