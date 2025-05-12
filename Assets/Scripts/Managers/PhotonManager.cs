@@ -8,33 +8,41 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 {
     private Dictionary<string, RoomInfo> availableRooms = new Dictionary<string, RoomInfo>();
     UI_Loading _loadingUI;
+    UI_Login _loginUI;
 
     void Start()
     {
         DontDestroyOnLoad(gameObject);
-
-//        ConnectToPhoton();
     }
 
-    void ConnectToPhoton()
+    public void ConnectToPhoton(UI_Login login)
     {
+        _loginUI = login;
         PhotonNetwork.ConnectUsingSettings();
         // 같은 버전만 매칭 시도를 위해 게임 버전 설정        PhotonNetwork.GameVersion = gameVersion;
         // 설정한 정보로 마스터 서버 접속 시도
         // 접속 시도 중 표시
+        _loginUI.SetConnectionInfoText("포톤 서버 연결중...");
     }
 
     public override void OnConnectedToMaster()
     {   // 포톤 마스터 서버에 접속 성공한 경우 자동 실행됨.
+        _loginUI.SetConnectionInfoText("연결 성공!");
         Managers.Scene.LoadScene(Define.Scene.Lobby);
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {   // 마스터 서버 접속 실패 || 서버 접속 상태에서 접속이 끊긴 경우
-        Reconnect();
+        // UI 띄우면서 재접속 창 뜨게 하기
+        _loginUI.ShowReconnectButton();
     }
 
-    void Reconnect()
+    public void DisconnectPhoton()
+    {
+        PhotonNetwork.Disconnect();
+    }
+
+    public void Reconnect()
     {
         // 연결 재시도
         PhotonNetwork.ConnectUsingSettings();

@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UI_FriendList : UI_Base
+public class UI_FriendList : UI_FriendBase
 {
     enum Buttons
     {
@@ -28,8 +29,16 @@ public class UI_FriendList : UI_Base
         Bind<Button>(typeof(Buttons));
         Bind<TextMeshProUGUI>(typeof(Texts));
         Bind<Image>(typeof(Images));
+        Setting();
 
         BindEvent(GetButton((int)Buttons.UI_FriendList_DeleteButton).gameObject, DeleteFriend);
+    }
+
+    public override void Setting()
+    {
+        //GetText((int)Texts.UI_FriendList_FriendNameText).text = Name;
+        //GetText((int)Texts.UI_FriendList_FriendStatusText).text = Status;
+        //GetImage((int)Images.UI_FriendList_Icon).sprite = Icon.sprite;
     }
 
     public void SetStatusInfo(bool isOnline)
@@ -59,6 +68,15 @@ public class UI_FriendList : UI_Base
 
     void DeleteFriend(PointerEventData data)
     {
-        Debug.Log("Friend Delete!");
+        Managers.UI.ShowPopupUI<UI_FriendDelPopup>().InitCaller(this);
+    }
+
+    public void DeleteFriend(bool isDel)
+    {
+        if (isDel == false) return;
+
+        // 模备 昏力 贸府...
+        Debug.Log("Friend Deleted!");
+        Managers.Resource.Destroy(gameObject);
     }
 }

@@ -34,7 +34,10 @@ public class UI_Lobby : UI_Scene
         UI_Profile,
         UI_Profile_Icon,
         UI_Money,
+        UI_Backspace,
     }
+
+    UI_Popup _popup = null;
 
     public override void Init()
     {
@@ -44,22 +47,76 @@ public class UI_Lobby : UI_Scene
         Bind<TextMeshProUGUI>(typeof(Texts));
         Bind<Image>(typeof(Images));
 
+        GetText((int)Texts.UI_Profile_Text).text = Managers.User.nickName;
+        GetText((int)Texts.UI_Money_Text).text = Managers.User.seedMoney.ToString();
+
+        BindEvent(GetImage((int)Images.UI_Backspace).gameObject, BackspaceClick);
+        GetImage((int)Images.UI_Backspace).gameObject.SetActive(false);
+
         BindEvent(GetButton((int)Buttons.UI_ButtonHoldem).gameObject, HoldemClicked);
+        BindEvent(GetButton((int)Buttons.UI_ButtonBlackJack).gameObject, JackClicked);
+        BindEvent(GetButton((int)Buttons.UI_ButtonPoker).gameObject, PokerClicked);
+
         BindEvent(GetImage((int)Images.UI_Profile).gameObject, MoveToPlayerInfoScene);
         BindEvent(GetImage((int)Images.UI_IconFriend).gameObject, MoveToFriendScene);
         BindEvent(GetImage((int)Images.UI_IconSetting).gameObject, SettingClicked);
+        BindEvent(GetImage((int)Images.UI_IconGift).gameObject, GiftClicked);
+        //BindEvent(GetButton((int)Buttons.UI_ButtonBlackJack).gameObject, LoginManager.Instance.LogOut);
     }
 
     void HoldemClicked(PointerEventData data)
     {
-        if (!GetButton((int)Buttons.UI_ButtonHoldem).interactable)
-            return;
+        PopupSetting(true);
 
-        GetButton((int)Buttons.UI_ButtonHoldem).interactable = false;
-        GetButton((int)Buttons.UI_ButtonBlackJack).gameObject.SetActive(false);
-        GetButton((int)Buttons.UI_ButtonPoker).gameObject.SetActive(false);
+        _popup = Managers.UI.ShowPopupUI<UI_HoldemPopup>();
 
-        Managers.Photon.JoinHoldem();
+        GetText((int)Texts.UI_LobbyTitleText).text = "ÅØ»ç½º È¦´ý";
+    }
+
+    void PokerClicked(PointerEventData data)
+    {
+        PopupSetting(true);
+
+        _popup = Managers.UI.ShowPopupUI<UI_PokerPopup>();
+
+        GetText((int)Texts.UI_LobbyTitleText).text = "¼¼ºì Æ÷Ä¿";
+    }
+
+    void JackClicked(PointerEventData data)
+    {
+        PopupSetting(true);
+
+        _popup = Managers.UI.ShowPopupUI<UI_JackPopup>();
+
+        GetText((int)Texts.UI_LobbyTitleText).text = "ºí·¢Àè";
+    }
+
+    void BackspaceClick(PointerEventData data)
+    {
+        Managers.UI.ClosePopupUI(_popup);
+
+        PopupSetting(false);
+
+        GetText((int)Texts.UI_LobbyTitleText).text = "Æ÷Ä¿ ÇÏ¿ì½º";
+    }
+
+    void PopupSetting(bool popupOn)
+    {
+        bool inScene = !popupOn;
+
+        GetImage((int)Images.UI_Profile).gameObject.SetActive(inScene);
+        GetImage((int)Images.UI_Money).gameObject.SetActive(inScene);
+        GetImage((int)Images.UI_IconSetting).gameObject.SetActive(inScene);
+        GetImage((int)Images.UI_IconFriend).gameObject.SetActive(inScene);
+        GetImage((int)Images.UI_IconWeb).gameObject.SetActive(inScene);
+        GetImage((int)Images.UI_IconGift).gameObject.SetActive(inScene);
+
+        GetImage((int)Images.UI_Backspace).gameObject.SetActive(popupOn);
+    }
+
+    void GiftClicked(PointerEventData data)
+    {
+        Managers.UI.ShowPopupUI<UI_DailyCheck>();
     }
 
     void SettingClicked(PointerEventData data)
@@ -75,12 +132,5 @@ public class UI_Lobby : UI_Scene
     void MoveToFriendScene(PointerEventData data)
     {
         Managers.Scene.LoadScene(Define.Scene.Friend);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-//        GetText((int)Texts.UI_Profile_Text).text = Managers.User.nickName;
-//        GetText((int)Texts.UI_Money_Text).text = Managers.User.seedMoney.ToString();
     }
 }

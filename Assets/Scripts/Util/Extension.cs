@@ -11,6 +11,12 @@ public static class Extension
         UI_Base.BindEvent(go, action, type);
     }
 
+    public static void DisBindEvent(this GameObject go, Action<PointerEventData> action, Define.UIEvent type = Define.UIEvent.Click)
+    {
+        UI_Base.DisBindEvent(go, action, type);
+    }
+
+
     public static T GetOrAddComponent<T>(this GameObject go) where T : UnityEngine.Component
     {
         return Util.GetOrAddComponent<T>(go);
