@@ -141,9 +141,11 @@ public class LoginManager : MonoBehaviour
                 auth.StateChanged -= AuthStateChanged;
 
             auth?.SignOut();
+            GoogleSignIn.DefaultInstance.SignOut();
             GoogleSignIn.DefaultInstance.Disconnect();
             user = null;
 
+            isGoogleSignInInitialized = false;
             isFirebaseInitialized = false;
 
             Debug.Log("Logout success.");
