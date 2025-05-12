@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UI_Login : UI_Scene        // Lobby¾ÀÀÇ SceneUI
+public class UI_Login : UI_Scene        // Lobbyï¿½ï¿½ï¿½ï¿½ SceneUI
 {
     enum Buttons
     {
@@ -35,17 +35,17 @@ public class UI_Login : UI_Scene        // Lobby¾ÀÀÇ SceneUI
         Bind<TextMeshProUGUI>(typeof(Texts));
 
         TextMeshProUGUI tmp = GetText((int)Texts.UI_GoogleLoginButton_Text);
-        tmp.text = "¹æ Âü°¡";
+        tmp.text = "ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½";
 
         tmp = GetText((int)Texts.UI_LoginText);
-        tmp.text = "¿¬°á Áß...";
+        tmp.text = "ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½...";
 
         _lobbyButton = GetButton((int)Buttons.UI_GoogleLoginButton);
         BindEvent(_lobbyButton.gameObject, OnButtonClicked);
 
         GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(false);
         BindEvent(GetButton((int)Buttons.UI_ReconnectButton).gameObject, ReconnectButtonClicked);
-//        LoginManager.Instance.LoginSceneLoaded(this);
+        LoginManager.Instance.LoginSceneLoaded(this);
     }
 
     public void SetConnectionInfoText(string info)
@@ -64,8 +64,8 @@ public class UI_Login : UI_Scene        // Lobby¾ÀÀÇ SceneUI
             return;
 
         DisableAllButton();
-        Managers.Photon.ConnectToPhoton(this);
-//        LoginManager.Instance.LogIn();
+        //Managers.Photon.ConnectToPhoton(this);
+        LoginManager.Instance.LogIn();
     }
 
     void DisableAllButton()

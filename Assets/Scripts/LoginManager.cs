@@ -85,7 +85,7 @@ public class LoginManager : MonoBehaviour
             if (user != null)
             {
                 userId = user.UserId;
-                _loginUI.SetConnectionInfoText("ÀÚµ¿ ·Î±×ÀÎ ¼º°ø!");
+                _loginUI.SetConnectionInfoText("ï¿½Úµï¿½ ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½!");
                 DBManager.Instance.GetUserInfo();
                 Managers.Photon.ConnectToPhoton(_loginUI);
             }
@@ -94,13 +94,13 @@ public class LoginManager : MonoBehaviour
 
     public void LogIn()
     {
-        _loginUI.SetConnectionInfoText("·Î±×ÀÎ Áß...");
+        _loginUI.SetConnectionInfoText("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½...");
 
         GoogleSignIn.DefaultInstance.SignIn().ContinueWith(task =>
         {
             if (task.IsCanceled)
             {
-                _loginUI.SetConnectionInfoText("·Î±×ÀÎ ½ÇÆÐ...");
+                _loginUI.SetConnectionInfoText("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½...");
                 return;
             }
             if (task.IsFaulted)
