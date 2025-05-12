@@ -5,7 +5,7 @@ using UnityEngine;
 public class LobbyScene : BaseScene
 {
 
-    bool isReward = true;
+    bool isReward = false;
 
     protected override void Init()
     {

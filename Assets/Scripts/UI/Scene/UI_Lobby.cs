@@ -60,6 +60,7 @@ public class UI_Lobby : UI_Scene
         BindEvent(GetImage((int)Images.UI_Profile).gameObject, MoveToPlayerInfoScene);
         BindEvent(GetImage((int)Images.UI_IconFriend).gameObject, MoveToFriendScene);
         BindEvent(GetImage((int)Images.UI_IconSetting).gameObject, SettingClicked);
+        BindEvent(GetImage((int)Images.UI_IconGift).gameObject, GiftClicked);
         //BindEvent(GetButton((int)Buttons.UI_ButtonBlackJack).gameObject, LoginManager.Instance.LogOut);
     }
 
@@ -111,6 +112,11 @@ public class UI_Lobby : UI_Scene
         GetImage((int)Images.UI_IconGift).gameObject.SetActive(inScene);
 
         GetImage((int)Images.UI_Backspace).gameObject.SetActive(popupOn);
+    }
+
+    void GiftClicked(PointerEventData data)
+    {
+        Managers.UI.ShowPopupUI<UI_DailyCheck>();
     }
 
     void SettingClicked(PointerEventData data)
