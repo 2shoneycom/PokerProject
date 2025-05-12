@@ -46,12 +46,12 @@ public class UI_FriendList : UI_FriendBase
         TextMeshProUGUI txt = GetText((int)Texts.UI_FriendList_FriendStatusText);
         if (isOnline)
         {
-            txt.text = "¿Â¶óÀÎ";
+            txt.text = "ì˜¨ë¼ì¸";
             txt.color = Color.green;
         }
         else
         {
-            txt.text = "¿ÀÇÁ¶óÀÎ";
+            txt.text = "ì˜¤í”„ë¼ì¸";
             txt.color = Color.red;
         }
     }
@@ -75,7 +75,7 @@ public class UI_FriendList : UI_FriendBase
     {
         if (isDel == false) return;
 
-        // Ä£±¸ »èÁ¦ Ã³¸®...
+        // ì¹œêµ¬ ì‚­ì œ ì²˜ë¦¬...
         Debug.Log("Friend Deleted!");
         Managers.Resource.Destroy(gameObject);
     }

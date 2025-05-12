@@ -50,7 +50,7 @@ public class DBManager : MonoBehaviour
 
     private void DataSetting()
     {
-        // ÃÊ±â µ¥ÀÌÅÍ ¼³Á¤
+        // ì´ˆê¸° ë°ì´í„° ì„¤ì •
         dts = new DataToSave(
             "User" + Random.Range(10000, 100000),
             1_000_000L,
@@ -66,7 +66,7 @@ public class DBManager : MonoBehaviour
             return;
         }
 
-        // µ¥ÀÌÅÍº£ÀÌ½º¿¡¼­ »ç¿ëÀÚ Á¤º¸ Á¶È¸
+        // ë°ì´í„°ë² ì´ìŠ¤ì—ì„œ ì‚¬ìš©ì ì •ë³´ ì¡°íšŒ
         DBManager.Instance.dbRef.Child("Users").Child(LoginManager.Instance.userId)
             .GetValueAsync().ContinueWithOnMainThread(task =>
             {
@@ -78,23 +78,23 @@ public class DBManager : MonoBehaviour
 
                 DataSnapshot snapshot = task.Result;
 
-                // ±âÁ¸ µ¥ÀÌÅÍ°¡ ÀÖ´Â °æ¿ì
+                // ê¸°ì¡´ ë°ì´í„°ê°€ ìˆëŠ” ê²½ìš°
                 if (snapshot.Exists)
                 {
-                    // JSON µ¥ÀÌÅÍ ÆÄ½Ì
+                    // JSON ë°ì´í„° íŒŒì‹±
                     string jsonData = snapshot.GetRawJsonValue();
                     DataToSave loadedData = JsonUtility.FromJson<DataToSave>(jsonData);
 
-                    // µ¥ÀÌÅÍ Àû¿ë
+                    // ë°ì´í„° ì ìš©
                     Managers.User.nickName = loadedData.nickName;
                     Managers.User.seedMoney = loadedData.seedMoney;
                     Debug.Log("user data load success");
                 }
-                // »õ·Î¿î »ç¿ëÀÚÀÎ °æ¿ì
+                // ìƒˆë¡œìš´ ì‚¬ìš©ìì¸ ê²½ìš°
                 else
                 {
-                    DataSetting(); // ÃÊ±â µ¥ÀÌÅÍ »ı¼º
-                    SaveNewUserData(); // µ¥ÀÌÅÍº£ÀÌ½º¿¡ ÀúÀå
+                    DataSetting(); // ì´ˆê¸° ë°ì´í„° ìƒì„±
+                    SaveNewUserData(); // ë°ì´í„°ë² ì´ìŠ¤ì— ì €ì¥
                     Managers.User.nickName = dts.nickName;
                     Managers.User.seedMoney = dts.seedMoney;
                     Debug.Log("new user data create success");

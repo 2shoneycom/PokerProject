@@ -70,7 +70,7 @@ public class UI_Lobby : UI_Scene
 
         _popup = Managers.UI.ShowPopupUI<UI_HoldemPopup>();
 
-        GetText((int)Texts.UI_LobbyTitleText).text = "ÅØ»ç½º È¦´ı";
+        GetText((int)Texts.UI_LobbyTitleText).text = "í…ì‚¬ìŠ¤ í™€ë¤";
     }
 
     void PokerClicked(PointerEventData data)
@@ -79,7 +79,7 @@ public class UI_Lobby : UI_Scene
 
         _popup = Managers.UI.ShowPopupUI<UI_PokerPopup>();
 
-        GetText((int)Texts.UI_LobbyTitleText).text = "¼¼ºì Æ÷Ä¿";
+        GetText((int)Texts.UI_LobbyTitleText).text = "ì„¸ë¸ í¬ì»¤";
     }
 
     void JackClicked(PointerEventData data)
@@ -88,7 +88,7 @@ public class UI_Lobby : UI_Scene
 
         _popup = Managers.UI.ShowPopupUI<UI_JackPopup>();
 
-        GetText((int)Texts.UI_LobbyTitleText).text = "ºí·¢Àè";
+        GetText((int)Texts.UI_LobbyTitleText).text = "ë¸”ë™ì­";
     }
 
     void BackspaceClick(PointerEventData data)
@@ -97,7 +97,7 @@ public class UI_Lobby : UI_Scene
 
         PopupSetting(false);
 
-        GetText((int)Texts.UI_LobbyTitleText).text = "Æ÷Ä¿ ÇÏ¿ì½º";
+        GetText((int)Texts.UI_LobbyTitleText).text = "í¬ì»¤ í•˜ìš°ìŠ¤";
     }
 
     void PopupSetting(bool popupOn)

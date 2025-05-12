@@ -5,6 +5,6 @@ using UnityEngine;
 public class User
 {
     public string nickName;
-    public long seedMoney; // privateÀ¸·Î nickNameÀÌ¶û seedMoney
+    public long seedMoney; // privateìœ¼ë¡œ nickNameì´ë‘ seedMoney
 
 }

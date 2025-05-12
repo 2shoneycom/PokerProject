@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UI_Login : UI_Scene        // Lobby���� SceneUI
+public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
 {
     enum Buttons
     {
@@ -35,10 +35,10 @@ public class UI_Login : UI_Scene        // Lobby���� SceneUI
         Bind<TextMeshProUGUI>(typeof(Texts));
 
         TextMeshProUGUI tmp = GetText((int)Texts.UI_GoogleLoginButton_Text);
-        tmp.text = "�� ����";
+        tmp.text = "방 참가";
 
         tmp = GetText((int)Texts.UI_LoginText);
-        tmp.text = "���� ��...";
+        tmp.text = "연결 중...";
 
         _lobbyButton = GetButton((int)Buttons.UI_GoogleLoginButton);
         BindEvent(_lobbyButton.gameObject, OnButtonClicked);

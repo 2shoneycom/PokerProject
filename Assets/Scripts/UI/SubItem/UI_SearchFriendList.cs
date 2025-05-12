@@ -35,7 +35,7 @@ public class UI_SearchFriendList : UI_FriendBase
 
     void AddFriend(PointerEventData data)
     {
-        // Ä£±¸ Ãß°¡ ·ÎÁ÷...
+        // ì¹œêµ¬ ì¶”ê°€ ë¡œì§...
         Debug.Log("Friend Add!");
         Managers.Resource.Destroy(gameObject);
     }

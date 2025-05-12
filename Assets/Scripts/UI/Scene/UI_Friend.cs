@@ -46,7 +46,7 @@ public class UI_Friend : UI_Scene
     void LoadAndMakeFriendList()
     {
         GameObject go = GetGameObject((int)GameObjects.UI_FriendList_Contents);
-        // ½ÇÁ¦ Ä£±¸ Á¤º¸¸¦ Âü°íÇÏ¿©
+        // ì‹¤ì œ ì¹œêµ¬ ì •ë³´ë¥¼ ì°¸ê³ í•˜ì—¬
         for (int i = 0; i < 10; i++)
         {
             GameObject friendGO = Managers.UI.MakeSubItem<UI_FriendList>(go.transform).gameObject;
@@ -64,7 +64,7 @@ public class UI_Friend : UI_Scene
     void LoadAndMakeAcceptFriendList()
     {
         GameObject go = GetGameObject((int)GameObjects.UI_FriendList_Contents);
-        // ½ÇÁ¦ Ä£±¸ Ãß°¡ Á¤º¸¸¦ Âü°íÇÏ¿©
+        // ì‹¤ì œ ì¹œêµ¬ ì¶”ê°€ ì •ë³´ë¥¼ ì°¸ê³ í•˜ì—¬
         for (int i = 0; i < 5; i++)
         {
             GameObject friendGO = Managers.UI.MakeSubItem<UI_AcceptFriendList>(go.transform).gameObject;
@@ -76,7 +76,7 @@ public class UI_Friend : UI_Scene
     {
         GetImage((int)Images.UI_IconAddFriend).gameObject.SetActive(false);
         GetButton((int)Buttons.UI_AcceptFriendButton).gameObject.SetActive(false);
-        GetText((int)Texts.UI_FriendTitleText).text = "Ä£±¸ ½ÅÃ» ¸ñ·Ï";
+        GetText((int)Texts.UI_FriendTitleText).text = "ì¹œêµ¬ ì‹ ì²­ ëª©ë¡";
 
         DisBindEvent(GetImage((int)Images.UI_Backspace).gameObject, Managers.Scene.MoveToLobbyScene);
         BindEvent(GetImage((int)Images.UI_Backspace).gameObject, SwitchToFriendList);
@@ -89,7 +89,7 @@ public class UI_Friend : UI_Scene
     {
         GetImage((int)Images.UI_IconAddFriend).gameObject.SetActive(true);
         GetButton((int)Buttons.UI_AcceptFriendButton).gameObject.SetActive(true);
-        GetText((int)Texts.UI_FriendTitleText).text = "Ä£±¸ ¸ñ·Ï";
+        GetText((int)Texts.UI_FriendTitleText).text = "ì¹œêµ¬ ëª©ë¡";
 
         DisBindEvent(GetImage((int)Images.UI_Backspace).gameObject, SwitchToFriendList);
         BindEvent(GetImage((int)Images.UI_Backspace).gameObject, Managers.Scene.MoveToLobbyScene);

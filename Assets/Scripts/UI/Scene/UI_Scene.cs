@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UI_Scene : UI_Base     // ¸ğµç ¾À UIÀÇ super class
+public class UI_Scene : UI_Base     // ëª¨ë“  ì”¬ UIì˜ super class
 {
     public override void Init()
     {

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public abstract class UI_Base : MonoBehaviour   // ¸ğµç UIÀÇ super class
+public abstract class UI_Base : MonoBehaviour   // ëª¨ë“  UIì˜ super class
 {
     Dictionary<Type, UnityEngine.Object[]> _objects = new Dictionary<Type, UnityEngine.Object[]>();
 

@@ -5,7 +5,7 @@ using Photon.Realtime;
 
 class SyncSystem : MonoBehaviourPun
 {
-    /* ½Ì±ÛÅæ */
+    /* ì‹±ê¸€í†¤ */
     private static SyncSystem instance;
     public static SyncSystem Instacne
     {
@@ -52,7 +52,7 @@ class SyncSystem : MonoBehaviourPun
     public void SyncHaveSeat(string uid, int seatIndex)
     {
         photonView.RPC("RPC_HaveSeat", RpcTarget.All, uid, seatIndex);
-    }   // ui ¼öÁ¤ÇÏ´Â °÷ ÅëÀÏÇÏ±â À§ÇØ all ·Î ¹Ù²Ş
+    }   // ui ìˆ˜ì •í•˜ëŠ” ê³³ í†µì¼í•˜ê¸° ìœ„í•´ all ë¡œ ë°”ê¿ˆ
 
     [PunRPC]
     private void RPC_HaveSeat(string uid, int seatIndex)

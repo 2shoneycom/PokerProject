@@ -29,14 +29,14 @@ public class UI_AddFriendPopup : UI_Popup
 
         BindEvent(GetGameObject((int)GameObjects.UI_PopupClose), (PointerEventData) => { ClosePopupUI(); });
 
-        // ÀÓ½Ã...
+        // ìž„ì‹œ...
         BindEvent(GetButton((int)Buttons.UI_SearchButton).gameObject, SearchFriend);
     }
 
     void SearchFriend(PointerEventData data)
     {
         GameObject go = GetGameObject((int)GameObjects.UI_SearchFriendList_Contents);
-        // ½ÇÁ¦ Ä£±¸ Ãß°¡ Á¤º¸¸¦ Âü°íÇÏ¿©
+        // ì‹¤ì œ ì¹œêµ¬ ì¶”ê°€ ì •ë³´ë¥¼ ì°¸ê³ í•˜ì—¬
         for (int i = 0; i < 3; i++)
         {
             GameObject friendGO = Managers.UI.MakeSubItem<UI_SearchFriendList>(go.transform).gameObject;

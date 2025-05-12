@@ -16,7 +16,7 @@ public class ResourceManager
         path = $"Prefabs/{path}";
 
         GameObject go = PhotonNetwork.Instantiate(path, parent.position, Quaternion.identity);
-        int index = go.name.IndexOf("(Clone)");         // ÇÁ¸®Æé »ý¼º½Ã ºÙ´Â Clone~À» ¾ø¾Ú
+        int index = go.name.IndexOf("(Clone)");         // í”„ë¦¬íŽ© ìƒì„±ì‹œ ë¶™ëŠ” Clone~ì„ ì—†ì•°
         if (index > 0)
             go.name = go.name.Substring(0, index);
 
@@ -33,7 +33,7 @@ public class ResourceManager
         }
 
         GameObject go = Object.Instantiate(prefab, parent);
-        int index = go.name.IndexOf("(Clone)");         // ÇÁ¸®Æé »ý¼º½Ã ºÙ´Â Clone~À» ¾ø¾Ú
+        int index = go.name.IndexOf("(Clone)");         // í”„ë¦¬íŽ© ìƒì„±ì‹œ ë¶™ëŠ” Clone~ì„ ì—†ì•°
         if (index > 0)
             go.name = go.name.Substring(0, index);
 

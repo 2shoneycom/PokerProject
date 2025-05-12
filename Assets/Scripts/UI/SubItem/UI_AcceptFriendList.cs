@@ -42,7 +42,7 @@ public class UI_AcceptFriendList : UI_FriendBase
 
     void AcceptFriend(PointerEventData data)
     {
-        // 荐遏 贸府...
+        // 靾橂澖 觳橂Μ...
 
         Debug.Log("Friend Accept!");
         Managers.Resource.Destroy(gameObject);
@@ -50,7 +50,7 @@ public class UI_AcceptFriendList : UI_FriendBase
 
     void RejecteFriend(PointerEventData data)
     {
-        // 芭例 贸府...
+        // 瓯办爤 觳橂Μ...
 
         Debug.Log("Friend Reject!");
         Managers.Resource.Destroy(gameObject);

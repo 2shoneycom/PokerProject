@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager      // CanvasÀÇ sort orderÀ» °ü¸®ÇÏ±âÀ§ÇØ
+public class UIManager      // Canvasì˜ sort orderì„ ê´€ë¦¬í•˜ê¸°ìœ„í•´
 {
     int _order = 10;
 
@@ -27,12 +27,12 @@ public class UIManager      // CanvasÀÇ sort orderÀ» °ü¸®ÇÏ±âÀ§ÇØ
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.overrideSorting = true;
 
-        if (sort)   // ÆË¾÷ UI
+        if (sort)   // íŒì—… UI
         {
             canvas.sortingOrder = _order;
             _order++;
         }
-        else        // ¾À UI
+        else        // ì”¬ UI
         {
             canvas.sortingOrder = 0;
         }
@@ -64,7 +64,7 @@ public class UIManager      // CanvasÀÇ sort orderÀ» °ü¸®ÇÏ±âÀ§ÇØ
 
     public T ShowSceneUI<T>(string name = null) where T : UI_Scene
     {
-        if (string.IsNullOrEmpty(name))     // ÀÌ¸§À» ÁöÁ¤ÇÏÁö ¾Ê¾Ñ´Ù¸é T¸¦ ÀÌ¸§À¸·Î
+        if (string.IsNullOrEmpty(name))     // ì´ë¦„ì„ ì§€ì •í•˜ì§€ ì•Šì•—ë‹¤ë©´ Të¥¼ ì´ë¦„ìœ¼ë¡œ
             name = typeof(T).Name;
 
         GameObject go = Managers.Resource.Instantiate($"UI/Scene/{name}");

@@ -58,7 +58,7 @@ public class UI_Holdem : UI_Scene
         Bind<Image>(typeof(Images));
         Bind<GameObject>(typeof(GameObjects));
 
-        // 0,0 Àº ¿ŞÂÊ ¾Æ·¡, 1,1 Àº ¿À¸¥ÂÊ À§
+        // 0,0 ì€ ì™¼ìª½ ì•„ë˜, 1,1 ì€ ì˜¤ë¥¸ìª½ ìœ„
         GetGameObject((int)GameObjects.UI_Backspace).transform.position =
             Camera.main.ViewportToWorldPoint(new Vector3(0, 1, Camera.main.nearClipPlane));
         GetGameObject((int)GameObjects.UI_IconFriend).transform.position =

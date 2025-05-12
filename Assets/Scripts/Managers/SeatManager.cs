@@ -11,7 +11,7 @@ public class SeatManager
 
     HoldemScene _holdem = null;
 
-    public void Init(int seatSize)      // holdemscene¿¡¼­ initÇØÁÜ
+    public void Init(int seatSize)      // holdemsceneì—ì„œ inití•´ì¤Œ
     {
         _holdem = (HoldemScene)Managers.Scene.CurrentScene;
 
@@ -48,14 +48,14 @@ public class SeatManager
             if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient)
             {
                 /* 
-                ¾ÉÀº »ç¶÷ 2¸í ÀÌ»óÀÌ°í ³»°¡ ¹æÀåÀÌ¸é,
-                UI¿¡ °ÔÀÓ ½ºÅ¸Æ® ¹öÆ° ¶ç¿ì±â ¿äÃ»
+                ì•‰ì€ ì‚¬ëŒ 2ëª… ì´ìƒì´ê³  ë‚´ê°€ ë°©ì¥ì´ë©´,
+                UIì— ê²Œì„ ìŠ¤íƒ€íŠ¸ ë²„íŠ¼ ë„ìš°ê¸° ìš”ì²­
                 */
             }
         }
         else
         {
-            Debug.Log($"{seatIndex}¹øÂ° ÀÚ¸®´Â ÀÌ¹Ì Â÷ÁöµÇ¾îÀÖ½À´Ï´Ù.");
+            Debug.Log($"{seatIndex}ë²ˆì§¸ ìë¦¬ëŠ” ì´ë¯¸ ì°¨ì§€ë˜ì–´ìˆìŠµë‹ˆë‹¤.");
         }
     }
 
@@ -75,8 +75,8 @@ public class SeatManager
         }
         else
         {
-//            MyDebug.Instance.DebugLog($"{seatIndex}¹øÂ° ÀÚ¸®´Â ¾É¾ÆÀÖ´ø ÀÚ¸®°¡ ¾Æ´Ï¹Ç·Î ¶°³¯ ¼ö ¾ø½À´Ï´Ù.");
-//            Debug.Log($"{seatIndex}¹øÂ° ÀÚ¸®´Â ¾É¾ÆÀÖ´ø ÀÚ¸®°¡ ¾Æ´Ï¹Ç·Î ¶°³¯ ¼ö ¾ø½À´Ï´Ù.");
+//            MyDebug.Instance.DebugLog($"{seatIndex}ë²ˆì§¸ ìë¦¬ëŠ” ì•‰ì•„ìˆë˜ ìë¦¬ê°€ ì•„ë‹ˆë¯€ë¡œ ë– ë‚  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+//            Debug.Log($"{seatIndex}ë²ˆì§¸ ìë¦¬ëŠ” ì•‰ì•„ìˆë˜ ìë¦¬ê°€ ì•„ë‹ˆë¯€ë¡œ ë– ë‚  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
 
 //        MyDebug.Instance.DebugLog($"{seats[0]}, {seats[1]}, {seats[2]}, {seats[3]}, {seats[4]}, {seats[5]}, {seats[6]}");
