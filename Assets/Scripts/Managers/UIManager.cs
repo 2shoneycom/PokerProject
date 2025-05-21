@@ -10,6 +10,8 @@ public class UIManager      // Canvas의 sort order을 관리하기위해
     Stack<UI_Popup> _popupStack = new Stack<UI_Popup>();
     UI_Scene _sceneUI = null;
 
+    public UI_Scene SceneUI { get { return _sceneUI; } }
+
     public GameObject Root
     {
         get
@@ -57,6 +59,7 @@ public class UIManager      // Canvas의 sort order을 관리하기위해
 
         if (canvas == null)
             return;
+        _sceneUI = go.GetOrAddComponent<UI_Scene>();
 
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.worldCamera = Camera.main;

@@ -59,4 +59,5 @@ class SyncSystem : MonoBehaviourPun
     {
         OnHaveSeat?.Invoke(uid, seatIndex);
     }
+
 }

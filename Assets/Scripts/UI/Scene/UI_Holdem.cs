@@ -17,6 +17,7 @@ public class UI_Holdem : UI_Scene
         UI_Buttons_Half,
         UI_Buttons_AllIn,
         UI_RoomButton,
+        UI_GameStartButton,
     }
 
     enum Texts
@@ -41,6 +42,7 @@ public class UI_Holdem : UI_Scene
         UI_Player5_Icon,
         UI_Player6_Icon,
         UI_Player7_Icon,
+        UI_PotMoney_Icon,
     }
 
     enum GameObjects
@@ -65,7 +67,7 @@ public class UI_Holdem : UI_Scene
         SettingUIIconPos();
 
         SeatBind();
-        ButtonOff();
+        UIOff();
 
         BindEvent(GetGameObject((int)GameObjects.UI_Backspace), Managers.Scene.MoveToLobbyScene);
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);
@@ -73,13 +75,20 @@ public class UI_Holdem : UI_Scene
         SetRoomButton(isRoomOpened);
     }
 
+
     void SettingUIIconPos()
     {
+        GameObject go = GetGameObject((int)GameObjects.UI_Backspace);
         // 0,0 은 왼쪽 아래, 1,1 은 오른쪽 위
-        GetGameObject((int)GameObjects.UI_Backspace).transform.position =
+        go.transform.position =
             Camera.main.ViewportToWorldPoint(new Vector3(0, 1, Camera.main.nearClipPlane));
-        GetGameObject((int)GameObjects.UI_IconFriend).transform.position =
+        // Z 축이 -가 되서 클릭이 안되는 현상 발생.
+        go.transform.position = SetZeroZ(go.transform);
+
+        go = GetGameObject((int)GameObjects.UI_IconFriend);
+        go.transform.position =
             Camera.main.ViewportToWorldPoint(new Vector3(1, 1, Camera.main.nearClipPlane));
+        go.transform.position = SetZeroZ(go.transform);
 
         RectTransform toRect = GetGameObject((int)GameObjects.UI_IconFriend).GetComponent<RectTransform>();
         RectTransform targetRect = GetButton((int)Buttons.UI_RoomButton).GetComponent<RectTransform>();
@@ -92,7 +101,14 @@ public class UI_Holdem : UI_Scene
         targetRect.position = leftCenterWorld;
     }
 
-    void ButtonOff()
+    Vector3 SetZeroZ(Transform transform)
+    {
+        Vector3 zeroZ = transform.position;
+        zeroZ.z = 0;
+        return zeroZ;
+    }
+
+    void UIOff()
     {
         foreach (int idx in Enum.GetValues(typeof(Buttons)))
         {
@@ -100,6 +116,12 @@ public class UI_Holdem : UI_Scene
                 continue;
             GetButton(idx).gameObject.SetActive(false);
         }
+        GetImage((int)Images.UI_PotMoney_Icon).gameObject.SetActive(false);
+    }
+
+    public void GameStartButtonOn()
+    {
+        GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(true);
     }
 
     public void UpdatePlayerName(int index, string str)
@@ -118,13 +140,34 @@ public class UI_Holdem : UI_Scene
         GetImage((int)Images.UI_Player7_Icon).gameObject.BindEvent(Button7);
     }
 
-    public void Button1(PointerEventData data) { Managers.Seat.HaveSeat("1", 0); }
-    public void Button2(PointerEventData data) { Managers.Seat.HaveSeat("2", 1); }
-    public void Button3(PointerEventData data) { Managers.Seat.HaveSeat("3", 2); }
-    public void Button4(PointerEventData data) { Managers.Seat.HaveSeat("4", 3); }
-    public void Button5(PointerEventData data) { Managers.Seat.HaveSeat("5", 4); }
-    public void Button6(PointerEventData data) { Managers.Seat.HaveSeat("6", 5); }
-    public void Button7(PointerEventData data) { Managers.Seat.HaveSeat("7", 6); }
+    public void Button1(PointerEventData data) {
+        //Managers.Seat.HaveSeat("1", 0);
+        HoldemCardManager.Instacne.AddCardToPlayer(0);
+    }
+    public void Button2(PointerEventData data) { 
+        //Managers.Seat.HaveSeat("2", 1);
+        HoldemCardManager.Instacne.AddCardToPlayer(1);
+    }
+    public void Button3(PointerEventData data) { 
+        //Managers.Seat.HaveSeat("3", 2);
+        HoldemCardManager.Instacne.AddCardToPlayer(2);
+    }
+    public void Button4(PointerEventData data) { 
+        //Managers.Seat.HaveSeat("4", 3);
+        HoldemCardManager.Instacne.AddCardToPlayer(3);
+    }
+    public void Button5(PointerEventData data) {
+        //Managers.Seat.HaveSeat("5", 4);
+        HoldemCardManager.Instacne.AddCardToPlayer(4);
+    }
+    public void Button6(PointerEventData data) {
+        //Managers.Seat.HaveSeat("6", 5);
+        HoldemCardManager.Instacne.AddCardToPlayer(5);
+    }
+    public void Button7(PointerEventData data) {
+        //Managers.Seat.HaveSeat("7", 6);
+        HoldemCardManager.Instacne.AddCardToPlayer(6);
+    }
 
     void SetRoomButton(bool isRoomOpened)
     {
@@ -146,7 +189,7 @@ public class UI_Holdem : UI_Scene
         }
     }
 
-    void IconFriendClicked(PointerEventData data)
+    public void IconFriendClicked(PointerEventData data)
     {
         Managers.UI.ShowPopupUI<UI_InviteFriendPopup>();
     }
@@ -159,5 +202,10 @@ public class UI_Holdem : UI_Scene
     void MoveRoomClicked(PointerEventData data)
     {
 
+    }
+
+    public GameObject GetPlayerGameObjcet(int index)
+    {
+        return GetImage((int)index).gameObject;
     }
 }

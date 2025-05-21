@@ -20,9 +20,6 @@ public class Managers : MonoBehaviour
     public static UIManager UI { get { return Instance._ui; } }
     public static PhotonManager Photon { get { return Instance._photon; } }
 
-    User _user = new User();
-    public static User User { get { return Instance._user; } }
-
 
     // Start is called before the first frame update
     void Start()

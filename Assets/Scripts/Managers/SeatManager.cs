@@ -32,7 +32,7 @@ public class SeatManager
         seats = new List<string>(seatSize);
         for (int i = 0; i < seatSize; i++)
         {
-            seats.Add("empty");
+            seats.Add("자리 선택");
         }
         // ui
         _holdem.UpdateAllSeatUI();
@@ -40,7 +40,7 @@ public class SeatManager
 
     public void HaveSeat(string player_uid, int seatIndex)
     {   
-        if (seats[seatIndex] == "empty")
+        if (seats[seatIndex] == "자리 선택" && User.NowUser.GetHoldemSeat() == -1)
         {
             seats[seatIndex] = player_uid;
             occupiedCount++;
@@ -51,6 +51,7 @@ public class SeatManager
                 앉은 사람 2명 이상이고 내가 방장이면,
                 UI에 게임 스타트 버튼 띄우기 요청
                 */
+                _holdem.ReadyForGameStart();
             }
         }
         else

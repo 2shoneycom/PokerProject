@@ -85,7 +85,7 @@ public class LoginManager : MonoBehaviour
             if (user != null)
             {
                 userId = user.UserId;
-                _loginUI.SetConnectionInfoText("�ڵ� �α��� ����!");
+                _loginUI.SetConnectionInfoText("자동 로그인 성공!");
                 DBManager.Instance.GetUserInfo();
                 Managers.Photon.ConnectToPhoton(_loginUI);
             }
@@ -94,13 +94,13 @@ public class LoginManager : MonoBehaviour
 
     public void LogIn()
     {
-        _loginUI.SetConnectionInfoText("�α��� ��...");
+        _loginUI.SetConnectionInfoText("로그인 중...");
 
         GoogleSignIn.DefaultInstance.SignIn().ContinueWith(task =>
         {
             if (task.IsCanceled)
             {
-                _loginUI.SetConnectionInfoText("�α��� ����...");
+                _loginUI.SetConnectionInfoText("로그인 실패...");
                 return;
             }
             if (task.IsFaulted)
@@ -125,7 +125,7 @@ public class LoginManager : MonoBehaviour
 
                 Debug.Log("Firebase auth success");
 
-                if (Managers.User == null)
+                if (User.NowUser == null)
                     Debug.LogError("User.Instance is null after login!!");
             });
         });
