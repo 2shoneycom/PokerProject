@@ -26,6 +26,8 @@ public class HoldemGameControl : MonoBehaviour
         }
     }
 
+    HoldemPlayerManager _holdemaPlayers;
+
     HoldemScene _scene;
     UI_Holdem _holdemUI;
 
