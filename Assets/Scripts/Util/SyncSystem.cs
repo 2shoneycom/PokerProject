@@ -52,7 +52,7 @@ class SyncSystem : MonoBehaviourPun
     public void SyncHaveSeat(string uid, int seatIndex)
     {
         photonView.RPC("RPC_HaveSeat", RpcTarget.All, uid, seatIndex);
-    }   // ui 수정하는 곳 통일하기 위해 all 로 바꿈
+    }
 
     [PunRPC]
     private void RPC_HaveSeat(string uid, int seatIndex)
@@ -60,4 +60,17 @@ class SyncSystem : MonoBehaviourPun
         OnHaveSeat?.Invoke(uid, seatIndex);
     }
 
+    public void HoldemStartSync()
+    {
+        photonView.RPC("HoldemStartSyncing", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void HoldemStartSyncing()
+    {
+        Managers.Seat.HoldemSeatSetting();
+        UI_Holdem ui = (UI_Holdem)Managers.UI.SceneUI;
+        ui.UISwitch(true);
+        HoldemGameControl.Instance.StartGame();
+    }
 }

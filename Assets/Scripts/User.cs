@@ -14,6 +14,7 @@ public class User
     }
 
     HoldemPlayer holdemPlayer;
+    public static HoldemPlayer NowHoldemPlayer { get { return NowUser.holdemPlayer; } }
 
     public string nickName;
     public long seedMoney; // private으로 nickName이랑 seedMoney
@@ -24,15 +25,5 @@ public class User
         nickName = Random.Range(10000, 100000).ToString();
         seedMoney = 1000000;
         holdemPlayer = new HoldemPlayer();
-    }
-
-    public int GetHoldemSeat()
-    {
-        return holdemPlayer.SeatIndex;
-    }
-
-    public void SetHoldemSeat(int idx)
-    {
-        holdemPlayer.SeatIndex = idx;
     }
 }

@@ -5,11 +5,17 @@ using UnityEngine;
 public class HoldemPlayerManager
 {
     string[] holdemPlayerUID;
-    HoldemPlayer[] players;
 
     void Init()
     {
         holdemPlayerUID = new string[7];
-        players = new HoldemPlayer[7];
+    }
+
+    public void UpdatePlayerUID(int seatIdx, string UID)
+    {
+        if (UID == "자리 없음")
+            UID = "";
+
+        holdemPlayerUID[seatIdx] = UID;
     }
 }

@@ -40,29 +40,39 @@ public class SeatManager
 
     public void HaveSeat(string player_uid, int seatIndex)
     {   
-        if (seats[seatIndex] == "자리 선택" && User.NowUser.GetHoldemSeat() == -1)
-        {
-            seats[seatIndex] = player_uid;
-            occupiedCount++;
-            SyncSystem.Instacne.SyncHaveSeat(player_uid, seatIndex);
-            if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient)
-            {
-                /* 
-                앉은 사람 2명 이상이고 내가 방장이면,
-                UI에 게임 스타트 버튼 띄우기 요청
-                */
-                _holdem.ReadyForGameStart();
-            }
-        }
-        else
+        if(seats[seatIndex] != "자리 선택")
         {
             Debug.Log($"{seatIndex}번째 자리는 이미 차지되어있습니다.");
+            return;
         }
+
+        if(User.NowHoldemPlayer.SeatIndex != -1)
+        {
+            Debug.Log($"이미 {User.NowHoldemPlayer.SeatIndex}번째 자리에 앉으셨습니다.");
+            return;
+        }
+
+        SyncSystem.Instacne.SyncHaveSeat(player_uid, seatIndex);
     }
 
     private void TakeSeat(string player_uid, int seatIndex)
     {
         seats[seatIndex] = player_uid;
+
+        if (player_uid == User.NowUser.nickName)
+            User.NowHoldemPlayer.SetSeatIndex(seatIndex);
+
+        // occupiedCount 변수 동기화 위해 옮김
+        occupiedCount++;
+        if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient && HoldemGameControl.Instance.IsPlaying == false)
+        {
+            /* 
+            앉은 사람 2명 이상이고 내가 방장이면,
+            UI에 게임 스타트 버튼 띄우기 요청
+            */
+            _holdem.ReadyForGameStart();
+        }
+
         // ui
         _holdem.UpdateAllSeatUI();
     }
@@ -99,8 +109,19 @@ public class SeatManager
         for (int i = 0; i < seatsLength; i++)
         {
             seats[i] = syncedSeats[i];
+
+            if (seats[i] != "자리 없음")
+                occupiedCount++;
         }
         // ui
         _holdem.UpdateAllSeatUI();
+    }
+
+    public void HoldemSeatSetting()
+    {
+        for (int i = 0; i < seats.Count; i++)
+        {
+            HoldemGameControl.Players.UpdatePlayerUID(i, seats[i]);
+        }
     }
 }

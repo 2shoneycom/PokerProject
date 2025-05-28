@@ -31,8 +31,6 @@ public class HoldemCardManager : MonoBehaviour
     const int FULL_CARD_LEN = 52;
     const int DEALER_CARD_NUM = 5;
     const float DEALER_CARD_SPACE = 6.5f;
-    const float ICON_OFFSET = 3f;
-    const float CARD_OFFSET = 4f;
 
     List<int> cardBuffer;
     List<char> cardShape;       // 0-12 : Clover , 13-25 : Diamond, 26-38 : Heart, 39-51 : Spade
@@ -142,7 +140,7 @@ public class HoldemCardManager : MonoBehaviour
 
         if(isDealer == false)
         {
-            _holdemScene.Players[playerIndex].AddCardToList(cardGO);
+            User.NowHoldemPlayer.AddCardToList(cardGO);
 
             CardMoveToPosPlayer(playerIndex);
         }
@@ -174,47 +172,14 @@ public class HoldemCardManager : MonoBehaviour
 
     void CardMoveToPosPlayer(int playerIndex)
     {
-        GameObject targetCardGO = _holdemScene.Players[playerIndex].GetLastAddedCard();
-        Vector3 destPos = CalCardPos(playerIndex);
+        GameObject targetCardGO = User.NowHoldemPlayer.GetLastAddedCard();
+        Vector3 destPos = User.NowHoldemPlayer.GetCardPos();
 
         targetCardGO.transform.DOMove(destPos, 0.7f);
         targetCardGO.transform.DORotateQuaternion(Quaternion.identity, 0.7f);
         targetCardGO.transform.DOScale(Vector3.one * 3.5f, 0.7f);
     }
 
-    Vector3 CalCardPos(int playerIndex)
-    {
-        UI_Holdem holdemUI = (UI_Holdem)Managers.UI.SceneUI;
-        GameObject destGO = holdemUI.GetPlayerGameObjcet(playerIndex);
-
-        RectTransform reference = destGO.GetComponent<RectTransform>();
-        // 기준 RectTransform의 가로 길이
-        float width = reference.rect.width;
-        // 피벗 기준으로 오른쪽 끝 로컬 좌표 계산
-        // (1 - pivot.x)을 곱하면 피벗 위치에서 오른쪽 끝까지 거리
-        Vector3 localEdge = Vector3.zero;
-        Vector3 worldPos = Vector3.zero;
-
-        if (playerIndex % 2 == 0 && playerIndex != 0) 
-        {
-            localEdge = new Vector3(-reference.pivot.x * width, 0f, 0f);
-            worldPos = reference.TransformPoint(localEdge);
-            worldPos.x -= ICON_OFFSET;
-
-            if (_holdemScene.Players[playerIndex].GetPosIndex() == 1)
-                worldPos.x -= CARD_OFFSET;
-        }
-        else
-        {
-            localEdge = new Vector3((1f - reference.pivot.x) * width, 0f, 0f);
-            worldPos = reference.TransformPoint(localEdge);
-            worldPos.x += ICON_OFFSET;
-
-            if (_holdemScene.Players[playerIndex].GetPosIndex() == 1)
-                worldPos.x += CARD_OFFSET;
-        }
-        return worldPos;
-    }
 
     Sprite GetRightCardImage(int cardIndex)
     {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -67,14 +68,14 @@ public class UI_Holdem : UI_Scene
         SettingUIIconPos();
 
         SeatBind();
-        UIOff();
+        UISwitch(false);
 
+        GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
         BindEvent(GetGameObject((int)GameObjects.UI_Backspace), Managers.Scene.MoveToLobbyScene);
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);
 
         SetRoomButton(isRoomOpened);
     }
-
 
     void SettingUIIconPos()
     {
@@ -108,20 +109,37 @@ public class UI_Holdem : UI_Scene
         return zeroZ;
     }
 
-    void UIOff()
+    public void UISwitch(bool isOn)
     {
         foreach (int idx in Enum.GetValues(typeof(Buttons)))
         {
-            if (idx == (int)Buttons.UI_RoomButton) 
+            if (idx == (int)Buttons.UI_RoomButton || idx == (int)Buttons.UI_GameStartButton) 
                 continue;
-            GetButton(idx).gameObject.SetActive(false);
+
+            GetButton(idx).interactable = false;
+            GetButton(idx).gameObject.SetActive(isOn);
         }
-        GetImage((int)Images.UI_PotMoney_Icon).gameObject.SetActive(false);
+        GetImage((int)Images.UI_PotMoney_Icon).gameObject.SetActive(isOn);
     }
 
     public void GameStartButtonOn()
     {
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(true);
+        GetButton((int)Buttons.UI_GameStartButton).gameObject.BindEvent(GameStartButtonClicked);
+    }
+
+    void GameStartButtonClicked(PointerEventData data)
+    {
+        GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
+
+        // 게임 시작
+        SyncSystem.Instacne.HoldemStartSync();
+    }
+
+    public void BetButtonInteractiveSwitch(string betType, bool isOn)
+    {
+        string type = $"UI_Buttons_{betType}";
+        GetButton((int)Enum.Parse(typeof(Buttons), type)).interactable = isOn;
     }
 
     public void UpdatePlayerName(int index, string str)
@@ -131,42 +149,15 @@ public class UI_Holdem : UI_Scene
 
     void SeatBind()
     {
-        GetImage((int)Images.UI_Player1_Icon).gameObject.BindEvent(Button1);
-        GetImage((int)Images.UI_Player2_Icon).gameObject.BindEvent(Button2);
-        GetImage((int)Images.UI_Player3_Icon).gameObject.BindEvent(Button3);
-        GetImage((int)Images.UI_Player4_Icon).gameObject.BindEvent(Button4);
-        GetImage((int)Images.UI_Player5_Icon).gameObject.BindEvent(Button5);
-        GetImage((int)Images.UI_Player6_Icon).gameObject.BindEvent(Button6);
-        GetImage((int)Images.UI_Player7_Icon).gameObject.BindEvent(Button7);
-    }
-
-    public void Button1(PointerEventData data) {
-        //Managers.Seat.HaveSeat("1", 0);
-        HoldemCardManager.Instacne.AddCardToPlayer(0);
-    }
-    public void Button2(PointerEventData data) { 
-        //Managers.Seat.HaveSeat("2", 1);
-        HoldemCardManager.Instacne.AddCardToPlayer(1);
-    }
-    public void Button3(PointerEventData data) { 
-        //Managers.Seat.HaveSeat("3", 2);
-        HoldemCardManager.Instacne.AddCardToPlayer(2);
-    }
-    public void Button4(PointerEventData data) { 
-        //Managers.Seat.HaveSeat("4", 3);
-        HoldemCardManager.Instacne.AddCardToPlayer(3);
-    }
-    public void Button5(PointerEventData data) {
-        //Managers.Seat.HaveSeat("5", 4);
-        HoldemCardManager.Instacne.AddCardToPlayer(4);
-    }
-    public void Button6(PointerEventData data) {
-        //Managers.Seat.HaveSeat("6", 5);
-        HoldemCardManager.Instacne.AddCardToPlayer(5);
-    }
-    public void Button7(PointerEventData data) {
-        //Managers.Seat.HaveSeat("7", 6);
-        HoldemCardManager.Instacne.AddCardToPlayer(6);
+        for(int i = 0; i < 7; i++)
+        {
+            string img = $"UI_Player{i + 1}_Icon";
+            int num = i;
+            GetImage((int)Enum.Parse(typeof(Images), img)).gameObject.BindEvent(PointerEventData =>
+            {
+                Managers.Seat.HaveSeat(User.NowUser.nickName, num);
+            });
+        }
     }
 
     void SetRoomButton(bool isRoomOpened)
