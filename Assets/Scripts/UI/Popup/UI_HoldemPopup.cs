@@ -48,6 +48,7 @@ public class UI_HoldemPopup : UI_Popup
     void BeginnerButton(PointerEventData data)
     {
         SetEnterPanel(Buttons.UI_Beginner);
+        Managers.CurrentDifficulty = Define.Difficulty.Beginner;
 
         BindEvent(GetButton((int)Buttons.UI_EnterRoomButton).gameObject, EnterBeginnerRoom);
         BindEvent(GetButton((int)Buttons.UI_CreateRoomButton).gameObject, CreateBeginnerRoom);

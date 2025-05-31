@@ -6,12 +6,14 @@ public class HoldemPlayer
 {
     const float ICON_OFFSET = 3f;
     const float CARD_OFFSET = 4f;
+    const int MAX_CARD_NUM = 2;
 
     int seatedIndex = -1;
     public int SeatIndex {  get { return seatedIndex; } }
 
     int cardLen = 0;
     GameObject[] myCardList;
+    int[] myCardDetail;
     Vector3[] myCardPos;
 
     public HoldemPlayer()
@@ -21,15 +23,17 @@ public class HoldemPlayer
 
     void Init()
     {
-        myCardList = new GameObject[2];
-        myCardPos = new Vector3[2];
+        myCardList = new GameObject[MAX_CARD_NUM];
+        myCardPos = new Vector3[MAX_CARD_NUM];
+        myCardDetail = new int[MAX_CARD_NUM];
     }
 
-    public void AddCardToList(GameObject card)
+    public void AddCardToList(GameObject card, int cardDetail)
     {
-        if (cardLen > 2)
+        if (cardLen > MAX_CARD_NUM)
             return;
 
+        myCardDetail[cardLen] = cardDetail;
         myCardList[cardLen++] = card;
     }
 
@@ -82,5 +86,10 @@ public class HoldemPlayer
     public Vector3 GetCardPos()
     {
         return myCardPos[cardLen - 1];
+    }
+
+    public int GetCardLen()
+    {
+        return cardLen;
     }
 }

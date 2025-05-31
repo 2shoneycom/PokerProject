@@ -26,4 +26,22 @@ public class User
         seedMoney = 1000000;
         holdemPlayer = new HoldemPlayer();
     }
+
+    public void DecreaseMoney(string targetUID, int amount)
+    {
+        if (targetUID != nickName)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney -= amount;
+    }
+
+    public void IncreaseMoney(string targetUID, int amount)
+    {
+        if (targetUID != nickName)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney += amount;
+    }
 }

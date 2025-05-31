@@ -9,6 +9,8 @@ public class SeatManager
     public List<string> Seats { get { return seats; } }
     private int occupiedCount;
 
+    public const string DEFAULT_NULL_SEAT = "자리 선택";
+
     HoldemScene _holdem = null;
 
     public void Init(int seatSize)      // holdemscene에서 init해줌
@@ -32,7 +34,7 @@ public class SeatManager
         seats = new List<string>(seatSize);
         for (int i = 0; i < seatSize; i++)
         {
-            seats.Add("자리 선택");
+            seats.Add(DEFAULT_NULL_SEAT);
         }
         // ui
         _holdem.UpdateAllSeatUI();
@@ -40,7 +42,7 @@ public class SeatManager
 
     public void HaveSeat(string player_uid, int seatIndex)
     {   
-        if(seats[seatIndex] != "자리 선택")
+        if(seats[seatIndex] != DEFAULT_NULL_SEAT)
         {
             Debug.Log($"{seatIndex}번째 자리는 이미 차지되어있습니다.");
             return;
@@ -64,7 +66,7 @@ public class SeatManager
 
         // occupiedCount 변수 동기화 위해 옮김
         occupiedCount++;
-        if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient && HoldemGameControl.Instance.IsPlaying == false)
+        if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient && HoldemGameControl.Control.IsPlaying == false)
         {
             /* 
             앉은 사람 2명 이상이고 내가 방장이면,
@@ -81,7 +83,7 @@ public class SeatManager
     {
         if (seats[seatIndex] == player_uid)
         {
-            seats[seatIndex] = "empty";
+            seats[seatIndex] = DEFAULT_NULL_SEAT;
             occupiedCount--;
         }
         else
@@ -110,14 +112,14 @@ public class SeatManager
         {
             seats[i] = syncedSeats[i];
 
-            if (seats[i] != "자리 없음")
+            if (seats[i] != DEFAULT_NULL_SEAT)
                 occupiedCount++;
         }
         // ui
         _holdem.UpdateAllSeatUI();
     }
 
-    public void HoldemSeatSetting()
+    public void ConverToPlayers()
     {
         for (int i = 0; i < seats.Count; i++)
         {

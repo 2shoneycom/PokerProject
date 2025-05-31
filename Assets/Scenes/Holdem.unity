@@ -403,7 +403,6 @@ GameObject:
   - component: {fileID: 728495357}
   - component: {fileID: 728495359}
   - component: {fileID: 728495360}
-  - component: {fileID: 728495361}
   m_Layer: 0
   m_Name: '@Holdem'
   m_TagString: Untagged
@@ -472,18 +471,6 @@ MonoBehaviour:
   sceneViewId: 1
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &728495361
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 728495356}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e5b7f44325b3f249aeb252983685c7a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1853230838
 GameObject:
   m_ObjectHideFlags: 0

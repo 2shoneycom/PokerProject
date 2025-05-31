@@ -21,6 +21,14 @@ public class Managers : MonoBehaviour
     public static PhotonManager Photon { get { return Instance._photon; } }
 
 
+    Define.Difficulty difficulty = Define.Difficulty.None;
+    public static Define.Difficulty CurrentDifficulty
+    {
+        get { return m_instance.difficulty; }
+        set { m_instance.difficulty = value; }
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {

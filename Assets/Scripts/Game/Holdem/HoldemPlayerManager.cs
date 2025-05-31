@@ -5,17 +5,30 @@ using UnityEngine;
 public class HoldemPlayerManager
 {
     string[] holdemPlayerUID;
+    int _nowPlayerNum;
+    public int NowPlayerNum { get { return _nowPlayerNum; } }
 
-    void Init()
+    public HoldemPlayerManager(int max_num)
     {
-        holdemPlayerUID = new string[7];
+        holdemPlayerUID = new string[max_num];
     }
 
     public void UpdatePlayerUID(int seatIdx, string UID)
     {
-        if (UID == "자리 없음")
-            UID = "";
+        _nowPlayerNum++;
 
-        holdemPlayerUID[seatIdx] = UID;
+        if (UID == SeatManager.DEFAULT_NULL_SEAT)
+        {
+            UID = "";
+            _nowPlayerNum--;
+        }
+
+        int gameIndex = HoldemGameControl.Control.ConvertUItoGame(seatIdx);
+        holdemPlayerUID[gameIndex] = UID;
+    }
+
+    public string GetPlayerUID(int index)
+    {
+        return holdemPlayerUID[index];
     }
 }

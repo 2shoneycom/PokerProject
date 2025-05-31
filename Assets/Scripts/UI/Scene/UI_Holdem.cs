@@ -147,6 +147,11 @@ public class UI_Holdem : UI_Scene
         GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{index}_NameText")).text = str;
     }
 
+    public void UpdatePotMoney()
+    {
+        GetText((int)Texts.UI_PotMoney_Text).text = $"{HoldemGameControl.Control.PotMoney}";
+    }
+
     void SeatBind()
     {
         for(int i = 0; i < 7; i++)
