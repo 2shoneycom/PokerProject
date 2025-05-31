@@ -54,6 +54,17 @@ class SyncSystem : MonoBehaviourPun
         User.NowUser.IncreaseMoney(uid, amount);
     }
 
+    public void HoldemBetMoneyToTarget(string uid, int amount)
+    {
+        photonView.RPC("RPC_HoldemBetMoneyToTarget", RpcTarget.All, uid, amount);
+    }
+
+    [PunRPC]
+    private void RPC_HoldemBetMoneyToTarget(string uid, int amount)
+    {
+        User.NowUser.HoldemBettingMoney(uid, amount);
+    }
+
     #endregion
 
     public void SyncSeatsToMaster()
@@ -199,14 +210,47 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Control.NextStage(state);
     }
 
-    public void SyncCard(GameObject cardObj)
+    public void HoldemBetStart(int curplayer)
     {
-//        photonView.RPC("RPC_SyncCard", RpcTarget.Others, cardObj.GetComponent<PhotonView>().ViewID);
+        photonView.RPC("RPC_HoldemBetStart", RpcTarget.All, curplayer);
     }
 
     [PunRPC]
-    private void RPC_SyncCard()
+    private void RPC_HoldemBetStart(int curplayer)
     {
+        HoldemGameControl.Bet.HandleBet(curplayer);
+    }
 
+    public void SyncMyBetting(int index, int amount)
+    {
+        photonView.RPC("RPC_SyncMyBetting", RpcTarget.All, index, amount);
+    }
+
+    [PunRPC]
+    private void RPC_SyncMyBetting(int index, int amount)
+    {
+        HoldemGameControl.Players.UpdatePlayerBetting(index, amount);
+    }
+
+    public void HoldemAutoDieTimerSwitch(bool isOn)
+    {
+        photonView.RPC("RPC_HoldemAutoDieTimerSwitch", RpcTarget.All, isOn);
+    }
+
+    [PunRPC]
+    private void RPC_HoldemAutoDieTimerSwitch(bool isOn)
+    {
+        HoldemGameControl.Control.AutoDieTimerSwitch(isOn);
+    }
+
+    public void HoldemBetProcess(int curPlayer, string betType)
+    {
+        photonView.RPC("RPC_HoldemBetProcess", RpcTarget.MasterClient, curPlayer, betType);
+    }
+
+    [PunRPC]
+    public void RPC_HoldemBetProcess(int curPlayer, string betType)
+    {
+        HoldemGameControl.Bet.BetProcess(curPlayer, betType);
     }
 }

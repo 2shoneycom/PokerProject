@@ -44,4 +44,14 @@ public class User
         //////////////////////////////// DB와 소통
         seedMoney += amount;
     }
+
+    public void HoldemBettingMoney(string targetUID, int amount)
+    {
+        if (targetUID != nickName)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney -= amount;
+        NowHoldemPlayer.SetBetMoney(NowHoldemPlayer.BetMoney + amount);
+    }
 }

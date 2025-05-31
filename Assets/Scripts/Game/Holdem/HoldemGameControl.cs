@@ -20,7 +20,7 @@ public class HoldemGameControl : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            _betManager = new HoldemBetManager(_holdemUI);
+            _betManager = new HoldemBetManager();
             _holdemaPlayers = new HoldemPlayerManager(MAX_PLAYER_NUM);
             _cardManager = new HoldemCardManager();
         }
@@ -62,6 +62,7 @@ public class HoldemGameControl : MonoBehaviour
         set { _stageDetail = value; }
     }
 
+    private IEnumerator dieTimer;
 
     int _playerD;
     int _playerSB;
@@ -83,12 +84,19 @@ public class HoldemGameControl : MonoBehaviour
 
     public void StartGame()
     {
+        if (User.NowHoldemPlayer.SeatIndex == -1)
+            return;
+
         isPlaying = true;
         _holdemUI.UISwitch(true);
-        Card.Init();
 
-        _betManager.CalBetAndButtonSwitch();
+        Players.GameSetting();
+        Card.Init();
+        Bet.Init(_holdemUI);
+
         PotMoney = 0;
+
+        dieTimer = Bet.AutoDieTimer(HoldemBetManager.AUTO_DIE_TIMER);
 
         if(PhotonNetwork.IsMasterClient)
             ProcessStage();
@@ -112,7 +120,6 @@ public class HoldemGameControl : MonoBehaviour
 
     void ProcessStage()
     {
-        Debug.Log($"now stage {StageCount}, now detail {StageDetail}");
         switch(StageCount)
         {
             case 0:         // 자리 Setting
@@ -147,8 +154,25 @@ public class HoldemGameControl : MonoBehaviour
                     StartCoroutine(Card.DealingCard(0, toPlayer));
                     break;
 
-            case 6:         // 배팅 1     프리플랍 -> bb의 다음사람(언더더건)부터 시작 / 2인일 경우엔 딜러부터
-                SyncSystem.Instacne.HoldemNextStage(); // test
+            case 6:         // 배팅 1     프리플랍 -> bb의 다음사람(언더더건)부터 시작 / 2인일 경우엔 딜러부터  // 2인일때 무조건 bb다음이 딜러여서 따로 처리 필요 x
+                // 타이머 끄기 (타이머는 monobehaviour 필요)
+                SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false);
+
+                // 배팅 처리 넘기기
+                int curBetPlayer = (_playerBB + StageDetail + 1) % MAX_PLAYER_NUM;
+                string pUID = Players.GetPlayerUID(curBetPlayer);
+
+                if(pUID == "")        // 플레이어가 없는 자리면 넘어가기
+                {
+                    SyncSystem.Instacne.HoldemNextStage(1);
+                }
+                else
+                {
+                    SyncSystem.Instacne.HoldemBetStart(curBetPlayer);
+                }
+
+                // 타이머 키기
+                SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true);
                 break;
 
             case 7:         // 오픈 카드 3
@@ -163,7 +187,7 @@ public class HoldemGameControl : MonoBehaviour
                 break;
 
             case 8:         // 배팅 2     플랍 -> sb 부터 배팅 / 2인일 경우엔 bb부터
-                SyncSystem.Instacne.HoldemNextStage(); // test
+
                 break;
 
             case 9:         // 오픈 카드 1
@@ -177,7 +201,7 @@ public class HoldemGameControl : MonoBehaviour
                 break;
 
             case 10:         // 배팅 3     턴 -> sb 부터 배팅 / 2인일 경우엔 bb부터
-                SyncSystem.Instacne.HoldemNextStage(); // test
+
                 break;
 
             case 11:         // 오픈 카드 1
@@ -258,4 +282,17 @@ public class HoldemGameControl : MonoBehaviour
         }
     }
 
+    public void AutoDieTimerSwitch(bool isOn)
+    {
+        if (!IsPlaying)
+            return;
+
+        if (isOn)
+            StartCoroutine(dieTimer);
+        else
+        {
+            if(dieTimer != null)
+                StopCoroutine(dieTimer);
+        }
+    }
 }

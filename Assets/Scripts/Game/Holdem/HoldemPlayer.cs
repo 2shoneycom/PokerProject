@@ -16,6 +16,9 @@ public class HoldemPlayer
     int[] myCardDetail;
     Vector3[] myCardPos;
 
+    int betMoney;
+    public int BetMoney { get { return betMoney; } }
+
     public HoldemPlayer()
     {
         Init();
@@ -91,5 +94,12 @@ public class HoldemPlayer
     public int GetCardLen()
     {
         return cardLen;
+    }
+
+    public void SetBetMoney(int amount)
+    {
+        betMoney = amount;
+
+        SyncSystem.Instacne.SyncMyBetting(HoldemGameControl.Control.ConvertUItoGame(SeatIndex), amount);
     }
 }
