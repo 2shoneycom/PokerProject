@@ -50,4 +50,9 @@ public class Util
         }
         return null;
     }
+
+    public static IEnumerator LoadingTime(float sec)
+    {
+        yield return new WaitForSeconds(sec);
+    }
 }

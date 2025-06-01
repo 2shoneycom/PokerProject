@@ -236,7 +236,6 @@ public class HoldemCardManager
         targetCardGO.transform.DOScale(Vector3.one * 5f, 0.7f);
     }
 
-
     void CardMoveToPosPlayer()
     {
         GameObject targetCardGO = User.NowHoldemPlayer.GetLastAddedCard();
@@ -260,6 +259,21 @@ public class HoldemCardManager
         {
             cardBuffer.Add(cardDeck[i]);
         }
+    }
+
+    public int[] GetDealerCardDetail()
+    {
+        return dealerCardDetail;
+    }
+
+    public int GetCardNum(int index)
+    {
+        return cardNum[index];
+    }
+
+    public char GetCardShape(int index)
+    {
+        return cardShape[index];
     }
 
     Sprite GetRightCardImage(int cardIndex)

@@ -8,19 +8,37 @@ public class HoldemPlayerManager
     int _nowPlayerNum;
     public int NowPlayerNum { get { return _nowPlayerNum; } }
 
-    int highestDealPlayer = 0;
+    int deadPlayerNum = 0;
+    int[] playerSeedMoney;
     int[] playerBettingMoney;
     bool[] playerIsBet;
     bool[] playerIsAlive;
+    bool[] playerIsTurn;
     bool[] playerDieReserve;
-
-    public HoldemPlayerManager(int max_num)
+    bool isOneLeft;
+    public bool IsOneLeft
     {
-        holdemPlayerUID = new string[max_num];
-        playerBettingMoney = new int[max_num];
-        playerIsBet = new bool[max_num];
-        playerIsAlive = new bool[max_num];
-        playerDieReserve = new bool[max_num];
+        get { return isOneLeft; }
+        set { isOneLeft = value; }
+    }
+
+    int[,] playerCardDetails;
+    public int[,] PlayerCards {  get { return playerCardDetails; } }
+
+    List<string> winnerList;    // UI 용도
+
+    public HoldemPlayerManager()
+    {
+        holdemPlayerUID = new string[HoldemGameControl.MAX_PLAYER_NUM];
+        playerSeedMoney = new int[HoldemGameControl.MAX_PLAYER_NUM];
+        playerBettingMoney = new int[HoldemGameControl.MAX_PLAYER_NUM];
+        playerIsBet = new bool[HoldemGameControl.MAX_PLAYER_NUM];
+        playerIsAlive = new bool[HoldemGameControl.MAX_PLAYER_NUM];
+        playerIsTurn = new bool[HoldemGameControl.MAX_PLAYER_NUM];
+        playerDieReserve = new bool[HoldemGameControl.MAX_PLAYER_NUM];
+        playerCardDetails = new int[HoldemGameControl.MAX_PLAYER_NUM, HoldemPlayer.MAX_CARD_NUM];
+
+        winnerList = new List<string>();
     }
 
     public void GameSetting()
@@ -28,9 +46,23 @@ public class HoldemPlayerManager
         for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
             playerBettingMoney[i] = 0;
-            playerIsAlive[i] = true;
             playerIsBet[i] = false;
+            playerIsAlive[i] = true;
+            playerIsTurn[i] = false;
             playerDieReserve[i] = false;
+        }
+        winnerList.Clear();
+
+        deadPlayerNum = 0;
+        isOneLeft = false;
+    }
+
+    public void ClearBetSetting()
+    {
+        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        {
+            playerIsBet[i] = false;
+            playerIsTurn[i] = false;
         }
     }
 
@@ -53,9 +85,25 @@ public class HoldemPlayerManager
         return holdemPlayerUID[index];
     }
 
+    public int GetPlayerSeedMoney(int index)
+    {
+        return playerSeedMoney[index];
+    }
+
+    public void UpdatePlayerSeedMoney(int index, int seedMoney)
+    {
+        playerSeedMoney[index] = seedMoney;
+    }
+
     public int GetPlayerBet(int index)
     {
         return playerBettingMoney[index];
+    }
+
+    public void UpdatePlayerBetting(int index, int amount)      // User가 자신의 HoldemPlayer에서 SetBetMoney을 호출할때 마다 동기화
+    {
+        playerBettingMoney[index] = amount;
+        playerIsBet[index] = true;
     }
 
     public bool GetPlayerIsBet(int index)
@@ -63,14 +111,68 @@ public class HoldemPlayerManager
         return playerIsBet[index];
     }
 
+    public void UpdatePlayerIsBet(int index, bool val)
+    {
+        playerIsBet[index] = val;
+    }
+
     public bool GetPlayerState(int index)
     {
         return playerIsAlive[index];
     }
 
+    public void UpdatePlayerState(int index, bool val)
+    {
+        playerIsAlive[index] = val;
+    }
+
+    public bool GetPlayerTurn(int index)
+    {
+        return playerIsTurn[index];
+    }
+
+    public void UpdatePlayerTurn(int index, bool val)
+    {
+        playerIsTurn[index] = val;
+    }
+
     public bool GetPlayerDieReserve(int index)
     {
         return playerDieReserve[index];
+    }
+
+    public void UpdatePlayerDieReserve(int index, bool val)
+    {
+        playerDieReserve[index] = val;
+    }
+
+    public int GetDeadPlayerNum()
+    {
+        return deadPlayerNum;
+    }
+
+    public void SetDeadPlayerNum(int num)
+    {
+        deadPlayerNum = num;
+    }
+
+    public void SetPlayerCardDetails(int index, int card1, int card2)
+    {
+        playerCardDetails[index, 0] = card1;
+        playerCardDetails[index, 1] = card2;
+    }
+
+    public List<string> GetWinnerList()
+    {
+        return winnerList;
+    }
+
+    public void SetWinnerList(string[] wList)
+    {
+        for (int i = 0; i < wList.Length; i++)
+        {
+            winnerList.Add(wList[i]);
+        }
     }
 
     public int FindHighestBet()
@@ -83,11 +185,4 @@ public class HoldemPlayerManager
         }
         return max_bet;
     }
-
-    public void UpdatePlayerBetting(int index, int amount)      // User가 자신의 HoldemPlayer에서 SetBetMoney을 호출할때 마다 동기화
-    {
-        playerBettingMoney[index] = amount;
-        playerIsBet[index] = true;
-    }
-
 }

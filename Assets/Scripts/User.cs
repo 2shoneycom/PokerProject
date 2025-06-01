@@ -34,6 +34,7 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
+        HoldemSyncSeedMoney();
     }
 
     public void IncreaseMoney(string targetUID, int amount)
@@ -43,6 +44,7 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney += amount;
+        HoldemSyncSeedMoney();
     }
 
     public void HoldemBettingMoney(string targetUID, int amount)
@@ -52,6 +54,13 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
+        HoldemSyncSeedMoney();
         NowHoldemPlayer.SetBetMoney(NowHoldemPlayer.BetMoney + amount);
+    }
+
+    public void HoldemSyncSeedMoney()      // seedmoney 수정시 항상 호출
+    {
+        if(HoldemGameControl.Control.IsPlaying)
+            SyncSystem.Instacne.SyncHoldemPlayerSeedMoney(NowHoldemPlayer.GameIndex, (int)seedMoney);
     }
 }

@@ -32,6 +32,7 @@ public class UI_Holdem : UI_Scene
         UI_Player7_NameText,
         UI_PotMoney_Text,
         UI_RoomButton_Text,
+        UI_TmpWinnerShow_Text,
     }
 
     enum Images
@@ -50,6 +51,7 @@ public class UI_Holdem : UI_Scene
     {
         UI_Backspace,
         UI_IconFriend,
+        UI_TmpWinnerShow,
     }
 
     bool isRoomOpened = false;
@@ -68,8 +70,10 @@ public class UI_Holdem : UI_Scene
         SettingUIIconPos();
 
         SeatBind();
+        BetButtonBind();
         UISwitch(false);
 
+        GetGameObject((int)GameObjects.UI_TmpWinnerShow).gameObject.SetActive(false);
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
         BindEvent(GetGameObject((int)GameObjects.UI_Backspace), Managers.Scene.MoveToLobbyScene);
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);
@@ -185,9 +189,49 @@ public class UI_Holdem : UI_Scene
         }
     }
 
-    public void IconFriendClicked(PointerEventData data)
+    void IconFriendClicked(PointerEventData data)
     {
         Managers.UI.ShowPopupUI<UI_InviteFriendPopup>();
+    }
+
+    void BetButtonBind()            // interactable 체크 귀찮아서 onclick 이벤트로 추가함
+    {
+        Button bt = null;
+
+        bt = GetButton((int)Buttons.UI_Buttons_Call);
+        bt.onClick.AddListener(() => RequestBet("Call"));
+
+        bt = GetButton((int)Buttons.UI_Buttons_Die);
+        bt.onClick.AddListener(() => RequestBet("Die"));
+
+        bt = GetButton((int)Buttons.UI_Buttons_Double);
+        bt.onClick.AddListener(() => RequestBet("Double"));
+
+        bt = GetButton((int)Buttons.UI_Buttons_Quater);
+        bt.onClick.AddListener(() => RequestBet("Quater"));
+
+        bt = GetButton((int)Buttons.UI_Buttons_Half);
+        bt.onClick.AddListener(() => RequestBet("Half"));
+
+        bt = GetButton((int)Buttons.UI_Buttons_AllIn);
+        bt.onClick.AddListener(() => RequestBet("AllIn"));
+    }
+
+    void RequestBet(string betType)
+    {
+        if (HoldemGameControl.Players.GetPlayerTurn(User.NowHoldemPlayer.GameIndex) == false)
+        {
+            if (betType == "Die")       // 자신의 턴이 아니면 die만 켜져있어서 die만 누를테지만 혹시 모르니
+            {
+                if (HoldemGameControl.Players.GetPlayerDieReserve(User.NowHoldemPlayer.GameIndex) == false)
+                    SyncSystem.Instacne.SyncHoldemDieReserve(User.NowHoldemPlayer.GameIndex, true);
+                else
+                    SyncSystem.Instacne.SyncHoldemDieReserve(User.NowHoldemPlayer.GameIndex, false);
+            }
+            return;     // 자신의 턴이 아닐때 die가 아니면 모두 리턴
+        }
+
+        HoldemGameControl.Bet.PlayerBetSelected(betType);
     }
 
     void OpenRoomClicked(PointerEventData data)
@@ -203,5 +247,30 @@ public class UI_Holdem : UI_Scene
     public GameObject GetPlayerGameObjcet(int index)
     {
         return GetImage((int)index).gameObject;
+    }
+
+    public void SetWinnerPanel(bool isOn)
+    {
+        GetGameObject((int)GameObjects.UI_TmpWinnerShow).SetActive(isOn);
+
+        if (!isOn)
+            return;
+
+        var panelText = GetText((int)Texts.UI_TmpWinnerShow_Text);
+
+        panelText.text = "Winner : ";
+
+        List<string> wList = HoldemGameControl.Players.GetWinnerList();
+        int len = wList.Count;
+
+        for(int i = 0; i < len; i++)
+        {
+            panelText.text += wList[i];
+
+            if (i != len - 1)
+            {
+                panelText.text += ", ";
+            }
+        }
     }
 }

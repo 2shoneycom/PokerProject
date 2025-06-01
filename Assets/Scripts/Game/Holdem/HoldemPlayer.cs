@@ -6,10 +6,12 @@ public class HoldemPlayer
 {
     const float ICON_OFFSET = 3f;
     const float CARD_OFFSET = 4f;
-    const int MAX_CARD_NUM = 2;
+    public const int MAX_CARD_NUM = 2;
 
     int seatedIndex = -1;
     public int SeatIndex {  get { return seatedIndex; } }
+
+    public int GameIndex { get { return HoldemGameControl.Control.ConvertUItoGame(seatedIndex); } }
 
     int cardLen = 0;
     GameObject[] myCardList;
@@ -100,6 +102,11 @@ public class HoldemPlayer
     {
         betMoney = amount;
 
-        SyncSystem.Instacne.SyncMyBetting(HoldemGameControl.Control.ConvertUItoGame(SeatIndex), amount);
+        SyncSystem.Instacne.SyncHoldemMyBetting(GameIndex, amount);
+    }
+
+    public void GiveMyCardDetailToOthers()
+    {
+        SyncSystem.Instacne.SyncHoldemPlayerCardDetails(GameIndex, myCardDetail[0], myCardDetail[1]);
     }
 }
