@@ -168,17 +168,31 @@ public class DBManager : MonoBehaviour
 
     public void DeleteUserData(string userId, Action<bool, string> onComplete = null)
     {
-        dbRef.Child("Users").Child(userId).RemoveValueAsync().ContinueWithOnMainThread(task =>
+        // 삭제할 경로들
+        List<Task> deleteTasks = new List<Task>();
+
+        // 1. Users/{userId} 삭제
+        deleteTasks.Add(dbRef.Child("Users").Child(userId).RemoveValueAsync());
+
+        // 2. MoneyRank/{gameType}/{userId} 삭제
+        string[] gameTypes = { "holdem", "seven", "blackjack" };
+        foreach (string gameType in gameTypes)
+        {
+            deleteTasks.Add(dbRef.Child("MoneyRank").Child(gameType).Child(userId).RemoveValueAsync());
+        }
+
+        // 모든 삭제 작업 완료 후 콜백 처리
+        Task.WhenAll(deleteTasks).ContinueWithOnMainThread(task =>
         {
             if (task.IsCompleted && !task.IsFaulted && !task.IsCanceled)
             {
-                Debug.Log($"DBManager: 사용자 {userId} 데이터 삭제 성공");
+                Debug.Log($"DBManager: 사용자 {userId} 데이터(Users 및 MoneyRank) 삭제 성공");
                 onComplete?.Invoke(true, null);
             }
             else
             {
                 string error = task.Exception?.Message ?? "Unknown DB error";
-                Debug.LogError($"DBManager: 사용자 {userId} 데이터 삭제 실패 - {error}");
+                Debug.LogError($"DBManager: 사용자 {userId} 데이터(Users 및 MoneyRank) 삭제 실패 - {error}");
                 onComplete?.Invoke(false, error);
             }
         });
