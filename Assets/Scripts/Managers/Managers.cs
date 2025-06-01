@@ -12,6 +12,7 @@ public class Managers : MonoBehaviour
     SceneManagerEx _scene = new SceneManagerEx();
     SeatManager _seat = new SeatManager();
     UIManager _ui = new UIManager();
+    LoginManager _login;
     PhotonManager _photon;
 
     public static ResourceManager Resource { get { return Instance._resource; } }
@@ -19,6 +20,7 @@ public class Managers : MonoBehaviour
     public static SeatManager Seat { get { return Instance._seat; } }
     public static UIManager UI { get { return Instance._ui; } }
     public static PhotonManager Photon { get { return Instance._photon; } }
+    public static LoginManager Login { get { return Instance._login; } }
 
     User _user = new User();
     public static User User { get { return Instance._user; } }
@@ -29,6 +31,7 @@ public class Managers : MonoBehaviour
     {
         Init();
         _photon = FindAnyObjectByType<PhotonManager>();
+        _login = FindAnyObjectByType<LoginManager>();
     }
 
     // Update is called once per frame

@@ -27,10 +27,11 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
     Button _lobbyButton = null;
     public Button LobbyButton {  get { return _lobbyButton; } }
 
+    public static UI_Login Instance { get; private set; } // AuthManager에서 사용하기 위해서 추가
     public override void Init()
     {
         base.Init();
-
+        Instance = this; // AuthManager에서 사용하기 위해서 추가
         Bind<Button>(typeof(Buttons));
         Bind<TextMeshProUGUI>(typeof(Texts));
 
@@ -65,7 +66,7 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
 
         DisableAllButton();
         //Managers.Photon.ConnectToPhoton(this);
-        LoginManager.Instance.LogIn();
+        LoginScene.Instance.RequestLogin();
     }
 
     void DisableAllButton()

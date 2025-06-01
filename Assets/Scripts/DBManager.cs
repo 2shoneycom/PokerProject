@@ -8,6 +8,7 @@ using TMPro;
 using Firebase.Auth;
 using Firebase.Database;
 using System.Net;
+using System;
 
 public class DataToSave
 {
@@ -52,7 +53,7 @@ public class DBManager : MonoBehaviour
     {
         // 초기 데이터 설정
         dts = new DataToSave(
-            "User" + Random.Range(10000, 100000),
+            "User" + UnityEngine.Random.Range(10000, 100000),
             1_000_000L,
             false
             );
@@ -60,14 +61,14 @@ public class DBManager : MonoBehaviour
 
     public void GetUserInfo()
     {
-        if (string.IsNullOrEmpty(LoginManager.Instance.userId))
+        if (string.IsNullOrEmpty(AuthManager.Instance.userId))
         {
             Debug.LogError("User ID is not set");
             return;
         }
 
         // 데이터베이스에서 사용자 정보 조회
-        DBManager.Instance.dbRef.Child("Users").Child(LoginManager.Instance.userId)
+        DBManager.Instance.dbRef.Child("Users").Child(AuthManager.Instance.userId)
             .GetValueAsync().ContinueWithOnMainThread(task =>
             {
                 if (task.IsFaulted)
@@ -111,7 +112,7 @@ public class DBManager : MonoBehaviour
             { "reward", dts.reward }
         };
 
-        DBManager.Instance.dbRef.Child("Users").Child(LoginManager.Instance.userId)
+        DBManager.Instance.dbRef.Child("Users").Child(AuthManager.Instance.userId)
             .SetValueAsync(defaultData).ContinueWithOnMainThread(task =>
             {
                 if (task.IsFaulted)
@@ -119,5 +120,23 @@ public class DBManager : MonoBehaviour
                     Debug.LogError("data save fail: " + task.Exception);
                 }
             });
+    }
+
+    public void DeleteUserData(string userId, Action<bool, string> onComplete = null)
+    {
+        dbRef.Child("Users").Child(userId).RemoveValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted && !task.IsFaulted && !task.IsCanceled)
+            {
+                Debug.Log($"DBManager: 사용자 {userId} 데이터 삭제 성공");
+                onComplete?.Invoke(true, null);
+            }
+            else
+            {
+                string error = task.Exception?.Message ?? "Unknown DB error";
+                Debug.LogError($"DBManager: 사용자 {userId} 데이터 삭제 실패 - {error}");
+                onComplete?.Invoke(false, error);
+            }
+        });
     }
 }
