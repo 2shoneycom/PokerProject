@@ -4,7 +4,21 @@ using UnityEngine;
 
 public class User
 {
-    public string nickName;
-    public long seedMoney; // private으로 nickName이랑 seedMoney
+    private string uid;
+    private string nickName;
+    private long seedMoney;
 
+    public void SetUid(string value) => uid = value;
+    public void SetNickName(string value) => nickName = value;
+    public void SetSeedMoney(long value) => seedMoney = value;
+
+    // 값 읽기용 getter도 필요하다면 추가
+    public string GetUid() => uid;
+    public string GetNickName() => nickName;
+    public long GetSeedMoney() => seedMoney;
+
+    public void UpdateMoney(long value)
+    {
+        seedMoney += value;
+    }
 }

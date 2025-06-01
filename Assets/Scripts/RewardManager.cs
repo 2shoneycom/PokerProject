@@ -69,7 +69,7 @@ public class RewardManager : MonoBehaviour
                     }
                     else
                     {
-                        Managers.User.seedMoney = loadedData.seedMoney;
+                        Managers.User.SetSeedMoney(loadedData.seedMoney);
                         Debug.Log("data save success");
                     }
                 });
