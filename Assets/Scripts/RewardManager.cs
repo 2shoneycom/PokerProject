@@ -10,7 +10,7 @@ public class RewardManager : MonoBehaviour
     {
         Debug.Log("daily gift start");
 
-        string userId = LoginManager.Instance.userId;
+        string userId = AuthManager.Instance.userId;
         if (string.IsNullOrEmpty(userId))
         {
             Debug.LogError("User ID is not set");
@@ -69,7 +69,7 @@ public class RewardManager : MonoBehaviour
                     }
                     else
                     {
-                        User.NowUser.seedMoney = loadedData.seedMoney;
+                        User.NowUser.SetSeedMoney(loadedData.seedMoney);
                         Debug.Log("data save success");
                     }
                 });

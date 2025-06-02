@@ -16,8 +16,23 @@ public class User
     HoldemPlayer holdemPlayer;
     public static HoldemPlayer NowHoldemPlayer { get { return NowUser.holdemPlayer; } }
 
-    public string nickName;
-    public long seedMoney; // private으로 nickName이랑 seedMoney
+    private string uid;
+    private string nickName;
+    private long seedMoney;
+
+    public void SetUid(string value) => uid = value;
+    public void SetNickName(string value) => nickName = value;
+    public void SetSeedMoney(long value) => seedMoney = value;
+
+    // 값 읽기용 getter도 필요하다면 추가
+    public string GetUid() => uid;
+    public string GetNickName() => nickName;
+    public long GetSeedMoney() => seedMoney;
+
+    public void UpdateMoney(long value)
+    {
+        seedMoney += value;
+    }
 
 
     public void SetHoldemPlay()
@@ -60,7 +75,8 @@ public class User
 
     public void HoldemSyncSeedMoney()      // seedmoney 수정시 항상 호출
     {
-        if(HoldemGameControl.Control.IsPlaying)
+        if (HoldemGameControl.Control.IsPlaying)
             SyncSystem.Instacne.SyncHoldemPlayerSeedMoney(NowHoldemPlayer.GameIndex, (int)seedMoney);
     }
+
 }

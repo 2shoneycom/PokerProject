@@ -47,8 +47,8 @@ public class UI_Lobby : UI_Scene
         Bind<TextMeshProUGUI>(typeof(Texts));
         Bind<Image>(typeof(Images));
 
-        GetText((int)Texts.UI_Profile_Text).text = User.NowUser.nickName;
-        GetText((int)Texts.UI_Money_Text).text = User.NowUser.seedMoney.ToString();
+        GetText((int)Texts.UI_Profile_Text).text = User.NowUser.GetNickName();
+        GetText((int)Texts.UI_Money_Text).text = User.NowUser.GetSeedMoney().ToString();
 
         BindEvent(GetImage((int)Images.UI_Backspace).gameObject, BackspaceClick);
         GetImage((int)Images.UI_Backspace).gameObject.SetActive(false);
