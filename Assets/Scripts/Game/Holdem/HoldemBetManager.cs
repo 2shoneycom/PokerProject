@@ -77,7 +77,7 @@ public class HoldemBetManager
             _isBetting = true;
         }
 
-        if (HoldemGameControl.Players.GetPlayerUID(curPlayer) != User.NowUser.nickName)
+        if (HoldemGameControl.Players.GetPlayerUID(curPlayer) != User.NowUser.GetNickName())
             return;
 
         if (HoldemGameControl.Players.IsOneLeft)

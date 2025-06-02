@@ -40,6 +40,8 @@ public class UI_PlayerInfo : UI_Scene
         BindEvent(GetImage((int)Images.UI_MainInfo_UserEdit).gameObject, UserEditClicked);
         BindEvent(GetButton((int)Buttons.UI_LogoutButton).gameObject, LogoutClicked);
         BindEvent(GetButton((int)Buttons.UI_DelAccountButton).gameObject, DelAccountClicked);
+
+        SetPlayerInfo();
     }
 
     void DelAccountClicked(PointerEventData data)
@@ -56,5 +58,11 @@ public class UI_PlayerInfo : UI_Scene
     void LogoutClicked(PointerEventData data)
     {
         LoginManager.Instance.LogOut(data);
+    }
+
+    void SetPlayerInfo()
+    {
+        GetText((int)Texts.UI_MainInfo_UserName).text = User.NowUser.GetNickName();
+        GetText((int)Texts.UI_MainInfo_Money_Text).text = User.NowUser.GetSeedMoney().ToString();
     }
 }

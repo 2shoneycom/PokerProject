@@ -78,7 +78,7 @@ public class DBManager : MonoBehaviour
                 }
 
                 DataSnapshot snapshot = task.Result;
-                Managers.User.SetUid(AuthManager.Instance.userId);
+                User.NowUser.SetUid(AuthManager.Instance.userId);
 
                 // 기존 데이터가 있는 경우
                 if (snapshot.Exists)
@@ -88,8 +88,8 @@ public class DBManager : MonoBehaviour
                     DataToSave loadedData = JsonUtility.FromJson<DataToSave>(jsonData);
 
                     // 데이터 적용
-                    Managers.User.SetNickName(loadedData.nickName);
-                    Managers.User.SetSeedMoney(loadedData.seedMoney);
+                    User.NowUser.SetNickName(loadedData.nickName);
+                    User.NowUser.SetSeedMoney(loadedData.seedMoney);
                     Debug.Log("user data load success");
                 }
                 // 새로운 사용자인 경우
@@ -97,8 +97,8 @@ public class DBManager : MonoBehaviour
                 {
                     DataSetting(); // 초기 데이터 생성
                     SaveNewUserData(); // 데이터베이스에 저장
-                    Managers.User.SetNickName(dts.nickName);
-                    Managers.User.SetSeedMoney(dts.seedMoney);
+                    User.NowUser.SetNickName(dts.nickName);
+                    User.NowUser.SetSeedMoney(dts.seedMoney);
                     Debug.Log("new user data create success");
                 }
             });

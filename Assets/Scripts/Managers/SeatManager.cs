@@ -61,7 +61,7 @@ public class SeatManager
     {
         seats[seatIndex] = player_uid;
 
-        if (player_uid == User.NowUser.nickName)
+        if (player_uid == User.NowUser.GetNickName())
             User.NowHoldemPlayer.SetSeatIndex(seatIndex);
 
         // occupiedCount 변수 동기화 위해 옮김

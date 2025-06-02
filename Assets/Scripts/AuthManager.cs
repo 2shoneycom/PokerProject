@@ -86,7 +86,7 @@ public class AuthManager : MonoBehaviour
 
             Debug.Log("Firebase auth success");
 
-            if (Managers.User == null)
+            if (User.NowUser == null)
                 Debug.LogError("User.Instance is null after login!!");
         });
     }

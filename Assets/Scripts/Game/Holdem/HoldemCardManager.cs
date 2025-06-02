@@ -163,7 +163,7 @@ public class HoldemCardManager
 
         HoldemGameControl.Players.test(playerUID, HoldemGameControl.Control.StageCount == 4 ? 0 : 1, popedCard);
 
-        if (playerUID == User.NowUser.nickName)
+        if (playerUID == User.NowUser.GetNickName())
             AddCardToPlayer(false, popedCard);
 
         HoldemGameControl.Control.NextStage(1);

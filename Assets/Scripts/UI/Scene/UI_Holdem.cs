@@ -170,7 +170,7 @@ public class UI_Holdem : UI_Scene
             int num = i;
             GetImage((int)Enum.Parse(typeof(Images), img)).gameObject.BindEvent(PointerEventData =>
             {
-                Managers.Seat.HaveSeat(User.NowUser.nickName, num);
+                Managers.Seat.HaveSeat(User.NowUser.GetNickName(), num);
             });
         }
     }

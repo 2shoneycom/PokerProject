@@ -37,8 +37,6 @@ public class User
 
     public void SetHoldemPlay()
     {
-        nickName = Random.Range(10000, 100000).ToString();
-        seedMoney = 1000000;
         holdemPlayer = new HoldemPlayer();
     }
 
