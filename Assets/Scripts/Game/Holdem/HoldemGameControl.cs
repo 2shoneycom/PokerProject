@@ -260,7 +260,7 @@ public class HoldemGameControl : MonoBehaviour
                 // 타이머 끄기
                 StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 
-                SyncSystem.Instacne.RequestPlayerCardDetail();
+                //StartCoroutine(SyncSystem.Instacne.RequestPlayerCardDetail());
 
                 StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
                 break;

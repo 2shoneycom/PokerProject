@@ -272,7 +272,7 @@ class SyncSystem : MonoBehaviourPun
         photonView.RPC("RPC_RequestPlayerCardDetail", RpcTarget.All);
     }
 
-    [PunRPC]
+    [PunRPC] 
     private void RPC_RequestPlayerCardDetail()
     {
         User.NowHoldemPlayer.GiveMyCardDetailToOthers();

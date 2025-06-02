@@ -140,6 +140,12 @@ public class UI_Holdem : UI_Scene
         SyncSystem.Instacne.HoldemStartSync();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+            GameStartButtonClicked(null);
+    }
+
     public void BetButtonInteractiveSwitch(string betType, bool isOn)
     {
         string type = $"UI_Buttons_{betType}";
@@ -274,7 +280,7 @@ public class UI_Holdem : UI_Scene
         }
 
         if (isOn)
-            WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME);
+            StartCoroutine(WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME));
     }
 
     IEnumerator WaitWinnerPanel(float sec)

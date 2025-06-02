@@ -161,6 +161,8 @@ public class HoldemCardManager
     {
         int popedCard = PopCard();
 
+        HoldemGameControl.Players.test(playerUID, HoldemGameControl.Control.StageCount == 4 ? 0 : 1, popedCard);
+
         if (playerUID == User.NowUser.nickName)
             AddCardToPlayer(false, popedCard);
 

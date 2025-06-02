@@ -171,6 +171,17 @@ public class HoldemPlayerManager
         playerCardDetails[index, 1] = card2;
     }
 
+    public void test(string uid, int cardlen, int popedcard)
+    {
+        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if(uid == GetPlayerUID(i))
+            {
+                playerCardDetails[i, cardlen] = popedcard;
+            }
+        }
+    }
+
     public List<string> GetWinnerList()
     {
         return winnerList;
