@@ -132,7 +132,7 @@ public class HoldemGameControl : MonoBehaviour
             // 자리 Setting
             case 0:
                 SyncSystem.Instacne.SyncHoldemPlayerUID();
-                SyncSystem.Instacne.HoldemNextStage();
+                //SyncSystem.Instacne.HoldemNextStage();
                 break;
 
             // 카드 Shuffle
@@ -186,9 +186,12 @@ public class HoldemGameControl : MonoBehaviour
 
                     // 플레이어가 없는 자리면 넘어가기
                     if (pUID == "")
+                    {
                         SyncSystem.Instacne.HoldemNextStage(1);
-                    else
-                        SyncSystem.Instacne.HoldemBetStart(curBetPlayer);
+                        break;
+                    }
+
+                    SyncSystem.Instacne.HoldemBetStart(curBetPlayer);
 
                     // 타이머 키기
                     SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true);
@@ -228,9 +231,12 @@ public class HoldemGameControl : MonoBehaviour
 
                     // 플레이어가 없는 자리면 넘어가기
                     if (pUID == "")
+                    {
                         SyncSystem.Instacne.HoldemNextStage(1);
-                    else
-                        SyncSystem.Instacne.HoldemBetStart(curBetPlayer);
+                        break;
+                    }
+
+                    SyncSystem.Instacne.HoldemBetStart(curBetPlayer);
 
                     // 타이머 키기
                     SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true);

@@ -125,5 +125,6 @@ public class SeatManager
         {
             HoldemGameControl.Players.UpdatePlayerUID(i, seats[i]);
         }
+
     }
 }

@@ -22,6 +22,7 @@ public class HoldemPlayerManager
         set { isOneLeft = value; }
     }
 
+    List<(GameObject, GameObject)> playerCardGO;
     int[,] playerCardDetails;
     public int[,] PlayerCards {  get { return playerCardDetails; } }
 
@@ -37,12 +38,14 @@ public class HoldemPlayerManager
         playerIsTurn = new bool[HoldemGameControl.MAX_PLAYER_NUM];
         playerDieReserve = new bool[HoldemGameControl.MAX_PLAYER_NUM];
         playerCardDetails = new int[HoldemGameControl.MAX_PLAYER_NUM, HoldemPlayer.MAX_CARD_NUM];
+        playerCardGO = new List<(GameObject, GameObject)>();
 
         winnerList = new List<string>();
     }
 
     public void GameSetting()
     {
+        playerCardGO.Clear();
         for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
             playerBettingMoney[i] = 0;
@@ -50,6 +53,8 @@ public class HoldemPlayerManager
             playerIsAlive[i] = true;
             playerIsTurn[i] = false;
             playerDieReserve[i] = false;
+
+            playerCardGO.Add((null, null));
         }
         winnerList.Clear();
 

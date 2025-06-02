@@ -135,13 +135,16 @@ public class HoldemCardManager
                 SyncSystem.Instacne.HoldemAddCard(pUID);
                 yield return delay05;
             }
+            else
+            {
+                SyncSystem.Instacne.HoldemNextStage(1);
+            }
         }
         else                // 딜러에게 카드 배분
         {
             SyncSystem.Instacne.HoldemDealerCard();
             yield return delay05;
         }
-        SyncSystem.Instacne.HoldemNextStage(1);
     }
 
     public void AddCardToPlayerStarter(string playerUID = "")
@@ -157,13 +160,16 @@ public class HoldemCardManager
     private void AddCardOrPopCard(string playerUID = "")
     {
         int popedCard = PopCard();
-        if(playerUID == User.NowUser.nickName)
+        SyncSystem.Instacne.HoldemNextStage(1);
+
+        if (playerUID == User.NowUser.nickName)
             AddCardToPlayer(false, popedCard);
     }
 
     private void AddCardToDealer()
     {
         int popedCard = PopCard();
+        SyncSystem.Instacne.HoldemNextStage(1);
 
         if (!PhotonNetwork.IsMasterClient)
             return;
