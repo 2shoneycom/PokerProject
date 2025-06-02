@@ -97,7 +97,7 @@ public class HoldemBetManager
         // 내가 이미 죽엇다면 처리
         if (HoldemGameControl.Players.GetPlayerState(curPlayer) == false)
         {
-            SyncSystem.Instacne.HoldemNextStage(1);
+            SyncSystem.Instacne.HoldemNextStage_V2(1);
             return;
         }
         // 내가 예약 죽음햇다면 처리
@@ -253,7 +253,7 @@ public class HoldemBetManager
             SyncSystem.Instacne.HoldemBetMoneyToTarget(HoldemGameControl.Players.GetPlayerUID(curPlayer), curBetAmount);
             SyncSystem.Instacne.SyncHoldemPotMoney(HoldemGameControl.Control.PotMoney + curBetAmount);
         }
-        SyncSystem.Instacne.HoldemNextStage(1);
+        SyncSystem.Instacne.HoldemNextStage_V2(1);
     }
 
     public void CurrentStageBetEnd()
@@ -262,7 +262,7 @@ public class HoldemBetManager
         HoldemGameControl.Players.ClearBetSetting();
 
         if (PhotonNetwork.IsMasterClient)
-            SyncSystem.Instacne.HoldemNextStage();
+            SyncSystem.Instacne.HoldemNextStage_V2();
     }
 
     public void PlayerBetSelected(string betType)

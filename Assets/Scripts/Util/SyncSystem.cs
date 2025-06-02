@@ -249,6 +249,11 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Control.NextStage(state);
     }
 
+    public void HoldemNextStage_V2(int state = 0)
+    {
+        photonView.RPC("RPC_HoldemNextStage", RpcTarget.All, state);
+    }
+
     public IEnumerator HoldemAutoDieTimerSwitch(bool isOn)
     {
         yield return null;

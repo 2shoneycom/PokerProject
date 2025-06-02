@@ -137,7 +137,7 @@ public class HoldemCardManager
             }
             else
             {
-                SyncSystem.Instacne.HoldemNextStage(1);
+                SyncSystem.Instacne.HoldemNextStage_V2(1);
             }
         }
         else                // 딜러에게 카드 배분
@@ -164,7 +164,7 @@ public class HoldemCardManager
         if (playerUID == User.NowUser.nickName)
             AddCardToPlayer(false, popedCard);
 
-        SyncSystem.Instacne.HoldemNextStage(1);
+        SyncSystem.Instacne.HoldemNextStage_V2(1);
     }
 
     private void AddCardToDealer()
@@ -176,7 +176,7 @@ public class HoldemCardManager
 
         AddCardToPlayer(true, popedCard);
 
-        SyncSystem.Instacne.HoldemNextStage(1);
+        SyncSystem.Instacne.HoldemNextStage_V2(1);
     }
 
     private void AddCardToPlayer(bool isDealer, int popedCard)         // 카드 살짝 버벅임 있음
