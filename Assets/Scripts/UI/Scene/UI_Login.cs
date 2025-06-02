@@ -46,7 +46,7 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
 
         GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(false);
         BindEvent(GetButton((int)Buttons.UI_ReconnectButton).gameObject, ReconnectButtonClicked);
-        //LoginManager.Instance.LoginSceneLoaded(this);
+        Managers.Login.LoginSceneLoaded(this);
     }
 
     public void SetConnectionInfoText(string info)
