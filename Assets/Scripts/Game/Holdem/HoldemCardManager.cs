@@ -160,21 +160,23 @@ public class HoldemCardManager
     private void AddCardOrPopCard(string playerUID = "")
     {
         int popedCard = PopCard();
-        SyncSystem.Instacne.HoldemNextStage(1);
 
         if (playerUID == User.NowUser.nickName)
             AddCardToPlayer(false, popedCard);
+
+        SyncSystem.Instacne.HoldemNextStage(1);
     }
 
     private void AddCardToDealer()
     {
         int popedCard = PopCard();
-        SyncSystem.Instacne.HoldemNextStage(1);
 
         if (!PhotonNetwork.IsMasterClient)
             return;
 
         AddCardToPlayer(true, popedCard);
+
+        SyncSystem.Instacne.HoldemNextStage(1);
     }
 
     private void AddCardToPlayer(bool isDealer, int popedCard)         // 카드 살짝 버벅임 있음
@@ -259,6 +261,7 @@ public class HoldemCardManager
         {
             cardBuffer.Add(cardDeck[i]);
         }
+        HoldemGameControl.Control.NextStage();
     }
 
     public int[] GetDealerCardDetail()
@@ -281,4 +284,14 @@ public class HoldemCardManager
         return cardSprites[cardIndex];
     }
 
+    public void ClearDealerCard()
+    {
+        for (int i = 0; i < DEALER_CARD_NUM; i++)
+        {
+            if (PhotonNetwork.IsMasterClient)
+                Managers.Resource.PhotonDestroy(dealerCardList[i]);
+
+            dealerCardList[i] = null;
+        }
+    }
 }

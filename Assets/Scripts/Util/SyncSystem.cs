@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Google.MiniJSON;
 using Photon.Pun;
@@ -210,8 +211,9 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Control.StageCount = count;
     }
 
-    public void SyncHoldemPlayerUID()
+    public IEnumerator SyncHoldemPlayerUID()
     {
+        yield return null;
         photonView.RPC("RPC_SyncHoldemPlayerUID", RpcTarget.All);
     }
 
@@ -220,19 +222,24 @@ class SyncSystem : MonoBehaviourPun
     {
         Managers.Seat.ConverToPlayers();
     }
-    public void SyncHoldemPotMoney(int money)
+    public IEnumerator SyncHoldemPotMoney(int money, bool isNextStage = false)
     {
-        photonView.RPC("RPC_SyncHoldemPotMoney", RpcTarget.All, money);
+        yield return null;
+        photonView.RPC("RPC_SyncHoldemPotMoney", RpcTarget.All, money, isNextStage);
     }
 
     [PunRPC]
-    private void RPC_SyncHoldemPotMoney(int money)
+    private void RPC_SyncHoldemPotMoney(int money, bool isNextStage)
     {
         HoldemGameControl.Control.PotMoney = money;
+
+        if (isNextStage)
+            HoldemGameControl.Control.NextStage();
     }
 
-    public void HoldemNextStage(int state = 0)      // 1은 스테이지 세부 사항 카운트 증가
+    public IEnumerator HoldemNextStage(int state = 0)      // 1은 스테이지 세부 사항 카운트 증가
     {
+        yield return null;
         photonView.RPC("RPC_HoldemNextStage", RpcTarget.All, state);
     }
 
@@ -242,8 +249,9 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Control.NextStage(state);
     }
 
-    public void HoldemAutoDieTimerSwitch(bool isOn)
+    public IEnumerator HoldemAutoDieTimerSwitch(bool isOn)
     {
+        yield return null;
         photonView.RPC("RPC_HoldemAutoDieTimerSwitch", RpcTarget.All, isOn);
     }
 
@@ -253,8 +261,9 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Control.AutoDieTimerSwitch(isOn);
     }
 
-    public void RequestPlayerCardDetail()
+    public IEnumerator RequestPlayerCardDetail()
     {
+        yield return null;
         photonView.RPC("RPC_RequestPlayerCardDetail", RpcTarget.All);
     }
 
@@ -264,12 +273,25 @@ class SyncSystem : MonoBehaviourPun
         User.NowHoldemPlayer.GiveMyCardDetailToOthers();
     }
 
+    public IEnumerator HoldemClearGame()
+    {
+        yield return null;
+        photonView.RPC("RPC_HoldemClearGame", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_HoldemClearGame()
+    {
+        HoldemGameControl.Control.ClearGame();
+    }
+
     #endregion
 
     #region HoldemBetManager
 
-    public void HoldemBetStart(int curplayer)
+    public IEnumerator HoldemBetStart(int curplayer)
     {
+        yield return null;
         photonView.RPC("RPC_HoldemBetStart", RpcTarget.All, curplayer);
     }
 
@@ -305,8 +327,9 @@ class SyncSystem : MonoBehaviourPun
 
     #region HoldemCardManager
 
-    public void SyncHoldemDeck()
+    public IEnumerator SyncHoldemDeck()
     {
+        yield return null;
         photonView.RPC("RPC_SyncHoldemDeck", RpcTarget.All, HoldemGameControl.Card.GetCardDeck());
     }
 
@@ -316,8 +339,9 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Card.SetCardDeck(cardDeck);
     }
 
-    public void SyncHoldemDealerIndex(int index)
+    public IEnumerator SyncHoldemDealerIndex(int index)
     {
+        yield return null;
         photonView.RPC("RPC_SyncHoldemDealerIndex", RpcTarget.All, index);
     }
 
@@ -395,8 +419,9 @@ class SyncSystem : MonoBehaviourPun
 
     #endregion
 
-    public void SyncHoldemResultUI(bool isOn)
+    public IEnumerator SyncHoldemResultUI(bool isOn)
     {
+        yield return null;
         photonView.RPC("RPC_SyncHoldemResultUI", RpcTarget.All, isOn);
     }
 

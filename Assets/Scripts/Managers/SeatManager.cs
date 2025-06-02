@@ -125,6 +125,11 @@ public class SeatManager
         {
             HoldemGameControl.Players.UpdatePlayerUID(i, seats[i]);
         }
+        HoldemGameControl.Control.NextStage();
+    }
 
+    public int GetOccupiedCount()
+    {
+        return occupiedCount;
     }
 }

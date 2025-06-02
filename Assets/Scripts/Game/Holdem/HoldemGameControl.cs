@@ -104,6 +104,7 @@ public class HoldemGameControl : MonoBehaviour
         User.NowUser.HoldemSyncSeedMoney();
         PotMoney = 0;
         StageCount = 0;
+        StageDetail = 0;
 
         if(PhotonNetwork.IsMasterClient)
             ProcessStage();
@@ -131,33 +132,29 @@ public class HoldemGameControl : MonoBehaviour
         {
             // 자리 Setting
             case 0:
-                SyncSystem.Instacne.SyncHoldemPlayerUID();
-                //SyncSystem.Instacne.HoldemNextStage();
+                StartCoroutine(SyncSystem.Instacne.SyncHoldemPlayerUID());
                 break;
 
             // 카드 Shuffle
             case 1:
                 Card.ShuffleCard();
 
-                SyncSystem.Instacne.SyncHoldemDeck();
-                SyncSystem.Instacne.HoldemNextStage();
+                StartCoroutine(SyncSystem.Instacne.SyncHoldemDeck());
                 break;
 
             // 딜러 선택
             case 2:
                 DecideDealer();
 
-                SyncSystem.Instacne.SyncHoldemDealerIndex(_playerD);
-                SyncSystem.Instacne.HoldemNextStage();
+                StartCoroutine(SyncSystem.Instacne.SyncHoldemDealerIndex(_playerD));
                 break;
 
             // 기본 베팅    sb -> bb 순으로
             case 3:
-                _betManager.BaseBetting(_playerSB, _playerBB);
-                int baseBetAmount = _betManager.GetBaseBetAmount(Define.Difficulty.Beginner, true) + _betManager.GetBaseBetAmount(Define.Difficulty.Beginner, false);
+                Bet.BaseBetting(_playerSB, _playerBB);
+                int baseBetAmount = Bet.GetBaseBetAmount(Define.Difficulty.Beginner, true) + Bet.GetBaseBetAmount(Define.Difficulty.Beginner, false);
 
-                SyncSystem.Instacne.SyncHoldemPotMoney(PotMoney + baseBetAmount);
-                SyncSystem.Instacne.HoldemNextStage();
+                StartCoroutine(SyncSystem.Instacne.SyncHoldemPotMoney(PotMoney + baseBetAmount, true));
                 break;
 
             // 첫번째 카드 배부    sb부터 받음
@@ -166,7 +163,7 @@ public class HoldemGameControl : MonoBehaviour
             case 5:
                     if (StageDetail >= MAX_PLAYER_NUM)
                     {
-                        SyncSystem.Instacne.HoldemNextStage();
+                        StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
                         break;
                     }
 
@@ -178,7 +175,7 @@ public class HoldemGameControl : MonoBehaviour
             case 6:
                 {
                     // 타이머 끄기 (타이머는 monobehaviour 필요)
-                    SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false);
+                    StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 
                     // 배팅 처리 넘기기
                     int curBetPlayer = (_playerBB + StageDetail + 1) % MAX_PLAYER_NUM;
@@ -187,25 +184,24 @@ public class HoldemGameControl : MonoBehaviour
                     // 플레이어가 없는 자리면 넘어가기
                     if (pUID == "")
                     {
-                        SyncSystem.Instacne.HoldemNextStage(1);
+                        StartCoroutine(SyncSystem.Instacne.HoldemNextStage(1));
                         break;
                     }
-
-                    SyncSystem.Instacne.HoldemBetStart(curBetPlayer);
-
                     // 타이머 키기
-                    SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true);
+                    StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true));
+
+                    StartCoroutine(SyncSystem.Instacne.HoldemBetStart(curBetPlayer));
                 }
                 break;
 
             // 오픈 카드 3
             case 7:
                  // 타이머 끄기
-                SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false);
+                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 
                 if (StageDetail >= 3)
                 {
-                    SyncSystem.Instacne.HoldemNextStage();
+                    StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
                     break;
                 }
 
@@ -220,7 +216,7 @@ public class HoldemGameControl : MonoBehaviour
             case 12:
                 {
                     // 타이머 끄기 (타이머는 monobehaviour 필요)
-                    SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false);
+                    StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 
                     // 배팅 처리 넘기기
                     int curBetPlayer = (_playerSB + StageDetail) % MAX_PLAYER_NUM;
@@ -232,39 +228,25 @@ public class HoldemGameControl : MonoBehaviour
                     // 플레이어가 없는 자리면 넘어가기
                     if (pUID == "")
                     {
-                        SyncSystem.Instacne.HoldemNextStage(1);
+                        StartCoroutine(SyncSystem.Instacne.HoldemNextStage(1));
                         break;
                     }
-
-                    SyncSystem.Instacne.HoldemBetStart(curBetPlayer);
-
                     // 타이머 키기
-                    SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true);
+                    StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true));
+
+                    StartCoroutine(SyncSystem.Instacne.HoldemBetStart(curBetPlayer));
                 }
                 break;
 
             // 오픈 카드 1
             case 9:
-                // 타이머 끄기
-                SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false);
-
-                if (StageDetail >= 1)
-                {
-                    SyncSystem.Instacne.HoldemNextStage();
-                    break;
-                }
-
-                StartCoroutine(Card.DealingCard(1));
-                break;
-
-            // 오픈 카드 1
             case 11:
                 // 타이머 끄기
-                SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false);
+                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 
                 if (StageDetail >= 1)
                 {
-                    SyncSystem.Instacne.HoldemNextStage();
+                    StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
                     break;
                 }
 
@@ -274,13 +256,11 @@ public class HoldemGameControl : MonoBehaviour
             // 참가자에게 카드 정보 공유 요청
             case 13:
                 // 타이머 끄기
-                SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false);
+                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 
                 SyncSystem.Instacne.RequestPlayerCardDetail();
 
-                StartCoroutine(Util.LoadingTime(0.3f));         // 혹시 모르는 로딩 추가
-
-                SyncSystem.Instacne.HoldemNextStage();
+                StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
                 break;
 
             // 결과 발표
@@ -290,22 +270,15 @@ public class HoldemGameControl : MonoBehaviour
                 EndGame();
 
                 // UI 보여주기
-                StartCoroutine(Util.LoadingTime(0.3f));         // 혹시 모르는 로딩 추가
-                SyncSystem.Instacne.SyncHoldemResultUI(true);
-                SyncSystem.Instacne.HoldemNextStage();
+                StartCoroutine(SyncSystem.Instacne.SyncHoldemResultUI(true));
                 // 상대방 카드도 보일수 있으면 보이기
-
-                break;
-
-            // 결과창 대기 타이머
-            case 15:
-                StartCoroutine(Util.LoadingTime(RESULT_SHOW_TIME));         // 아 결과창에서 나가면 바로 process 시작해서 무한로딩 가능해보이는데
-
-                SyncSystem.Instacne.SyncHoldemResultUI(false);
-                SyncSystem.Instacne.HoldemNextStage();
                 break;
 
             // 새로운 게임 준비
+            case 15:
+                StartCoroutine(SyncSystem.Instacne.HoldemClearGame());
+                break;
+
             case 16:
 
                 break;
@@ -341,6 +314,8 @@ public class HoldemGameControl : MonoBehaviour
             _playerSB = GetNextPlayerIndex(_playerD);
 
         _playerBB = GetNextPlayerIndex(_playerSB);
+
+        NextStage();
     }
 
     public int ConvertUItoGame(int index)
@@ -408,12 +383,30 @@ public class HoldemGameControl : MonoBehaviour
                 Debug.Log("우승자: " + winnerUID);
             }
         }
-
+        // 팟머니 0으로
+        SyncSystem.Instacne.SyncHoldemPotMoney(0);
         SyncSystem.Instacne.SyncHoldemWinnerList(winnerList.ToArray());
     }
 
     public void ShowResult(bool isOn)
     {
         _holdemUI.SetWinnerPanel(isOn);
+    }
+
+    public void ClearGame()
+    {
+        isPlaying = false;
+
+        // 자신 카드 삭제 및 관련 초기화
+        User.NowHoldemPlayer.ClearCard();
+
+        // 딜러 카드 삭제 및 관련 초기화
+        Card.ClearDealerCard();
+
+        // 인원수 체크를 하고 2 이상이면 바로 시작
+        if(Managers.Seat.GetOccupiedCount() >= 2)
+        {
+            StartGame();
+        }
     }
 }

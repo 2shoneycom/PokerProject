@@ -53,12 +53,16 @@ public class HoldemPlayerManager
             playerIsAlive[i] = true;
             playerIsTurn[i] = false;
             playerDieReserve[i] = false;
+            playerSeedMoney[i] = 0;
 
+            playerCardDetails[i, 0] = 0;
+            playerCardDetails[i, 1] = 0;
             playerCardGO.Add((null, null));
         }
         winnerList.Clear();
 
         deadPlayerNum = 0;
+        _nowPlayerNum = 0;
         isOneLeft = false;
     }
 

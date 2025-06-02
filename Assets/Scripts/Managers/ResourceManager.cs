@@ -40,6 +40,14 @@ public class ResourceManager
         return go;
     }
 
+    public void PhotonDestroy(GameObject go)
+    {
+        if (go == null)
+            return;
+
+        PhotonNetwork.Destroy(go);
+    }
+
     public void Destroy(GameObject go)
     {
         if (go == null)

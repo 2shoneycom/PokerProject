@@ -272,5 +272,16 @@ public class UI_Holdem : UI_Scene
                 panelText.text += ", ";
             }
         }
+
+        if (isOn)
+            WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME);
+    }
+
+    IEnumerator WaitWinnerPanel(float sec)
+    {
+        yield return new WaitForSeconds(sec);
+
+        SetWinnerPanel(false);
+        HoldemGameControl.Control.NextStage();
     }
 }
