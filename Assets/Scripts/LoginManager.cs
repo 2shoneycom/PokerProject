@@ -3,44 +3,12 @@ using UnityEngine.EventSystems;
 using Google;
 using Firebase.Auth;
 
-public class LoginManager : MonoBehaviour
+public class LoginManager
 {
-    private static LoginManager instance;
-    public static LoginManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                instance = FindObjectOfType<LoginManager>();
-                if (instance == null)
-                {
-                    GameObject obj = new GameObject(nameof(LoginManager));
-                    instance = obj.AddComponent<LoginManager>();
-                    DontDestroyOnLoad(obj);
-                }
-            }
-            return instance;
-        }
-    }
-
     public string GoogleAPI = "1022865872304-vpjlvm2modeojucrj1aa7ud7kq301jak.apps.googleusercontent.com";
 
     private UI_Login _loginUI;
     private bool isGoogleInitialized = false;
-
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else if (instance != this)
-        {
-            Destroy(gameObject);
-        }
-    }
 
     public void LoginSceneLoaded(UI_Login login)
     {
@@ -64,6 +32,9 @@ public class LoginManager : MonoBehaviour
 
     public void LogIn()
     {
+        if (_loginUI == null)
+            _loginUI = (UI_Login)Managers.UI.SceneUI;
+
         _loginUI.SetConnectionInfoText("로그인 중...");
 
         GoogleSignIn.DefaultInstance.SignIn().ContinueWith(task =>

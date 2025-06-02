@@ -357,7 +357,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2061534570}
   - component: {fileID: 2061534569}
-  - component: {fileID: 2061534568}
   - component: {fileID: 2061534571}
   m_Layer: 0
   m_Name: '@LoginManager'
@@ -366,19 +365,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2061534568
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2061534567}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18172ad949dc31044932328001b4b96e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GoogleAPI: 1022865872304-vpjlvm2modeojucrj1aa7ud7kq301jak.apps.googleusercontent.com
 --- !u!114 &2061534569
 MonoBehaviour:
   m_ObjectHideFlags: 0

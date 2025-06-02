@@ -46,7 +46,7 @@ public class UI_PlayerInfo : UI_Scene
 
     void DelAccountClicked(PointerEventData data)
     {
-        LoginManager.Instance.DeleteAccount();
+        Managers.Login.DeleteAccount();
     }
 
 
@@ -57,7 +57,7 @@ public class UI_PlayerInfo : UI_Scene
 
     void LogoutClicked(PointerEventData data)
     {
-        LoginManager.Instance.LogOut(data);
+        Managers.Login.LogOut(data);
     }
 
     void SetPlayerInfo()
