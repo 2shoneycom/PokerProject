@@ -73,7 +73,7 @@ public class UI_Holdem : UI_Scene
         BetButtonBind();
         UISwitch(false);
 
-        GetGameObject((int)GameObjects.UI_TmpWinnerShow).gameObject.SetActive(false);
+        GetGameObject((int)GameObjects.UI_TmpWinnerShow).SetActive(false);
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
         BindEvent(GetGameObject((int)GameObjects.UI_Backspace), Managers.Scene.MoveToLobbyScene);
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);

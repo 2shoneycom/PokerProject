@@ -25,6 +25,7 @@ class SyncSystem : MonoBehaviourPun
         if (instance == null)
         {
             instance = this;
+            //DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -171,12 +172,15 @@ class SyncSystem : MonoBehaviourPun
 
     public void SyncHoldemWinnerList(string[] wList)
     {
-        photonView.RPC("RPC_SyncHoldemWinnerList", RpcTarget.All, wList);
+        string json = Json.Serialize(wList);
+        photonView.RPC("RPC_SyncHoldemWinnerList", RpcTarget.All, json);
     }
 
     [PunRPC]
-    private void RPC_SyncHoldemWinnerList(string[] wList)
+    private void RPC_SyncHoldemWinnerList(string json)
     {
+        List<object> wListRaw = Json.Deserialize(json) as List<object>;
+        string[] wList = wListRaw.ConvertAll(obj => obj.ToString()).ToArray();
         HoldemGameControl.Players.SetWinnerList(wList);
     }
 

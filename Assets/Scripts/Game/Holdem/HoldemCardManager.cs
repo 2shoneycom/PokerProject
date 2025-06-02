@@ -156,27 +156,22 @@ public class HoldemCardManager
 
     private void AddCardOrPopCard(string playerUID = "")
     {
+        int popedCard = PopCard();
         if(playerUID == User.NowUser.nickName)
-        {
-            AddCardToPlayer();
-        }
-        else
-        {
-            PopCard();
-        }
+            AddCardToPlayer(false, popedCard);
     }
 
     private void AddCardToDealer()
     {
+        int popedCard = PopCard();
+
         if (!PhotonNetwork.IsMasterClient)
-        {
-            PopCard();
             return;
-        }
-        AddCardToPlayer(true);
+
+        AddCardToPlayer(true, popedCard);
     }
 
-    private void AddCardToPlayer(bool isDealer = false)         // 카드 살짝 버벅임 있음
+    private void AddCardToPlayer(bool isDealer, int popedCard)         // 카드 살짝 버벅임 있음
     {
         if(cardDeckPos == null)     // 버그있음     왜 인진 모르겟지만 자꾸 null이 되네
             cardDeckPos = GameObject.FindGameObjectWithTag("Deck").transform;
@@ -188,7 +183,6 @@ public class HoldemCardManager
             return;
 
         GameObject cardGO = Managers.Resource.PhotonInstantiate("Game/Card", cardDeckPos);
-        int popedCard = PopCard();
 
         // 카드 앞면 처리       어차피 내꺼 아니면 안보여도 됨.
         cardGO.GetComponent<SpriteRenderer>().sprite = GetRightCardImage(popedCard);
