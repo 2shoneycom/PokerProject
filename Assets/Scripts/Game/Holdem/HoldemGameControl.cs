@@ -174,6 +174,7 @@ public class HoldemGameControl : MonoBehaviour
             // 배팅 1     프리플랍 -> bb의 다음사람(언더더건)부터 시작 / 2인일 경우엔 딜러부터  // 2인일때 무조건 bb다음이 딜러여서 따로 처리 필요 x
             case 6:
                 {
+                    Debug.Log("첫 배팅( 프리 플랍)");
                     // 타이머 끄기 (타이머는 monobehaviour 필요)
                     StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 
@@ -215,6 +216,7 @@ public class HoldemGameControl : MonoBehaviour
             // 배팅 4     리버 -> sb 부터 배팅 / 2인일 경우엔 bb부터
             case 12:
                 {
+                    Debug.Log($"다른 배팅{StageCount}, {StageDetail}");
                     // 타이머 끄기 (타이머는 monobehaviour 필요)
                     StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 

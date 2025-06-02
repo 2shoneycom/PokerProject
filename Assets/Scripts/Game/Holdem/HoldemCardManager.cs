@@ -132,8 +132,8 @@ public class HoldemCardManager
             string pUID = HoldemGameControl.Players.GetPlayerUID(toPlayer);
             if (pUID != "")
             {
-                SyncSystem.Instacne.HoldemAddCard(pUID);
                 yield return delay05;
+                SyncSystem.Instacne.HoldemAddCard(pUID);
             }
             else
             {
@@ -142,8 +142,8 @@ public class HoldemCardManager
         }
         else                // 딜러에게 카드 배분
         {
-            SyncSystem.Instacne.HoldemDealerCard();
             yield return delay05;
+            SyncSystem.Instacne.HoldemDealerCard();
         }
     }
 
@@ -164,7 +164,7 @@ public class HoldemCardManager
         if (playerUID == User.NowUser.nickName)
             AddCardToPlayer(false, popedCard);
 
-        SyncSystem.Instacne.HoldemNextStage_V2(1);
+        HoldemGameControl.Control.NextStage(1);
     }
 
     private void AddCardToDealer()
@@ -176,7 +176,7 @@ public class HoldemCardManager
 
         AddCardToPlayer(true, popedCard);
 
-        SyncSystem.Instacne.HoldemNextStage_V2(1);
+        HoldemGameControl.Control.NextStage(1);
     }
 
     private void AddCardToPlayer(bool isDealer, int popedCard)         // 카드 살짝 버벅임 있음
