@@ -11,8 +11,13 @@ using Photon.Pun;
 public class HoldemCardManager
 {
     const int FULL_CARD_LEN = 52;
+
     const int DEALER_CARD_NUM = 5;
     const float DEALER_CARD_SPACE = 6.5f;
+
+    const int PLAYER_CARD_NUM = 2;
+    const float ICON_OFFSET = 3f;
+    const float CARD_OFFSET = 4f;
 
     WaitForSeconds delay05 = new WaitForSeconds(0.5f);
 
@@ -29,13 +34,21 @@ public class HoldemCardManager
     GameObject[] dealerCardList;
     int[] dealerCardDetail;
 
+    Vector3[,] playerCardPos;
+
     HoldemScene _holdemScene;
 
     public static Action<string> OnAddCard;
     public static Action OnAddCardToDealer;
 
+    bool isInited = false;
+
     public void Init()
     {
+        if (isInited)
+            return;
+
+        isInited = true;
         Setup();
 
         OnAddCard -= AddCardOrPopCard;
@@ -48,12 +61,6 @@ public class HoldemCardManager
     void Setup()
     {
         _holdemScene = (HoldemScene)Managers.Scene.CurrentScene;
-
-        cardBuffer = new List<int>(FULL_CARD_LEN);
-        cardSprites = new List<Sprite>(FULL_CARD_LEN);
-        cardShape = new List<char>(FULL_CARD_LEN);
-        cardNum = new List<int>(FULL_CARD_LEN);
-        leavePlayerCard = new List<GameObject>();
 
         dealerCardPos = new Transform[DEALER_CARD_NUM];
         for(int i = 0; i < DEALER_CARD_NUM; i++)
@@ -68,8 +75,18 @@ public class HoldemCardManager
         }
         cardDeckPos = GameObject.FindGameObjectWithTag("Deck").transform;
 
+        playerCardPos = new Vector3[HoldemGameControl.MAX_PLAYER_NUM, PLAYER_CARD_NUM];
+        /////////////////////////////
+
+
         dealerCardList = new GameObject[DEALER_CARD_NUM];
         dealerCardDetail = new int[DEALER_CARD_NUM];
+
+        cardBuffer = new List<int>(FULL_CARD_LEN);
+        cardSprites = new List<Sprite>(FULL_CARD_LEN);
+        cardShape = new List<char>(FULL_CARD_LEN);
+        cardNum = new List<int>(FULL_CARD_LEN);
+        leavePlayerCard = new List<GameObject>();
 
         for (int i = 0; i < FULL_CARD_LEN; i++)
         {
@@ -127,7 +144,7 @@ public class HoldemCardManager
 
     public IEnumerator DealingCard(int state, int toPlayer = -1)
     {
-        if (state == 0)      // 플레이어에게 카드 배분
+        if (state == 0)      // 플레이어에게 카드 배분                         로직 수정 필요//////////////////////////////////
         {
             string pUID = HoldemGameControl.Players.GetPlayerUID(toPlayer);
             if (pUID != "")
@@ -183,7 +200,7 @@ public class HoldemCardManager
 
     private void AddCardToPlayer(bool isDealer, int popedCard)         // 카드 살짝 버벅임 있음
     {
-        if(cardDeckPos == null)     // 버그있음     왜 인진 모르겟지만 자꾸 null이 되네
+        if(cardDeckPos == null)                                     // 버그있음     왜 인진 모르겟지만 자꾸 null이 되네
             cardDeckPos = GameObject.FindGameObjectWithTag("Deck").transform;
 
         if (HoldemGameControl.Control.StageCount == 4 && User.NowHoldemPlayer.GetCardLen() == 1)        // 버그 처리용
@@ -295,5 +312,6 @@ public class HoldemCardManager
 
             dealerCardList[i] = null;
         }
+        leavePlayerCard.Clear();
     }
 }

@@ -171,7 +171,7 @@ public class HoldemPlayerManager
         playerCardDetails[index, 1] = card2;
     }
 
-    public void test(string uid, int cardlen, int popedcard)
+    public void test(string uid, int cardlen, int popedcard)        /////////////////////////////////////////////////////////////////////////////////////////////////
     {
         for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
