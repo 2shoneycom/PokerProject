@@ -54,7 +54,7 @@ public class LoginManager
             Debug.Log("Google Sign-In success: " + task.Result.DisplayName);
 
             // Firebase Auth로 전달
-            AuthManager.Instance.SignInWithGoogle(task.Result.IdToken, _loginUI);
+            Managers.Auth.SignInWithGoogle(task.Result.IdToken, _loginUI);
         });
     }
 
@@ -69,7 +69,7 @@ public class LoginManager
 
             isGoogleInitialized = false;
 
-            AuthManager.Instance.SignOutFirebase();
+            Managers.Auth.SignOutFirebase();
 
             Debug.Log("Logout success.");
             Managers.Photon.DisconnectPhoton();
@@ -89,21 +89,21 @@ public class LoginManager
             if (task.IsCanceled || task.IsFaulted)
             {
                 Debug.LogError("Google 재로그인 실패: 계정 삭제 중단");
-                UI_Login.Instance?.SetConnectionInfoText("Google 재인증 실패. 다시 시도해주세요.");
+                _loginUI?.SetConnectionInfoText("Google 재인증 실패. 다시 시도해주세요.");
                 return;
             }
 
             string idToken = task.Result.IdToken;
 
             // 2. Firebase 계정 삭제 요청
-            AuthManager.Instance.DeleteAccount(idToken, (success, error) =>
+            Managers.Auth.DeleteAccount(idToken, (success, error) =>
             {
                 if (success)
                 {
                     Debug.Log("계정 삭제 완료");
                     GoogleSignIn.DefaultInstance.SignOut();
                     GoogleSignIn.DefaultInstance.Disconnect();
-                    UI_Login.Instance?.SetConnectionInfoText("회원 탈퇴 완료");
+                    _loginUI?.SetConnectionInfoText("회원 탈퇴 완료");
 
                     Managers.Photon.DisconnectPhoton();
                     Managers.Scene.LoadScene(Define.Scene.Login);
@@ -111,7 +111,7 @@ public class LoginManager
                 else
                 {
                     Debug.LogError("계정 삭제 실패: " + error);
-                    UI_Login.Instance?.SetConnectionInfoText("회원 탈퇴 실패: " + error);
+                    _loginUI?.SetConnectionInfoText("회원 탈퇴 실패: " + error);
                 }
             });
         });

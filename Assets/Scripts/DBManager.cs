@@ -25,26 +25,12 @@ public class DataToSave
     }
 }
 
-public class DBManager : MonoBehaviour
+public class DBManager
 {
     public DatabaseReference dbRef;
     public DataToSave dts;
-    private static DBManager instance;
-    public static DBManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                GameObject obj = new GameObject("DBManager");
-                instance = obj.AddComponent<DBManager>();
-                DontDestroyOnLoad(obj);
-            }
-            return instance;
-        }
-    }
 
-    private void Awake()
+    public void Init()
     {
         dbRef = FirebaseDatabase.DefaultInstance.RootReference;
     }
@@ -61,14 +47,14 @@ public class DBManager : MonoBehaviour
 
     public void GetUserInfo()
     {
-        if (string.IsNullOrEmpty(AuthManager.Instance.userId))
+        if (string.IsNullOrEmpty(Managers.Auth.userId))
         {
             Debug.LogError("User ID is not set");
             return;
         }
 
         // 데이터베이스에서 사용자 정보 조회
-        dbRef.Child("Users").Child(AuthManager.Instance.userId)
+        dbRef.Child("Users").Child(Managers.Auth.userId)
             .GetValueAsync().ContinueWithOnMainThread(task =>
             {
                 if (task.IsFaulted)
@@ -78,7 +64,7 @@ public class DBManager : MonoBehaviour
                 }
 
                 DataSnapshot snapshot = task.Result;
-                User.NowUser.SetUid(AuthManager.Instance.userId);
+                User.NowUser.SetUid(Managers.Auth.userId);
 
                 // 기존 데이터가 있는 경우
                 if (snapshot.Exists)
@@ -114,7 +100,7 @@ public class DBManager : MonoBehaviour
         { "reward", dts.reward }
     };
 
-        dbRef.Child("Users").Child(AuthManager.Instance.userId)
+        dbRef.Child("Users").Child(Managers.Auth.userId)
             .SetValueAsync(defaultData).ContinueWithOnMainThread(task =>
             {
                 if (task.IsFaulted)
@@ -122,7 +108,7 @@ public class DBManager : MonoBehaviour
             });
 
         // MoneyRank 저장 방식 수정
-        string userId = AuthManager.Instance.userId;
+        string userId = Managers.Auth.userId;
         var tasks = new List<Task>();
 
         string[] gameTypes = { "holdem", "seven", "blackjack" };

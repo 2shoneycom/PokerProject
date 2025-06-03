@@ -34,7 +34,6 @@ public class User
         seedMoney += value;
     }
 
-
     public void SetHoldemPlay()
     {
         holdemPlayer = new HoldemPlayer();

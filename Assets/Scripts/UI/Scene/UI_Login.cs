@@ -27,26 +27,23 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
     Button _lobbyButton = null;
     public Button LobbyButton {  get { return _lobbyButton; } }
 
-    public static UI_Login Instance { get; private set; } // AuthManager에서 사용하기 위해서 추가
     public override void Init()
     {
         base.Init();
-        Instance = this; // AuthManager에서 사용하기 위해서 추가
         Bind<Button>(typeof(Buttons));
         Bind<TextMeshProUGUI>(typeof(Texts));
 
         TextMeshProUGUI tmp = GetText((int)Texts.UI_GoogleLoginButton_Text);
-        tmp.text = "방 참가";
+        tmp.text = "구글 로그인";
 
-        tmp = GetText((int)Texts.UI_LoginText);
-        tmp.text = "연결 중...";
+        SetConnectionInfoText("로그인 해주세요!");
 
         _lobbyButton = GetButton((int)Buttons.UI_GoogleLoginButton);
         BindEvent(_lobbyButton.gameObject, OnButtonClicked);
 
         GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(false);
         BindEvent(GetButton((int)Buttons.UI_ReconnectButton).gameObject, ReconnectButtonClicked);
-        Managers.Login.LoginSceneLoaded(this);
+        //Managers.Login.LoginSceneLoaded(this);
     }
 
     public void SetConnectionInfoText(string info)
@@ -65,8 +62,8 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
             return;
 
         DisableAllButton();
-        //Managers.Photon.ConnectToPhoton(this);
-        LoginScene.Instance.RequestLogin();
+        Managers.Photon.ConnectToPhoton(this);
+        //LoginScene.Instance.RequestLogin();
     }
 
     void DisableAllButton()

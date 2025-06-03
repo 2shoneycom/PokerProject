@@ -3,46 +3,15 @@ using Firebase.Auth;
 using Firebase.Extensions;
 using System;
 
-public class AuthManager : MonoBehaviour
-{
-    private static AuthManager instance;
-    public static AuthManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                instance = FindObjectOfType<AuthManager>();
-                if (instance == null)
-                {
-                    GameObject obj = new GameObject(nameof(AuthManager));
-                    instance = obj.AddComponent<AuthManager>();
-                    DontDestroyOnLoad(obj);
-                }
-            }
-            return instance;
-        }
-    }
-    
+public class AuthManager 
+{    
     private FirebaseAuth auth;
     private FirebaseUser user;
     public string userId;
 
     private bool isFirebaseInitialized = false;
 
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-            InitFirebase();
-        }
-        else if (instance != this)
-        {
-            Destroy(gameObject);
-        }
-    }
+    UI_Login loginUI;
 
     private void InitFirebase()
     {
@@ -62,11 +31,13 @@ public class AuthManager : MonoBehaviour
                 userId = user.UserId;
                 Debug.Log("Firebase Auth Changed: User logged in.");
 
-                DBManager.Instance.GetUserInfo();
-                if (UI_Login.Instance != null)
-                    UI_Login.Instance.SetConnectionInfoText("자동 로그인 성공!");
+                Managers.DB.GetUserInfo();
+                if (loginUI == null)
+                    loginUI = (UI_Login)Managers.UI.SceneUI;
 
-                Managers.Photon.ConnectToPhoton(UI_Login.Instance);
+                loginUI.SetConnectionInfoText("자동 로그인 성공!");
+
+                Managers.Photon.ConnectToPhoton(loginUI);
             }
         }
     }
@@ -123,7 +94,7 @@ public class AuthManager : MonoBehaviour
             {
                 if (deleteTask.IsCompleted && !deleteTask.IsFaulted && !deleteTask.IsCanceled)
                 {
-                    DBManager.Instance.DeleteUserData(targetUserId, (dbSuccess, dbError) =>
+                    Managers.DB.DeleteUserData(targetUserId, (dbSuccess, dbError) =>
                     {
                         if (!dbSuccess)
                             Debug.LogWarning("사용자 DB 데이터 삭제 실패: " + dbError);

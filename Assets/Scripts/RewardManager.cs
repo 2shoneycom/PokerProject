@@ -4,27 +4,27 @@ using Firebase.Extensions;
 using UnityEngine;
 using Firebase.Database;
 
-public class RewardManager : MonoBehaviour
+public class RewardManager
 {
     public void DailyGift()
     {
         Debug.Log("daily gift start");
 
-        string userId = AuthManager.Instance.userId;
+        string userId = Managers.Auth.userId;
         if (string.IsNullOrEmpty(userId))
         {
             Debug.LogError("User ID is not set");
             return;
         }
 
-        var userRef = DBManager.Instance.dbRef.Child("Users").Child(userId);
+        var userRef = Managers.DB.dbRef.Child("Users").Child(userId);
 
         userRef.GetValueAsync().ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
             {
                 Debug.LogError("Data fetch failed: " + task.Exception);
-                return;
+                return; 
             }
 
             DataSnapshot snapshot = task.Result;

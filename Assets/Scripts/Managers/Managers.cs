@@ -13,6 +13,9 @@ public class Managers : MonoBehaviour
     SeatManager _seat = new SeatManager();
     UIManager _ui = new UIManager();
     LoginManager _login = new LoginManager();
+    DBManager _db = new DBManager();
+    AuthManager _auth = new AuthManager();
+    RewardManager _reward = new RewardManager();
     PhotonManager _photon;
 
     public static ResourceManager Resource { get { return Instance._resource; } }
@@ -20,6 +23,9 @@ public class Managers : MonoBehaviour
     public static SeatManager Seat { get { return Instance._seat; } }
     public static UIManager UI { get { return Instance._ui; } }
     public static LoginManager Login { get { return Instance._login; } }
+    public static DBManager DB { get { return Instance._db; } }
+    public static AuthManager Auth { get { return Instance._auth; } }
+    public static RewardManager Reward { get { return Instance._reward; } }
     public static PhotonManager Photon { get { return Instance._photon; } }
 
 
@@ -57,6 +63,8 @@ public class Managers : MonoBehaviour
 
             DontDestroyOnLoad(go);
             m_instance = go.GetComponent<Managers>();
+
+            DB.Init();
         }
     }
 
