@@ -147,15 +147,8 @@ public class HoldemCardManager
         if (state == 0)      // 플레이어에게 카드 배분                         로직 수정 필요//////////////////////////////////
         {
             string pUID = HoldemGameControl.Players.GetPlayerUID(toPlayer);
-            if (pUID != "")
-            {
-                yield return delay05;
-                SyncSystem.Instacne.HoldemAddCard(pUID);
-            }
-            else
-            {
-                SyncSystem.Instacne.HoldemNextStage_V2(1);
-            }
+            yield return delay05;
+            SyncSystem.Instacne.HoldemAddCard(pUID);
         }
         else                // 딜러에게 카드 배분
         {
@@ -178,12 +171,18 @@ public class HoldemCardManager
     {
         int popedCard = PopCard();
 
-        HoldemGameControl.Players.test(playerUID, HoldemGameControl.Control.StageCount == 4 ? 0 : 1, popedCard);
+        HoldemGameControl.Players.test(playerUID, HoldemGameControl.Control.StageCount == 5 ? 0 : 1, popedCard);
 
         if (playerUID == User.NowUser.GetNickName())
+        {
             AddCardToPlayer(false, popedCard);
 
-        HoldemGameControl.Control.NextStage(1);
+            Debug.Log($"case {HoldemGameControl.Control.StageCount} / stage detail {HoldemGameControl.Control.StageDetail} 종료, nextStage");
+            SyncSystem.Instacne.HoldemNextStage_V2(1);
+        }
+
+        //Debug.Log($"case {HoldemGameControl.Control.StageCount} / stage detail {HoldemGameControl.Control.StageDetail} 종료, nextStage");
+        //HoldemGameControl.Control.NextStage(1);
     }
 
     private void AddCardToDealer()
@@ -280,6 +279,8 @@ public class HoldemCardManager
         {
             cardBuffer.Add(cardDeck[i]);
         }
+
+        Debug.Log("case 1 종료, nextStage");
         HoldemGameControl.Control.NextStage();
     }
 

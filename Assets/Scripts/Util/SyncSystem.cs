@@ -222,6 +222,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Managers.Seat.ConverToPlayers();
     }
+
     public IEnumerator SyncHoldemPotMoney(int money, bool isNextStage = false)
     {
         yield return null;
@@ -234,7 +235,10 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Control.PotMoney = money;
 
         if (isNextStage)
+        {
+            Debug.Log($"case {HoldemGameControl.Control.StageCount} 종료, nextStage");
             HoldemGameControl.Control.NextStage();
+        }
     }
 
     public IEnumerator HoldemNextStage(int state = 0)      // 1은 스테이지 세부 사항 카운트 증가

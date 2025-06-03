@@ -128,11 +128,14 @@ public class UI_Holdem : UI_Scene
 
     public void GameStartButtonOn()
     {
-        GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(true);
-        GetButton((int)Buttons.UI_GameStartButton).gameObject.BindEvent(GameStartButtonClicked);
+        Button bt = GetButton((int)Buttons.UI_GameStartButton);
+        bt.gameObject.SetActive(true);
+
+        bt.onClick.RemoveAllListeners();
+        bt.onClick.AddListener(GameStartButtonClicked);
     }
 
-    void GameStartButtonClicked(PointerEventData data)
+    void GameStartButtonClicked()
     {
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
 

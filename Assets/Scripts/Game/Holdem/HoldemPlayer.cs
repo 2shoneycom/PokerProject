@@ -110,12 +110,13 @@ public class HoldemPlayer
         SyncSystem.Instacne.SyncHoldemPlayerCardDetails(GameIndex, myCardDetail[0], myCardDetail[1]);
     }
 
-    public void ClearCard()
+    public void ClearSetting()
     {
         for(int i = 0; i < MAX_CARD_NUM; i++)
         {
             Managers.Resource.PhotonDestroy(myCardList[i]);
         }
         cardLen = 0;
+        betMoney = 0;
     }
 }

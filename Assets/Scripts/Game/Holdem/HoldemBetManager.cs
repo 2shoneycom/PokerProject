@@ -96,6 +96,7 @@ public class HoldemBetManager
             SyncSystem.Instacne.HoldemNextStage_V2(1);
             return;
         }
+
         // 내가 예약 죽음햇다면 처리
         if (HoldemGameControl.Players.GetPlayerDieReserve(curPlayer) == true)
         {
@@ -257,8 +258,6 @@ public class HoldemBetManager
         _isBetting = false;
         HoldemGameControl.Players.ClearBetSetting();
 
-        //if (PhotonNetwork.IsMasterClient)
-        //    SyncSystem.Instacne.HoldemNextStage_V2();
         // 어차피 이 함수는 모두가 호출하니
         HoldemGameControl.Control.NextStage();
     }

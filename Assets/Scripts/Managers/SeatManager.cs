@@ -125,6 +125,7 @@ public class SeatManager
         {
             HoldemGameControl.Players.UpdatePlayerUID(i, seats[i]);
         }
+        Debug.Log("case 1 종료, nextStage");
         HoldemGameControl.Control.NextStage();
     }
 

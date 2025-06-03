@@ -57,9 +57,10 @@ public class HoldemGameControl : MonoBehaviour
     public bool IsPlaying { get { return isPlaying; } }
 
     int _stageCount = 0;
-    public int StageCount { 
+    public int StageCount
+    {
         get { return _stageCount; }
-        set {  _stageCount = value; }
+        set { _stageCount = value; }
     }
 
     int _stageDetail = 0;
@@ -76,9 +77,11 @@ public class HoldemGameControl : MonoBehaviour
     int _playerBB;
     int _potMoney;
 
-    public int PotMoney {  
-        get { return _potMoney; } 
-        set {
+    public int PotMoney
+    {
+        get { return _potMoney; }
+        set
+        {
             _potMoney = value;
             _holdemUI.UpdatePotMoney();
         }
@@ -92,10 +95,15 @@ public class HoldemGameControl : MonoBehaviour
 
     public void StartGame()
     {
+        Debug.Log("Start");
+        if (isPlaying)
+            return;
+
         if (User.NowHoldemPlayer.SeatIndex == -1)
             return;
 
         isPlaying = true;
+
         _holdemUI.UISwitch(true);
 
         Players.GameSetting();
@@ -107,13 +115,18 @@ public class HoldemGameControl : MonoBehaviour
         StageCount = 0;
         StageDetail = 0;
 
-        if(PhotonNetwork.IsMasterClient)
+        if (PhotonNetwork.IsMasterClient)
             ProcessStage();
     }
 
     public void NextStage(int state = 0)        // 1은 스테이지 세부 사항 카운트 증가
     {
-        if(state == 0)
+        Debug.Log($"NextStage -> cur Stage : {_stageCount},  cur Detail : {_stageDetail} / state : {state}");
+
+        if ((_stageCount == 5 || _stageCount == 6) && _stageDetail > 7)
+            return;
+
+        if (state == 0)
         {
             StageCount++;
             StageDetail = 0;
@@ -129,7 +142,8 @@ public class HoldemGameControl : MonoBehaviour
 
     void ProcessStage()
     {
-        switch(StageCount)
+        Debug.Log($"ProcessStage 시작 : stagecount : {StageCount} / stagedetail : {StageDetail}");
+        switch (StageCount)
         {
             // 자리 Setting
             case 0:
@@ -174,50 +188,44 @@ public class HoldemGameControl : MonoBehaviour
             case 5:
             // 두번째 카드 배부    sb부터 받음
             case 6:
-                    if (StageDetail >= MAX_PLAYER_NUM)
-                    {
-                        StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
-                        break;
-                    }
-
-                    int toPlayer = (_playerSB + StageDetail) % MAX_PLAYER_NUM;
-                    StartCoroutine(Card.DealingCard(0, toPlayer));
+                if (StageDetail >= MAX_PLAYER_NUM)
+                {
+                    StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
                     break;
+                }
+
+                int toPlayer = (_playerSB + StageDetail) % MAX_PLAYER_NUM;
+                string pUID = Players.GetPlayerUID(toPlayer);
+                if(pUID == "")
+                {
+                    StartCoroutine(SyncSystem.Instacne.HoldemNextStage(1));
+                    break;
+                }
+
+                StartCoroutine(Card.DealingCard(0, toPlayer));
+                break;
 
             // 배팅 1     프리플랍 -> bb의 다음사람(언더더건)부터 시작 / 2인일 경우엔 딜러부터  // 2인일때 무조건 bb다음이 딜러여서 따로 처리 필요 x
             case 7:
-                {
-                    Debug.Log("첫 배팅( 프리 플랍)");
-                    // 타이머 끄기 (타이머는 monobehaviour 필요)
-                    StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
+                Debug.Log("첫 배팅( 프리 플랍)");
+                // 타이머 끄기 (타이머는 monobehaviour 필요)
+                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 
-                    // 배팅 처리 넘기기
-                    //int curBetPlayer = (_playerBB + StageDetail + 1) % MAX_PLAYER_NUM;
-                    //string pUID = Players.GetPlayerUID(curBetPlayer);
+                // 어차피 베팅 끝날때 까지 계속 뺑글뺑글 돌텐데 저렇게 1씩 증가시키는게 의미 있나 해서 바꿔봄
+                if (Bet.IsBetting == false)
+                    Bet.CurBetPlayer = _playerBB;
 
-                    //// 플레이어가 없는 자리면 넘어가기
-                    //if (pUID == "")
-                    //{
-                    //    StartCoroutine(SyncSystem.Instacne.HoldemNextStage(1));
-                    //    break;
-                    //}
+                Bet.CurBetPlayer = GetNextPlayerIndex(Bet.CurBetPlayer);
 
-                    // 어차피 베팅 끝날때 까지 계속 뺑글뺑글 돌텐데 저렇게 1씩 증가시키는게 의미 있나 해서 바꿔봄
-                    if (Bet.IsBetting == false)
-                        Bet.CurBetPlayer = _playerBB;
+                // 타이머 키기
+                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true));
 
-                    Bet.CurBetPlayer = GetNextPlayerIndex(Bet.CurBetPlayer);
-
-                    // 타이머 키기
-                    StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true));
-
-                    StartCoroutine(SyncSystem.Instacne.HoldemBetStart(Bet.CurBetPlayer));
-                }
+                StartCoroutine(SyncSystem.Instacne.HoldemBetStart(Bet.CurBetPlayer));
                 break;
 
             // 오픈 카드 3
             case 8:
-                 // 타이머 끄기
+                // 타이머 끄기
                 StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
 
                 if (StageDetail >= 3)
@@ -235,42 +243,26 @@ public class HoldemGameControl : MonoBehaviour
             case 11:
             // 배팅 4     리버 -> sb 부터 배팅 / 2인일 경우엔 bb부터
             case 13:
+                Debug.Log($"다른 배팅  {StageCount},  {StageDetail}");
+                // 타이머 끄기 (타이머는 monobehaviour 필요)
+                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
+
+                if (Bet.IsBetting == false)
                 {
-                    Debug.Log($"다른 배팅  {StageCount},  {StageDetail}");
-                    // 타이머 끄기 (타이머는 monobehaviour 필요)
-                    StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
-
-                    //// 배팅 처리 넘기기
-                    //int curBetPlayer = (_playerSB + StageDetail) % MAX_PLAYER_NUM;
-                    //if(Players.NowPlayerNum == 2)
-                    //    curBetPlayer = (_playerBB + StageDetail) % MAX_PLAYER_NUM;
-
-                    //string pUID = Players.GetPlayerUID(curBetPlayer);
-
-                    //// 플레이어가 없는 자리면 넘어가기
-                    //if (pUID == "")
-                    //{
-                    //    StartCoroutine(SyncSystem.Instacne.HoldemNextStage(1));
-                    //    break;
-                    //}
-
-                    if (Bet.IsBetting == false)
-                    {
-                        if (Players.NowPlayerNum == 2)
-                            Bet.CurBetPlayer = _playerBB;
-                        else
-                            Bet.CurBetPlayer = _playerSB;
-                    }
+                    if (Players.NowPlayerNum == 2)
+                        Bet.CurBetPlayer = _playerBB;
                     else
-                    {
-                        Bet.CurBetPlayer = GetNextPlayerIndex(Bet.CurBetPlayer);
-                    }
-
-                    // 타이머 키기
-                    StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true));
-
-                    StartCoroutine(SyncSystem.Instacne.HoldemBetStart(Bet.CurBetPlayer));
+                        Bet.CurBetPlayer = _playerSB;
                 }
+                else
+                {
+                    Bet.CurBetPlayer = GetNextPlayerIndex(Bet.CurBetPlayer);
+                }
+
+                // 타이머 키기
+                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true));
+
+                StartCoroutine(SyncSystem.Instacne.HoldemBetStart(Bet.CurBetPlayer));
                 break;
 
             // 오픈 카드 1
@@ -350,6 +342,7 @@ public class HoldemGameControl : MonoBehaviour
 
         _playerBB = GetNextPlayerIndex(_playerSB);
 
+        Debug.Log("case 2 종료, nextStage");
         NextStage();
     }
 
@@ -386,7 +379,7 @@ public class HoldemGameControl : MonoBehaviour
 
         if (isOn)
         {
-            if(dieTimer != null)        // 왜인지 모르겟는데 타이머가 2번 작동함
+            if (dieTimer != null)        // 왜인지 모르겟는데 타이머가 2번 작동함
             {
                 StopCoroutine(dieTimer);
                 Debug.Log("Duplicate Time Handle");
@@ -396,7 +389,7 @@ public class HoldemGameControl : MonoBehaviour
         }
         else
         {
-            if(dieTimer != null)
+            if (dieTimer != null)
             {
                 StopCoroutine(dieTimer);
                 Debug.Log("Time stop");
@@ -433,13 +426,13 @@ public class HoldemGameControl : MonoBehaviour
         isPlaying = false;
 
         // 자신 카드 삭제 및 관련 초기화
-        User.NowHoldemPlayer.ClearCard();
+        User.NowHoldemPlayer.ClearSetting();
 
         // 딜러 카드 삭제 및 관련 초기화
         Card.ClearDealerCard();
 
         // 인원수 체크를 하고 2 이상이면 바로 시작
-        if(Managers.Seat.GetOccupiedCount() >= 2)
+        if (Managers.Seat.GetOccupiedCount() >= 2)
         {
             StartGame();
         }
