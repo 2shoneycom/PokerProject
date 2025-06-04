@@ -185,6 +185,18 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Players.SetWinnerList(wList);
     }
 
+    public void SyncHoldemPlayerCard(string pUID, GameObject cardGO, int cardDetail)
+    {
+        int cardViewID = cardGO.GetComponent<PhotonView>().ViewID;
+        photonView.RPC("RPC_SyncHoldemPlayerCard", RpcTarget.All, pUID, cardViewID, cardDetail);
+    }
+
+    [PunRPC]
+    private void RPC_SyncHoldemPlayerCard(string pUID, int cardViewID, int cardDetail)
+    {
+        HoldemGameControl.Players.SetPlayerCard(pUID, cardViewID, cardDetail);
+    }
+
     #endregion
 
     #region HoldemGameControl
@@ -268,18 +280,6 @@ class SyncSystem : MonoBehaviourPun
     private void RPC_HoldemAutoDieTimerSwitch(bool isOn)
     {
         HoldemGameControl.Control.AutoDieTimerSwitch(isOn);
-    }
-
-    public IEnumerator RequestPlayerCardDetail()
-    {
-        yield return null;
-        photonView.RPC("RPC_RequestPlayerCardDetail", RpcTarget.All);
-    }
-
-    [PunRPC] 
-    private void RPC_RequestPlayerCardDetail()
-    {
-        User.NowHoldemPlayer.GiveMyCardDetailToOthers();
     }
 
     public IEnumerator HoldemClearGame()

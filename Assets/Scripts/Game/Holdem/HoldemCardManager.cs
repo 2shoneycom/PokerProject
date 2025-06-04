@@ -15,11 +15,15 @@ public class HoldemCardManager
     const int DEALER_CARD_NUM = 5;
     const float DEALER_CARD_SPACE = 6.5f;
 
-    const int PLAYER_CARD_NUM = 2;
+    const float CARD_ANIMATION_TIME = 0.7f;
+
+    public const int PLAYER_CARD_NUM = 2;
     const float ICON_OFFSET = 3f;
     const float CARD_OFFSET = 4f;
 
-    WaitForSeconds delay05 = new WaitForSeconds(0.5f);
+    const string MAKE_DEALER_CARD = "MAKEDEALERCARD";
+
+    WaitForSeconds cardMoveDelay = new WaitForSeconds(CARD_ANIMATION_TIME);
 
     List<int> cardBuffer;
     List<char> cardShape;       // 0-12 : Clover , 13-25 : Diamond, 26-38 : Heart, 39-51 : Spade
@@ -35,8 +39,10 @@ public class HoldemCardManager
     int[] dealerCardDetail;
 
     Vector3[,] playerCardPos;
+    public int CardLen { get { return HoldemGameControl.Control.StageCount == 5 ? 0 : 1; } }
 
     HoldemScene _holdemScene;
+    UI_Holdem _holdemUI;
 
     public static Action<string> OnAddCard;
     public static Action OnAddCardToDealer;
@@ -61,9 +67,10 @@ public class HoldemCardManager
     void Setup()
     {
         _holdemScene = (HoldemScene)Managers.Scene.CurrentScene;
+        _holdemUI = (UI_Holdem)Managers.UI.SceneUI;
 
         dealerCardPos = new Transform[DEALER_CARD_NUM];
-        for(int i = 0; i < DEALER_CARD_NUM; i++)
+        for (int i = 0; i < DEALER_CARD_NUM; i++)
         {
             dealerCardPos[i] = new GameObject($"Dealer Card Pos {i + 1}").GetOrAddComponent<Transform>();
             if (i == 0)
@@ -71,13 +78,12 @@ public class HoldemCardManager
             else
             {
                 dealerCardPos[i].position = dealerCardPos[i - 1].position + new Vector3(DEALER_CARD_SPACE, 0, 0);
-            }  
+            }
         }
         cardDeckPos = GameObject.FindGameObjectWithTag("Deck").transform;
 
         playerCardPos = new Vector3[HoldemGameControl.MAX_PLAYER_NUM, PLAYER_CARD_NUM];
-        /////////////////////////////
-
+        SetupPlayerCardPos();
 
         dealerCardList = new GameObject[DEALER_CARD_NUM];
         dealerCardDetail = new int[DEALER_CARD_NUM];
@@ -93,7 +99,7 @@ public class HoldemCardManager
             int cS = i / 13;
             int cN = i % 13 + 1;
             Sprite cardSprite = null;
-            switch(cS)
+            switch (cS)
             {
                 case 0:     // Clover
                     cardShape.Add('C');
@@ -114,6 +120,43 @@ public class HoldemCardManager
             }
             cardNum.Add(cN);
             cardSprites.Add(cardSprite);
+        }
+    }
+
+    private void SetupPlayerCardPos()       ////////////////////////////////////////////////////
+    {
+        for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        {
+            int seatedIndex = HoldemGameControl.Control.ConvertGameToUI(i);
+            GameObject destGO = _holdemUI.GetPlayerGameObjcet(seatedIndex);
+            RectTransform reference = destGO.GetComponent<RectTransform>();
+            // 기준 RectTransform의 가로 길이
+            float width = reference.rect.width;
+            // 피벗 기준으로 오른쪽 끝 로컬 좌표 계산
+            // (1 - pivot.x)을 곱하면 피벗 위치에서 오른쪽 끝까지 거리
+            Vector3 localEdge = Vector3.zero;
+            Vector3 worldPos = Vector3.zero;
+
+            if (seatedIndex % 2 == 0 && seatedIndex != 0)
+            {
+                localEdge = new Vector3(-reference.pivot.x * width, 0f, 0f);
+                worldPos = reference.TransformPoint(localEdge);
+                worldPos.x -= ICON_OFFSET;
+                playerCardPos[i, 0] = worldPos;
+
+                worldPos.x -= CARD_OFFSET;
+                playerCardPos[i, 1] = worldPos;
+            }
+            else
+            {
+                localEdge = new Vector3((1f - reference.pivot.x) * width, 0f, 0f);
+                worldPos = reference.TransformPoint(localEdge);
+                worldPos.x += ICON_OFFSET;
+                playerCardPos[i, 0] = worldPos;
+
+                worldPos.x += CARD_OFFSET;
+                playerCardPos[i, 1] = worldPos;
+            }
         }
     }
 
@@ -147,12 +190,12 @@ public class HoldemCardManager
         if (state == 0)      // 플레이어에게 카드 배분                         로직 수정 필요//////////////////////////////////
         {
             string pUID = HoldemGameControl.Players.GetPlayerUID(toPlayer);
-            yield return delay05;
+            yield return cardMoveDelay;
             SyncSystem.Instacne.HoldemAddCard(pUID);
         }
         else                // 딜러에게 카드 배분
         {
-            yield return delay05;
+            yield return cardMoveDelay;
             SyncSystem.Instacne.HoldemDealerCard();
         }
     }
@@ -171,18 +214,13 @@ public class HoldemCardManager
     {
         int popedCard = PopCard();
 
-        HoldemGameControl.Players.test(playerUID, HoldemGameControl.Control.StageCount == 5 ? 0 : 1, popedCard);
+        if (!PhotonNetwork.IsMasterClient)
+            return;
 
-        if (playerUID == User.NowUser.GetNickName())
-        {
-            AddCardToPlayer(false, popedCard);
+        AddCardToPlayer(popedCard, playerUID);
 
-            Debug.Log($"case {HoldemGameControl.Control.StageCount} / stage detail {HoldemGameControl.Control.StageDetail} 종료, nextStage");
-            SyncSystem.Instacne.HoldemNextStage_V2(1);
-        }
-
-        //Debug.Log($"case {HoldemGameControl.Control.StageCount} / stage detail {HoldemGameControl.Control.StageDetail} 종료, nextStage");
-        //HoldemGameControl.Control.NextStage(1);
+        Debug.Log($"case {HoldemGameControl.Control.StageCount} / stage detail {HoldemGameControl.Control.StageDetail} 종료, nextStage");
+        SyncSystem.Instacne.HoldemNextStage_V2(1);
     }
 
     private void AddCardToDealer()
@@ -192,37 +230,23 @@ public class HoldemCardManager
         if (!PhotonNetwork.IsMasterClient)
             return;
 
-        AddCardToPlayer(true, popedCard);
+        AddCardToPlayer(popedCard);
 
         HoldemGameControl.Control.NextStage(1);
     }
 
-    private void AddCardToPlayer(bool isDealer, int popedCard)         // 카드 살짝 버벅임 있음
+    private void AddCardToPlayer(int popedCard, string pUID = MAKE_DEALER_CARD)         // 카드 살짝 버벅임 있음
     {
-        if(cardDeckPos == null)                                     // 버그있음     왜 인진 모르겟지만 자꾸 null이 되네
+        if (cardDeckPos == null)                                     // 버그있음     왜 인진 모르겟지만 자꾸 null이 되네
             cardDeckPos = GameObject.FindGameObjectWithTag("Deck").transform;
-
-        if (HoldemGameControl.Control.StageCount == 4 && User.NowHoldemPlayer.GetCardLen() == 1)        // 버그 처리용
-            return;
-
-        if (HoldemGameControl.Control.StageCount == 5 && User.NowHoldemPlayer.GetCardLen() == 2)        // 버그 처리용
-            return;
 
         GameObject cardGO = Managers.Resource.PhotonInstantiate("Game/Card", cardDeckPos);
 
-        // 카드 앞면 처리       어차피 내꺼 아니면 안보여도 됨.
-        cardGO.GetComponent<SpriteRenderer>().sprite = GetRightCardImage(popedCard);
-
-        if(isDealer == false)
-        {
-            User.NowHoldemPlayer.AddCardToList(cardGO, popedCard);
-
-            CardMoveToPosPlayer();
-        }
-        else
+        // 카드 동기화 처리
+        if (pUID == MAKE_DEALER_CARD)
         {
             int i;
-            for(i = 0; i < DEALER_CARD_NUM; i++)
+            for (i = 0; i < DEALER_CARD_NUM; i++)
             {
                 if (dealerCardList[i] == null)
                 {
@@ -233,6 +257,13 @@ public class HoldemCardManager
                 }
             }
             CardMoveToPosDealer(i);
+
+        }
+        else
+        {
+            SyncSystem.Instacne.SyncHoldemPlayerCard(pUID, cardGO, popedCard);
+
+            CardMoveToPosPlayer(cardGO, pUID);
         }
     }
 
@@ -248,22 +279,21 @@ public class HoldemCardManager
     {
         GameObject targetCardGO = dealerCardList[index];
         Transform targetPos = dealerCardPos[index];
-        if(targetPos == null)
+        if (targetPos == null)
             targetPos = GameObject.Find($"Dealer Card Pos {index + 1}").GetOrAddComponent<Transform>();
 
-        targetCardGO.transform.DOMove(targetPos.position, 0.7f);
-        targetCardGO.transform.DORotateQuaternion(Quaternion.identity, 0.7f);
-        targetCardGO.transform.DOScale(Vector3.one * 5f, 0.7f);
+        targetCardGO.transform.DOMove(targetPos.position, CARD_ANIMATION_TIME);
+        targetCardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);
+        targetCardGO.transform.DOScale(Vector3.one * 5f, CARD_ANIMATION_TIME);
     }
 
-    void CardMoveToPosPlayer()
+    void CardMoveToPosPlayer(GameObject cardGO, string pUID)
     {
-        GameObject targetCardGO = User.NowHoldemPlayer.GetLastAddedCard();
-        Vector3 destPos = User.NowHoldemPlayer.GetCardPos();
+        Vector3 destPos = playerCardPos[HoldemGameControl.Players.GetPlayerGameIndexByUID(pUID), CardLen];
 
-        targetCardGO.transform.DOMove(destPos, 0.7f);
-        targetCardGO.transform.DORotateQuaternion(Quaternion.identity, 0.7f);
-        targetCardGO.transform.DOScale(Vector3.one * 3.5f, 0.7f);
+        cardGO.transform.DOMove(destPos, CARD_ANIMATION_TIME);
+        cardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);
+        cardGO.transform.DOScale(Vector3.one * 3.5f, CARD_ANIMATION_TIME);
     }
 
     public int[] GetCardDeck()
@@ -299,7 +329,7 @@ public class HoldemCardManager
         return cardShape[index];
     }
 
-    Sprite GetRightCardImage(int cardIndex)
+    public Sprite GetRightCardImage(int cardIndex)
     {
         return cardSprites[cardIndex];
     }

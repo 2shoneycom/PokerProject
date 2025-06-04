@@ -1,3 +1,5 @@
+using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,7 +39,7 @@ public class HoldemPlayerManager
         playerIsAlive = new bool[HoldemGameControl.MAX_PLAYER_NUM];
         playerIsTurn = new bool[HoldemGameControl.MAX_PLAYER_NUM];
         playerDieReserve = new bool[HoldemGameControl.MAX_PLAYER_NUM];
-        playerCardDetails = new int[HoldemGameControl.MAX_PLAYER_NUM, HoldemPlayer.MAX_CARD_NUM];
+        playerCardDetails = new int[HoldemGameControl.MAX_PLAYER_NUM, HoldemCardManager.PLAYER_CARD_NUM];
         playerCardGO = new List<(GameObject, GameObject)>();
 
         winnerList = new List<string>();
@@ -87,6 +89,16 @@ public class HoldemPlayerManager
 
         int gameIndex = HoldemGameControl.Control.ConvertUItoGame(seatIdx);
         holdemPlayerUID[gameIndex] = UID;
+    }
+
+    public int GetPlayerGameIndexByUID(string pUID)
+    {
+        for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if (pUID == GetPlayerUID(i))
+                return i;
+        }
+        return -1;
     }
 
     public string GetPlayerUID(int index)
@@ -171,15 +183,21 @@ public class HoldemPlayerManager
         playerCardDetails[index, 1] = card2;
     }
 
-    public void test(string uid, int cardlen, int popedcard)        /////////////////////////////////////////////////////////////////////////////////////////////////
+    public void SetPlayerCard(string pUID, int cardViewID, int cardDetail)
     {
-        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
-        {
-            if(uid == GetPlayerUID(i))
-            {
-                playerCardDetails[i, cardlen] = popedcard;
-            }
-        }
+        int playerIndex = GetPlayerGameIndexByUID(pUID);
+
+        GameObject cardGO = PhotonView.Find(cardViewID).gameObject;
+        var ex = playerCardGO[playerIndex];
+        if (HoldemGameControl.Card.CardLen == 0)
+            playerCardGO[playerIndex] = (cardGO, ex.Item2);
+        else
+            playerCardGO[playerIndex] = (ex.Item1, cardGO);
+
+        playerCardDetails[playerIndex, HoldemGameControl.Card.CardLen] = cardDetail;
+
+        if (User.NowUser.GetNickName() == pUID)
+            cardGO.GetComponent<SpriteRenderer>().sprite = HoldemGameControl.Card.GetRightCardImage(cardDetail);
     }
 
     public List<string> GetWinnerList()
