@@ -18,8 +18,8 @@ public class SeatManager
         _holdem = (HoldemScene)Managers.Scene.CurrentScene;
 
         occupiedCount = 0;
-        SyncSystem.Instacne.OnSeatsSynced += ApplySeatsData;
-        SyncSystem.Instacne.OnHaveSeat += TakeSeat;
+        SyncSystem.Sync.OnSeatsSynced += ApplySeatsData;
+        SyncSystem.Sync.OnHaveSeat += TakeSeat;
 
         SetSeats(seatSize);
 
@@ -54,7 +54,7 @@ public class SeatManager
             return;
         }
 
-        SyncSystem.Instacne.SyncHaveSeat(player_uid, seatIndex);
+        SyncSystem.Sync.SyncHaveSeat(player_uid, seatIndex);
     }
 
     private void TakeSeat(string player_uid, int seatIndex)
@@ -97,7 +97,7 @@ public class SeatManager
 
     public void RequestSyncSeats()
     {
-        SyncSystem.Instacne.SyncSeatsToMaster();
+        SyncSystem.Sync.SyncSeatsToMaster();
     }
 
     public string[] SendSeatsData()

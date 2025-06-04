@@ -147,21 +147,21 @@ public class HoldemGameControl : MonoBehaviour
         {
             // 자리 Setting
             case 0:
-                StartCoroutine(SyncSystem.Instacne.SyncHoldemPlayerUID());
+                StartCoroutine(SyncSystem.Sync.SyncHoldemPlayerUID());
                 break;
 
             // 카드 Shuffle
             case 1:
                 Card.ShuffleCard();
 
-                StartCoroutine(SyncSystem.Instacne.SyncHoldemDeck());
+                StartCoroutine(SyncSystem.Sync.SyncHoldemDeck());
                 break;
 
             // 딜러 선택
             case 2:
                 DecideDealer();
 
-                StartCoroutine(SyncSystem.Instacne.SyncHoldemDealerIndex(_playerD));
+                StartCoroutine(SyncSystem.Sync.SyncHoldemDealerIndex(_playerD));
                 break;
 
             // 기본 베팅    sb
@@ -170,7 +170,7 @@ public class HoldemGameControl : MonoBehaviour
                     Bet.BaseBetting(_playerSB, true);
                     int baseBetAmount = Bet.GetBaseBetAmount(Managers.CurrentDifficulty, true);
 
-                    StartCoroutine(SyncSystem.Instacne.SyncHoldemPotMoney(PotMoney + baseBetAmount, true));
+                    StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(PotMoney + baseBetAmount, true));
                 }
                 break;
 
@@ -180,7 +180,7 @@ public class HoldemGameControl : MonoBehaviour
                     Bet.BaseBetting(_playerBB, false);
                     int baseBetAmount = Bet.GetBaseBetAmount(Managers.CurrentDifficulty, false);
 
-                    StartCoroutine(SyncSystem.Instacne.SyncHoldemPotMoney(PotMoney + baseBetAmount, true));
+                    StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(PotMoney + baseBetAmount, true));
                 }
                 break;
 
@@ -190,7 +190,7 @@ public class HoldemGameControl : MonoBehaviour
             case 6:
                 if (StageDetail >= MAX_PLAYER_NUM)
                 {
-                    StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
+                    StartCoroutine(SyncSystem.Sync.HoldemNextStage());
                     break;
                 }
 
@@ -198,7 +198,7 @@ public class HoldemGameControl : MonoBehaviour
                 string pUID = Players.GetPlayerUID(toPlayer);
                 if(pUID == "")
                 {
-                    StartCoroutine(SyncSystem.Instacne.HoldemNextStage(1));
+                    StartCoroutine(SyncSystem.Sync.HoldemNextStage(1));
                     break;
                 }
 
@@ -209,7 +209,7 @@ public class HoldemGameControl : MonoBehaviour
             case 7:
                 Debug.Log("첫 배팅( 프리 플랍)");
                 // 타이머 끄기 (타이머는 monobehaviour 필요)
-                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
 
                 // 어차피 베팅 끝날때 까지 계속 뺑글뺑글 돌텐데 저렇게 1씩 증가시키는게 의미 있나 해서 바꿔봄
                 if (Bet.IsBetting == false)
@@ -218,19 +218,19 @@ public class HoldemGameControl : MonoBehaviour
                 Bet.CurBetPlayer = GetNextPlayerIndex(Bet.CurBetPlayer);
 
                 // 타이머 키기
-                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true));
+                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(true));
 
-                StartCoroutine(SyncSystem.Instacne.HoldemBetStart(Bet.CurBetPlayer));
+                StartCoroutine(SyncSystem.Sync.HoldemBetStart(Bet.CurBetPlayer));
                 break;
 
             // 오픈 카드 3
             case 8:
                 // 타이머 끄기
-                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
 
                 if (StageDetail >= 3)
                 {
-                    StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
+                    StartCoroutine(SyncSystem.Sync.HoldemNextStage());
                     break;
                 }
 
@@ -245,7 +245,7 @@ public class HoldemGameControl : MonoBehaviour
             case 13:
                 Debug.Log($"다른 배팅  {StageCount},  {StageDetail}");
                 // 타이머 끄기 (타이머는 monobehaviour 필요)
-                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
 
                 if (Bet.IsBetting == false)
                 {
@@ -260,53 +260,45 @@ public class HoldemGameControl : MonoBehaviour
                 }
 
                 // 타이머 키기
-                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(true));
+                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(true));
 
-                StartCoroutine(SyncSystem.Instacne.HoldemBetStart(Bet.CurBetPlayer));
+                StartCoroutine(SyncSystem.Sync.HoldemBetStart(Bet.CurBetPlayer));
                 break;
 
             // 오픈 카드 1
             case 10:
             case 12:
                 // 타이머 끄기
-                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
 
                 if (StageDetail >= 1)
                 {
-                    StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
+                    StartCoroutine(SyncSystem.Sync.HoldemNextStage());
                     break;
                 }
 
                 StartCoroutine(Card.DealingCard(1));
                 break;
 
-            // 참가자에게 카드 정보 공유 요청
+            // 결과 발표
             case 14:
                 // 타이머 끄기
-                StartCoroutine(SyncSystem.Instacne.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
 
-                //StartCoroutine(SyncSystem.Instacne.RequestPlayerCardDetail());
-
-                StartCoroutine(SyncSystem.Instacne.HoldemNextStage());
-                break;
-
-            // 결과 발표
-            case 15:
                 Debug.Log("Result Time!");
 
                 EndGame();
 
                 // UI 보여주기
-                StartCoroutine(SyncSystem.Instacne.SyncHoldemResultUI(true));
+                StartCoroutine(SyncSystem.Sync.SyncHoldemResultUI(true));
                 // 상대방 카드도 보일수 있으면 보이기
+                Players.ShowPlayerCard();
+
                 break;
 
             // 새로운 게임 준비
-            case 16:
-                StartCoroutine(SyncSystem.Instacne.HoldemClearGame());
-                break;
-
-            case 17:
+            case 15:
+                StartCoroutine(SyncSystem.Sync.HoldemClearGame());
 
                 break;
         }
@@ -406,14 +398,14 @@ public class HoldemGameControl : MonoBehaviour
             foreach (string winnerUID in winnerList)
             {
                 // 우승자에게 돈주기
-                SyncSystem.Instacne.IncreaseMoneyToTarget(winnerUID, PotMoney / winnerList.Count);
+                SyncSystem.Sync.IncreaseMoneyToTarget(winnerUID, PotMoney / winnerList.Count);
 
                 Debug.Log("우승자: " + winnerUID);
             }
         }
         // 팟머니 0으로
-        StartCoroutine(SyncSystem.Instacne.SyncHoldemPotMoney(0));
-        SyncSystem.Instacne.SyncHoldemWinnerList(winnerList.ToArray());
+        StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(0));
+        SyncSystem.Sync.SyncHoldemWinnerList(winnerList.ToArray());
     }
 
     public void ShowResult(bool isOn)
@@ -425,11 +417,14 @@ public class HoldemGameControl : MonoBehaviour
     {
         isPlaying = false;
 
-        // 자신 카드 삭제 및 관련 초기화
+        // 자신 게임 관련 초기화 (사실 베팅금만 초기화)
         User.NowHoldemPlayer.ClearSetting();
 
         // 딜러 카드 삭제 및 관련 초기화
         Card.ClearDealerCard();
+
+        // 플레이어 카드 삭제
+        Players.ClearGameSetting();
 
         // 인원수 체크를 하고 2 이상이면 바로 시작
         if (Managers.Seat.GetOccupiedCount() >= 2)
@@ -440,6 +435,6 @@ public class HoldemGameControl : MonoBehaviour
 
     public void Request_SyncHoldemPotMoney(int amount, bool isNextStage = false)     // 코루틴 호출시키기 위한 함수
     {
-        StartCoroutine(SyncSystem.Instacne.SyncHoldemPotMoney(PotMoney + amount, isNextStage));
+        StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(PotMoney + amount, isNextStage));
     }
 }

@@ -140,7 +140,7 @@ public class UI_Holdem : UI_Scene
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
 
         // 게임 시작
-        SyncSystem.Instacne.HoldemStartSync();
+        SyncSystem.Sync.HoldemStartSync();
     }
 
     public void BetButtonInteractiveSwitch(string betType, bool isOn)
@@ -227,9 +227,9 @@ public class UI_Holdem : UI_Scene
             if (betType == "Die")       // 자신의 턴이 아니면 die만 켜져있어서 die만 누를테지만 혹시 모르니
             {
                 if (HoldemGameControl.Players.GetPlayerDieReserve(User.NowHoldemPlayer.GameIndex) == false)
-                    SyncSystem.Instacne.SyncHoldemDieReserve(User.NowHoldemPlayer.GameIndex, true);
+                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowHoldemPlayer.GameIndex, true);
                 else
-                    SyncSystem.Instacne.SyncHoldemDieReserve(User.NowHoldemPlayer.GameIndex, false);
+                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowHoldemPlayer.GameIndex, false);
             }
             return;     // 자신의 턴이 아닐때 die가 아니면 모두 리턴
         }

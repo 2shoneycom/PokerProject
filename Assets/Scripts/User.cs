@@ -75,7 +75,7 @@ public class User
     public void HoldemSyncSeedMoney()      // seedmoney 수정시 항상 호출
     {
         if (HoldemGameControl.Control.IsPlaying)
-            SyncSystem.Instacne.SyncHoldemPlayerSeedMoney(NowHoldemPlayer.GameIndex, (int)seedMoney);
+            SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowHoldemPlayer.GameIndex, (int)seedMoney);
     }
 
 }

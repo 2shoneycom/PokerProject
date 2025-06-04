@@ -10,7 +10,7 @@ class SyncSystem : MonoBehaviourPun
 {
     /* 싱글톤 */
     private static SyncSystem instance;
-    public static SyncSystem Instacne
+    public static SyncSystem Sync
     {
         get
         {
@@ -158,17 +158,6 @@ class SyncSystem : MonoBehaviourPun
     private void RPC_SyncHoldemIsOneLeft(bool isOn)
     {
         HoldemGameControl.Players.IsOneLeft = isOn;
-    }
-
-    public void SyncHoldemPlayerCardDetails(int index, int card1, int card2)
-    {
-        photonView.RPC("RPC_SyncHoldemPlayerCardDetails", RpcTarget.All, index, card1, card2);
-    }
-
-    [PunRPC]
-    private void RPC_SyncHoldemPlayerCardDetails(int index, int card1, int card2)
-    {
-        HoldemGameControl.Players.SetPlayerCardDetails(index, card1, card2);
     }
 
     public void SyncHoldemWinnerList(string[] wList)
@@ -384,7 +373,7 @@ class SyncSystem : MonoBehaviourPun
 
     public void SyncHoldemDealerCard(GameObject go, int index, int cardDetail)
     {
-        photonView.RPC("RPC_SyncHoldemDealerCard", RpcTarget.Others, go.GetComponent<PhotonView>().ViewID, index, cardDetail);
+        photonView.RPC("RPC_SyncHoldemDealerCard", RpcTarget.All, go.GetComponent<PhotonView>().ViewID, index, cardDetail);
     }
 
     [PunRPC]

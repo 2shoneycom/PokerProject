@@ -48,8 +48,8 @@ public class HoldemBetManager
     {
         string pUID = HoldemGameControl.Players.GetPlayerUID(playerIndex);
         int dAmount = GetBaseBetAmount(Managers.CurrentDifficulty, isSB);
-        SyncSystem.Instacne.HoldemBetMoneyToTarget(pUID, dAmount);
-        SyncSystem.Instacne.SyncHoldemPlayerIsBet(playerIndex, true);
+        SyncSystem.Sync.HoldemBetMoneyToTarget(pUID, dAmount);
+        SyncSystem.Sync.SyncHoldemPlayerIsBet(playerIndex, true);
     }
 
     //임의로 정한 값
@@ -86,25 +86,25 @@ public class HoldemBetManager
         if (HoldemGameControl.Players.IsOneLeft || IsBetEnd(curPlayer))
         {
             // 1명 남앗거나 정상 배팅 종료의 경우
-            SyncSystem.Instacne.HoldemBetEnd();
+            SyncSystem.Sync.HoldemBetEnd();
             return;
         }
 
         // 내가 이미 죽엇다면 처리
         if (HoldemGameControl.Players.GetPlayerState(curPlayer) == false)
         {
-            SyncSystem.Instacne.HoldemNextStage_V2(1);
+            SyncSystem.Sync.HoldemNextStage_V2(1);
             return;
         }
 
         // 내가 예약 죽음햇다면 처리
         if (HoldemGameControl.Players.GetPlayerDieReserve(curPlayer) == true)
         {
-            SyncSystem.Instacne.HoldemBetProcess(curPlayer, "Die");
+            SyncSystem.Sync.HoldemBetProcess(curPlayer, "Die");
             return;
         }
 
-        SyncSystem.Instacne.SyncHoldemIsTurn(curPlayer, true);
+        SyncSystem.Sync.SyncHoldemIsTurn(curPlayer, true);
         // 알맞은 버튼 키기
         CalBetAndButtonSwitch();
     }
@@ -141,7 +141,7 @@ public class HoldemBetManager
     bool IsBetEnd(int curPlayer)
     {
         if(HoldemGameControl.Players.NowPlayerNum - HoldemGameControl.Players.GetDeadPlayerNum() == 1){
-            SyncSystem.Instacne.SyncHoldemIsOneLeft(true);
+            SyncSystem.Sync.SyncHoldemIsOneLeft(true);
             return true;
         }
 
@@ -180,7 +180,7 @@ public class HoldemBetManager
         if (!PhotonNetwork.IsMasterClient)
             return;
 
-        SyncSystem.Instacne.SyncHoldemPlayerIsBet(curPlayer, true);
+        SyncSystem.Sync.SyncHoldemPlayerIsBet(curPlayer, true);
 
         int highestBetMoney = HoldemGameControl.Players.FindHighestBet();
         int curPlayerBetMoney = HoldemGameControl.Players.GetPlayerBet(curPlayer);
@@ -192,9 +192,9 @@ public class HoldemBetManager
                 Debug.Log($"Player {curPlayer} Die");
 
                 // deadplayernum 증가
-                SyncSystem.Instacne.SyncHoldemDeadPlayerNum(HoldemGameControl.Players.GetDeadPlayerNum() + 1);
+                SyncSystem.Sync.SyncHoldemDeadPlayerNum(HoldemGameControl.Players.GetDeadPlayerNum() + 1);
                 // isalive false로
-                SyncSystem.Instacne.SyncHoldemPlayerIsAlive(curPlayer, false);
+                SyncSystem.Sync.SyncHoldemPlayerIsAlive(curPlayer, false);
 
                 break;
 
@@ -247,10 +247,10 @@ public class HoldemBetManager
 
         if(betType != "Die")
         {
-            SyncSystem.Instacne.HoldemBetMoneyToTarget(HoldemGameControl.Players.GetPlayerUID(curPlayer), curBetAmount);
+            SyncSystem.Sync.HoldemBetMoneyToTarget(HoldemGameControl.Players.GetPlayerUID(curPlayer), curBetAmount);
             HoldemGameControl.Control.Request_SyncHoldemPotMoney(curBetAmount);
         }
-        SyncSystem.Instacne.HoldemNextStage_V2(1);
+        SyncSystem.Sync.HoldemNextStage_V2(1);
     }
 
     public void CurrentStageBetEnd()
@@ -264,8 +264,8 @@ public class HoldemBetManager
 
     public void PlayerBetSelected(string betType)
     {
-        SyncSystem.Instacne.SyncHoldemIsTurn(User.NowHoldemPlayer.GameIndex, false);
+        SyncSystem.Sync.SyncHoldemIsTurn(User.NowHoldemPlayer.GameIndex, false);
         //BetButtonDisable();
-        SyncSystem.Instacne.HoldemBetProcess(curBetPlayer, betType);
+        SyncSystem.Sync.HoldemBetProcess(curBetPlayer, betType);
     }
 }

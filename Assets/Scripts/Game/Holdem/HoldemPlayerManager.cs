@@ -177,12 +177,6 @@ public class HoldemPlayerManager
         deadPlayerNum = num;
     }
 
-    public void SetPlayerCardDetails(int index, int card1, int card2)
-    {
-        playerCardDetails[index, 0] = card1;
-        playerCardDetails[index, 1] = card2;
-    }
-
     public void SetPlayerCard(string pUID, int cardViewID, int cardDetail)
     {
         int playerIndex = GetPlayerGameIndexByUID(pUID);
@@ -222,5 +216,33 @@ public class HoldemPlayerManager
                 max_bet = playerBettingMoney[i];
         }
         return max_bet;
+    }
+
+    public void ShowPlayerCard()
+    {
+        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        {
+            (GameObject, GameObject) cards = playerCardGO[i];
+
+            if (GetPlayerUID(i) != "" && playerIsAlive[i])
+            {
+                cards.Item1.GetComponent<SpriteRenderer>().sprite = HoldemGameControl.Card.GetRightCardImage(playerCardDetails[i, 0]);
+                cards.Item2.GetComponent<SpriteRenderer>().sprite = HoldemGameControl.Card.GetRightCardImage(playerCardDetails[i, 1]);
+            }
+        }
+    }
+
+    public void ClearGameSetting()
+    {
+        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        {
+            (GameObject, GameObject) cards = playerCardGO[i];
+
+            if (cards.Item1.GetPhotonView().IsMine)
+            {
+                Managers.Resource.PhotonDestroy(cards.Item1);
+                Managers.Resource.PhotonDestroy(cards.Item2);
+            }
+        }
     }
 }

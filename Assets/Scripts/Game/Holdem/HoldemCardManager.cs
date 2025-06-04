@@ -191,12 +191,12 @@ public class HoldemCardManager
         {
             string pUID = HoldemGameControl.Players.GetPlayerUID(toPlayer);
             yield return cardMoveDelay;
-            SyncSystem.Instacne.HoldemAddCard(pUID);
+            SyncSystem.Sync.HoldemAddCard(pUID);
         }
         else                // 딜러에게 카드 배분
         {
             yield return cardMoveDelay;
-            SyncSystem.Instacne.HoldemDealerCard();
+            SyncSystem.Sync.HoldemDealerCard();
         }
     }
 
@@ -220,7 +220,7 @@ public class HoldemCardManager
         AddCardToPlayer(popedCard, playerUID);
 
         Debug.Log($"case {HoldemGameControl.Control.StageCount} / stage detail {HoldemGameControl.Control.StageDetail} 종료, nextStage");
-        SyncSystem.Instacne.HoldemNextStage_V2(1);
+        SyncSystem.Sync.HoldemNextStage_V2(1);
     }
 
     private void AddCardToDealer()
@@ -250,9 +250,7 @@ public class HoldemCardManager
             {
                 if (dealerCardList[i] == null)
                 {
-                    dealerCardList[i] = cardGO;
-                    dealerCardDetail[i] = popedCard;
-                    SyncSystem.Instacne.SyncHoldemDealerCard(cardGO, i, popedCard);
+                    SyncSystem.Sync.SyncHoldemDealerCard(cardGO, i, popedCard);
                     break;
                 }
             }
@@ -261,7 +259,7 @@ public class HoldemCardManager
         }
         else
         {
-            SyncSystem.Instacne.SyncHoldemPlayerCard(pUID, cardGO, popedCard);
+            SyncSystem.Sync.SyncHoldemPlayerCard(pUID, cardGO, popedCard);
 
             CardMoveToPosPlayer(cardGO, pUID);
         }
@@ -271,7 +269,6 @@ public class HoldemCardManager
     {
         dealerCardList[index] = PhotonView.Find(viewID).gameObject;
         dealerCardDetail[index] = cardDetail;
-
         dealerCardList[index].GetComponent<SpriteRenderer>().sprite = GetRightCardImage(cardDetail);
     }
 

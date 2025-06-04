@@ -31,7 +31,7 @@ public class HoldemPlayer
     {
         betMoney = amount;
 
-        SyncSystem.Instacne.SyncHoldemMyBetting(GameIndex, amount);
+        SyncSystem.Sync.SyncHoldemMyBetting(GameIndex, amount);
     }
 
     public void ClearSetting()
