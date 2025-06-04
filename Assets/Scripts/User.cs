@@ -36,8 +36,8 @@ public class User
 
     public void SetHoldemPlay()
     {
-        SetNickName(Random.Range(10000, 100000).ToString());
-        SetSeedMoney(100000);
+        //SetNickName(Random.Range(10000, 100000).ToString());
+        //SetSeedMoney(100000);
         holdemPlayer = new HoldemPlayer();
     }
 
@@ -48,6 +48,7 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
+        Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
         HoldemSyncSeedMoney();
     }
 
@@ -58,6 +59,7 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney += amount;
+        Managers.DB.DBUpdateMoney(uid, amount, "holdem");
         HoldemSyncSeedMoney();
     }
 
@@ -68,8 +70,9 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
-        HoldemSyncSeedMoney();
+        Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
         NowHoldemPlayer.SetBetMoney(NowHoldemPlayer.BetMoney + amount);
+        HoldemSyncSeedMoney();
     }
 
     public void HoldemSyncSeedMoney()      // seedmoney 수정시 항상 호출

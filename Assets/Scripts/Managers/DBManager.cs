@@ -191,6 +191,8 @@ public class DBManager
 
         // 2. MoneyRank/{gameType}/{uid} 업데이트
         UpdateMoneyRank(uid, amount, gameType);
+
+        // 업데이트
     }
 
     private void UpdateUserSeedMoney(string uid, long amount)
