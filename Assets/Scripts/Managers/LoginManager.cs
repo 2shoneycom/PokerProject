@@ -41,7 +41,7 @@ public class LoginManager
         {
             if (task.IsCanceled)
             {
-                _loginUI.SetConnectionInfoText("로그인 취소됨.");
+                _loginUI.SetConnectionInfoText("로그인 취소됨");
                 return;
             }
             if (task.IsFaulted)

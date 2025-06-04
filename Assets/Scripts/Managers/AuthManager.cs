@@ -3,8 +3,8 @@ using Firebase.Auth;
 using Firebase.Extensions;
 using System;
 
-public class AuthManager 
-{    
+public class AuthManager
+{
     private FirebaseAuth auth;
     private FirebaseUser user;
     public string userId;
@@ -12,6 +12,13 @@ public class AuthManager
     private bool isFirebaseInitialized = false;
 
     UI_Login loginUI;
+
+    public void LoginSceneLoaded(UI_Login login)
+    {
+        loginUI = login;
+        if (!isFirebaseInitialized)
+            InitFirebase();
+    }
 
     private void InitFirebase()
     {
@@ -56,6 +63,7 @@ public class AuthManager
             }
 
             Debug.Log("Firebase auth success");
+            loginUI.SetConnectionInfoText("로그인 성공!");
 
             if (User.NowUser == null)
                 Debug.LogError("User.Instance is null after login!!");
