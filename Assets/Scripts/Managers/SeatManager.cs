@@ -9,6 +9,8 @@ public class SeatManager
     public List<string> Seats { get { return seats; } }
     private int occupiedCount;
 
+    public const string DEFAULT_NULL_SEAT = "자리 선택";
+
     HoldemScene _holdem = null;
 
     public void Init(int seatSize)      // holdemscene에서 init해줌
@@ -16,8 +18,8 @@ public class SeatManager
         _holdem = (HoldemScene)Managers.Scene.CurrentScene;
 
         occupiedCount = 0;
-        SyncSystem.Instacne.OnSeatsSynced += ApplySeatsData;
-        SyncSystem.Instacne.OnHaveSeat += TakeSeat;
+        SyncSystem.Sync.OnSeatsSynced += ApplySeatsData;
+        SyncSystem.Sync.OnHaveSeat += TakeSeat;
 
         SetSeats(seatSize);
 
@@ -32,7 +34,7 @@ public class SeatManager
         seats = new List<string>(seatSize);
         for (int i = 0; i < seatSize; i++)
         {
-            seats.Add("empty");
+            seats.Add(DEFAULT_NULL_SEAT);
         }
         // ui
         _holdem.UpdateAllSeatUI();
@@ -40,28 +42,39 @@ public class SeatManager
 
     public void HaveSeat(string player_uid, int seatIndex)
     {   
-        if (seats[seatIndex] == "empty")
-        {
-            seats[seatIndex] = player_uid;
-            occupiedCount++;
-            SyncSystem.Instacne.SyncHaveSeat(player_uid, seatIndex);
-            if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient)
-            {
-                /* 
-                앉은 사람 2명 이상이고 내가 방장이면,
-                UI에 게임 스타트 버튼 띄우기 요청
-                */
-            }
-        }
-        else
+        if(seats[seatIndex] != DEFAULT_NULL_SEAT)
         {
             Debug.Log($"{seatIndex}번째 자리는 이미 차지되어있습니다.");
+            return;
         }
+
+        if(User.NowHoldemPlayer.SeatIndex != -1)
+        {
+            Debug.Log($"이미 {User.NowHoldemPlayer.SeatIndex}번째 자리에 앉으셨습니다.");
+            return;
+        }
+
+        SyncSystem.Sync.SyncHaveSeat(player_uid, seatIndex);
     }
 
     private void TakeSeat(string player_uid, int seatIndex)
     {
         seats[seatIndex] = player_uid;
+
+        if (player_uid == User.NowUser.GetNickName())
+            User.NowHoldemPlayer.SetSeatIndex(seatIndex);
+
+        // occupiedCount 변수 동기화 위해 옮김
+        occupiedCount++;
+        if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient && HoldemGameControl.Control.IsPlaying == false)
+        {
+            /* 
+            앉은 사람 2명 이상이고 내가 방장이면,
+            UI에 게임 스타트 버튼 띄우기 요청
+            */
+            _holdem.ReadyForGameStart();
+        }
+
         // ui
         _holdem.UpdateAllSeatUI();
     }
@@ -70,7 +83,7 @@ public class SeatManager
     {
         if (seats[seatIndex] == player_uid)
         {
-            seats[seatIndex] = "empty";
+            seats[seatIndex] = DEFAULT_NULL_SEAT;
             occupiedCount--;
         }
         else
@@ -84,7 +97,7 @@ public class SeatManager
 
     public void RequestSyncSeats()
     {
-        SyncSystem.Instacne.SyncSeatsToMaster();
+        SyncSystem.Sync.SyncSeatsToMaster();
     }
 
     public string[] SendSeatsData()
@@ -98,8 +111,26 @@ public class SeatManager
         for (int i = 0; i < seatsLength; i++)
         {
             seats[i] = syncedSeats[i];
+
+            if (seats[i] != DEFAULT_NULL_SEAT)
+                occupiedCount++;
         }
         // ui
         _holdem.UpdateAllSeatUI();
+    }
+
+    public void ConverToPlayers()
+    {
+        for (int i = 0; i < seats.Count; i++)
+        {
+            HoldemGameControl.Players.UpdatePlayerUID(i, seats[i]);
+        }
+        Debug.Log("case 1 종료, nextStage");
+        HoldemGameControl.Control.NextStage();
+    }
+
+    public int GetOccupiedCount()
+    {
+        return occupiedCount;
     }
 }

@@ -9,11 +9,12 @@ using UnityEngine.UI;
 
 public class LoginScene : BaseScene
 {
-
+    private static LoginScene instance;
+    public static LoginScene Instance {  get { return instance; } }
     protected override void Init()
     {
         base.Init();
-
+        instance = this;
         SceneType = Define.Scene.Login;
         Managers.UI.ShowSceneUI<UI_Login>();
     }
@@ -21,5 +22,17 @@ public class LoginScene : BaseScene
     public override void Clear()
     {
         Debug.Log("Login Scene Clear");
+    }
+
+    public void RequestLogin()
+    {
+        if (Managers.Login != null)
+        {
+            Managers.Login.LogIn();
+        }
+        else
+        {
+            Debug.LogError("LoginManager가 초기화되지 않았습니다.");
+        }
     }
 }

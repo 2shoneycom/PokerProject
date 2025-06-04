@@ -40,6 +40,7 @@ public class UI_DailyCheck : UI_Popup
 
     void GetRewardButton(PointerEventData data)
     {
-
+        // 보상 받기
+        ClosePopupUI();
     }
 }

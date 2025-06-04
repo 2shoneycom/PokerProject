@@ -15,6 +15,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
+    #region Connect
     public void ConnectToPhoton(UI_Login login)
     {
         _loginUI = login;
@@ -135,5 +136,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
         // 씬메니저로 로드하면 연결 정보가 사라짐.
     }
+
+    #endregion
+
+
+
 
 }

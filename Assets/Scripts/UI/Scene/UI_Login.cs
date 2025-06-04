@@ -30,22 +30,21 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
     public override void Init()
     {
         base.Init();
-
         Bind<Button>(typeof(Buttons));
         Bind<TextMeshProUGUI>(typeof(Texts));
 
         TextMeshProUGUI tmp = GetText((int)Texts.UI_GoogleLoginButton_Text);
-        tmp.text = "방 참가";
+        tmp.text = "구글 로그인";
 
-        tmp = GetText((int)Texts.UI_LoginText);
-        tmp.text = "연결 중...";
+        SetConnectionInfoText("로그인 해주세요!");
 
         _lobbyButton = GetButton((int)Buttons.UI_GoogleLoginButton);
         BindEvent(_lobbyButton.gameObject, OnButtonClicked);
 
         GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(false);
         BindEvent(GetButton((int)Buttons.UI_ReconnectButton).gameObject, ReconnectButtonClicked);
-        LoginManager.Instance.LoginSceneLoaded(this);
+        Managers.Login.LoginSceneLoaded(this);
+        Managers.Auth.LoginSceneLoaded(this);
     }
 
     public void SetConnectionInfoText(string info)
@@ -65,7 +64,7 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
 
         DisableAllButton();
         //Managers.Photon.ConnectToPhoton(this);
-        LoginManager.Instance.LogIn();
+        LoginScene.Instance.RequestLogin();
     }
 
     void DisableAllButton()

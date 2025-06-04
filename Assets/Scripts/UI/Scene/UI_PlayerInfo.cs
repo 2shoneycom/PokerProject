@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Google;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -37,16 +38,31 @@ public class UI_PlayerInfo : UI_Scene
 
         BindEvent(GetImage((int)Images.UI_Backspace).gameObject, Managers.Scene.MoveToLobbyScene);
         BindEvent(GetImage((int)Images.UI_MainInfo_UserEdit).gameObject, UserEditClicked);
+        BindEvent(GetButton((int)Buttons.UI_LogoutButton).gameObject, LogoutClicked);
         BindEvent(GetButton((int)Buttons.UI_DelAccountButton).gameObject, DelAccountClicked);
+
+        SetPlayerInfo();
     }
 
     void DelAccountClicked(PointerEventData data)
     {
-        Managers.UI.ShowPopupUI<UI_DelAccount>();
+        Managers.Login.DeleteAccount();
     }
+
 
     void UserEditClicked(PointerEventData data)
     {
         Managers.UI.ShowPopupUI<UI_EditNickName>();
+    }
+
+    void LogoutClicked(PointerEventData data)
+    {
+        Managers.Login.LogOut(data);
+    }
+
+    void SetPlayerInfo()
+    {
+        GetText((int)Texts.UI_MainInfo_UserName).text = User.NowUser.GetNickName();
+        GetText((int)Texts.UI_MainInfo_Money_Text).text = User.NowUser.GetSeedMoney().ToString();
     }
 }

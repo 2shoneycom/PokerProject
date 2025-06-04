@@ -29,11 +29,6 @@ public class UI_EditNickName : UI_Popup
         Bind<Image>(typeof(Images));
         Bind<Button>(typeof(Buttons));
 
-        BindEvent(GetImage((int)Images.UI_ClosePopUp).gameObject, PopUpClose);
-    }
-
-    void PopUpClose(PointerEventData data)
-    {
-        ClosePopupUI();
+        BindEvent(GetImage((int)Images.UI_ClosePopUp).gameObject, (PointerEventData) => { ClosePopupUI(); });
     }
 }

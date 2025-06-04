@@ -2,6 +2,7 @@ using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using WebSocketSharp.Server;
 
 public class Managers : MonoBehaviour
 {
@@ -12,16 +13,31 @@ public class Managers : MonoBehaviour
     SceneManagerEx _scene = new SceneManagerEx();
     SeatManager _seat = new SeatManager();
     UIManager _ui = new UIManager();
+    LoginManager _login = new LoginManager();
+    DBManager _db = new DBManager();
+    AuthManager _auth = new AuthManager();
+    RewardManager _reward = new RewardManager();
     PhotonManager _photon;
+    WebManager _web = new WebManager();
 
     public static ResourceManager Resource { get { return Instance._resource; } }
     public static SceneManagerEx Scene { get { return Instance._scene; } }
     public static SeatManager Seat { get { return Instance._seat; } }
     public static UIManager UI { get { return Instance._ui; } }
+    public static LoginManager Login { get { return Instance._login; } }
+    public static DBManager DB { get { return Instance._db; } }
+    public static AuthManager Auth { get { return Instance._auth; } }
+    public static RewardManager Reward { get { return Instance._reward; } }
     public static PhotonManager Photon { get { return Instance._photon; } }
+    public static WebManager Web { get { return Instance._web;  }}
 
-    User _user = new User();
-    public static User User { get { return Instance._user; } }
+
+    Define.Difficulty difficulty = Define.Difficulty.None;
+    public static Define.Difficulty CurrentDifficulty
+    {
+        get { return m_instance.difficulty; }
+        set { m_instance.difficulty = value; }
+    }
 
 
     // Start is called before the first frame update
@@ -50,6 +66,8 @@ public class Managers : MonoBehaviour
 
             DontDestroyOnLoad(go);
             m_instance = go.GetComponent<Managers>();
+
+            DB.Init();
         }
     }
 

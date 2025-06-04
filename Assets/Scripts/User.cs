@@ -4,7 +4,81 @@ using UnityEngine;
 
 public class User
 {
-    public string nickName;
-    public long seedMoney; // private으로 nickName이랑 seedMoney
+    private static User user = new User();
+    public static User NowUser
+    {
+        get
+        {
+            return user;
+        }
+    }
+
+    HoldemPlayer holdemPlayer;
+    public static HoldemPlayer NowHoldemPlayer { get { return NowUser.holdemPlayer; } }
+
+    private string uid;
+    private string nickName;
+    private long seedMoney;
+
+    public void SetUid(string value) => uid = value;
+    public void SetNickName(string value) => nickName = value;
+    public void SetSeedMoney(long value) => seedMoney = value;
+
+    // 값 읽기용 getter도 필요하다면 추가
+    public string GetUid() => uid;
+    public string GetNickName() => nickName;
+    public long GetSeedMoney() => seedMoney;
+
+    public void UpdateMoney(long value)
+    {
+        seedMoney += value;
+    }
+
+    public void SetHoldemPlay()
+    {
+        //SetNickName(Random.Range(10000, 100000).ToString());
+        //SetSeedMoney(100000);
+        holdemPlayer = new HoldemPlayer();
+    }
+
+    public void DecreaseMoney(string targetUID, int amount)
+    {
+        if (targetUID != nickName)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney -= amount;
+        Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
+        HoldemSyncSeedMoney();
+    }
+
+    public void IncreaseMoney(string targetUID, int amount)
+    {
+        if (targetUID != nickName)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney += amount;
+        Managers.DB.DBUpdateMoney(uid, amount, "holdem");
+        HoldemSyncSeedMoney();
+    }
+
+    public void HoldemBettingMoney(string targetUID, int amount)
+    {
+        if (targetUID != nickName)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney -= amount;
+        Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
+        NowHoldemPlayer.SetBetMoney(NowHoldemPlayer.BetMoney + amount);
+        HoldemSyncSeedMoney();
+    }
+
+    public void HoldemSyncSeedMoney()      // seedmoney 수정시 항상 호출
+    {
+        if (HoldemGameControl.Control.IsPlaying)
+            SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowHoldemPlayer.GameIndex, (int)seedMoney);
+    }
 
 }

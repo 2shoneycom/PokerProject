@@ -26,4 +26,12 @@ public class Define
         Online,
         Playing,
     }
+
+    public enum Difficulty
+    {
+        None,
+        Beginner,
+        Amateur,
+        Pro,
+    }
 }

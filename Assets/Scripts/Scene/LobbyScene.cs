@@ -14,22 +14,27 @@ public class LobbyScene : BaseScene
         SceneType = Define.Scene.Login;
         Managers.UI.ShowSceneUI<UI_Lobby>();
 
-        if(isReward == false)
+        if (isReward != false)           ///////////////////////////////////
             Managers.UI.ShowPopupUI<UI_DailyCheck>();
     }
 
     void Start()
     {
-        
+
     }
 
     void Update()
     {
-        
+
     }
 
     public override void Clear()
     {
         Debug.Log("Lobby Scene Clear");
+    }
+
+    public void RequestWebLink()
+    {
+        Managers.Web.LinkToWeb();
     }
 }

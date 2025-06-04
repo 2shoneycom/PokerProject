@@ -47,8 +47,8 @@ public class UI_Lobby : UI_Scene
         Bind<TextMeshProUGUI>(typeof(Texts));
         Bind<Image>(typeof(Images));
 
-        GetText((int)Texts.UI_Profile_Text).text = Managers.User.nickName;
-        GetText((int)Texts.UI_Money_Text).text = Managers.User.seedMoney.ToString();
+        GetText((int)Texts.UI_Profile_Text).text = User.NowUser.GetNickName();
+        GetText((int)Texts.UI_Money_Text).text = User.NowUser.GetSeedMoney().ToString();
 
         BindEvent(GetImage((int)Images.UI_Backspace).gameObject, BackspaceClick);
         GetImage((int)Images.UI_Backspace).gameObject.SetActive(false);
@@ -62,6 +62,7 @@ public class UI_Lobby : UI_Scene
         BindEvent(GetImage((int)Images.UI_IconSetting).gameObject, SettingClicked);
         BindEvent(GetImage((int)Images.UI_IconGift).gameObject, GiftClicked);
         //BindEvent(GetButton((int)Buttons.UI_ButtonBlackJack).gameObject, LoginManager.Instance.LogOut);
+        BindEvent(GetImage((int)Images.UI_IconWeb).gameObject, WebClicked);
     }
 
     void HoldemClicked(PointerEventData data)
@@ -132,5 +133,11 @@ public class UI_Lobby : UI_Scene
     void MoveToFriendScene(PointerEventData data)
     {
         Managers.Scene.LoadScene(Define.Scene.Friend);
+    }
+
+    private void WebClicked(PointerEventData data)
+    {
+        LobbyScene lobbyScene = new LobbyScene();
+        lobbyScene.RequestWebLink();
     }
 }
