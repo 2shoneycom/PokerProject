@@ -289,10 +289,8 @@ public class HoldemGameControl : MonoBehaviour
 
                 EndGame();
 
-                // UI 보여주기
+                // UI 보여주기 & 플레이어 카드 공개
                 StartCoroutine(SyncSystem.Sync.SyncHoldemResultUI(true));
-                // 상대방 카드도 보일수 있으면 보이기
-                Players.ShowPlayerCard();
 
                 break;
 
@@ -410,6 +408,9 @@ public class HoldemGameControl : MonoBehaviour
 
     public void ShowResult(bool isOn)
     {
+        // 플레이어 카드 보이기
+        Players.ShowPlayerCard();
+
         _holdemUI.SetWinnerPanel(isOn);
     }
 

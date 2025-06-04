@@ -201,17 +201,6 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Control.StartGame();
     }
 
-    public void SyncHoldemStageCount(int count)
-    {
-        photonView.RPC("RPC_SyncHoldemStageCount", RpcTarget.All);
-    }
-
-    [PunRPC]
-    private void RPC_SyncHoldemStageCount(int count)
-    {
-        HoldemGameControl.Control.StageCount = count;
-    }
-
     public IEnumerator SyncHoldemPlayerUID()
     {
         yield return null;

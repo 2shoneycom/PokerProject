@@ -238,6 +238,9 @@ public class HoldemPlayerManager
         {
             (GameObject, GameObject) cards = playerCardGO[i];
 
+            if (cards.Item1 == null)
+                continue;
+
             if (cards.Item1.GetPhotonView().IsMine)
             {
                 Managers.Resource.PhotonDestroy(cards.Item1);
