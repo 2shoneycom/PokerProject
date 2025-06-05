@@ -139,7 +139,17 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     #endregion
 
-
+    public void LeaveRoom()
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.LeaveRoom();
+        }
+        else
+        {
+            Debug.LogError("PhotonManger.cs -> LeaveRoom(), 현재 방에 들어와있는 상태가 아닙니다.");
+        }
+    }
 
 
 }
