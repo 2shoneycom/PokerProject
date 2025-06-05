@@ -36,12 +36,12 @@ public class HoldemScene : BaseScene
         Managers.Seat.Init(MAX_PLAYER);
     }
 
-    public void UpdateAllSeatUI()
+    public void UpdateSeatUI(int index, string nickname)
     {
-        for(int i = 0; i < Managers.Seat.Seats.Count; i++)
-        {
-            _holdemUI.UpdatePlayerName(i + 1, Managers.Seat.Seats[i]);
-        }
+        _holdemUI.UpdatePlayerName(index + 1, nickname);
+
+        if (nickname != SeatManager.DEFAULT_NULL_SEAT)
+            _holdemUI.UpdatePlayerIcon(index + 1, nickname);
     }
 
     public void ReadyForGameStart()
