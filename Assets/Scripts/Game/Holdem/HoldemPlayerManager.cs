@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class HoldemPlayerManager
 {
+    Dictionary<string, string> playerNickName;
     string[] holdemPlayerUID;
     int _nowPlayerNum;
     public int NowPlayerNum { get { return _nowPlayerNum; } }
@@ -32,6 +33,7 @@ public class HoldemPlayerManager
 
     public HoldemPlayerManager()
     {
+        playerNickName = new Dictionary<string, string>();
         holdemPlayerUID = new string[HoldemGameControl.MAX_PLAYER_NUM];
         playerSeedMoney = new int[HoldemGameControl.MAX_PLAYER_NUM];
         playerBettingMoney = new int[HoldemGameControl.MAX_PLAYER_NUM];
@@ -47,6 +49,7 @@ public class HoldemPlayerManager
 
     public void GameSetting()
     {
+        playerNickName.Clear();
         playerCardGO.Clear();
         for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
@@ -86,9 +89,18 @@ public class HoldemPlayerManager
             UID = "";
             _nowPlayerNum--;
         }
+        else
+        {
+            playerNickName.Add(UID, Managers.Seat.GetPlayerNickNameByUID(UID));
+        }
 
         int gameIndex = HoldemGameControl.Control.ConvertUItoGame(seatIdx);
         holdemPlayerUID[gameIndex] = UID;
+    }
+
+    public string GetPlayerNickNameByUID(string pUID)
+    {
+        return playerNickName[pUID];
     }
 
     public int GetPlayerGameIndexByUID(string pUID)
@@ -182,6 +194,7 @@ public class HoldemPlayerManager
         int playerIndex = GetPlayerGameIndexByUID(pUID);
 
         GameObject cardGO = PhotonView.Find(cardViewID).gameObject;
+
         var ex = playerCardGO[playerIndex];
         if (HoldemGameControl.Card.CardLen == 0)
             playerCardGO[playerIndex] = (cardGO, ex.Item2);
@@ -190,7 +203,7 @@ public class HoldemPlayerManager
 
         playerCardDetails[playerIndex, HoldemGameControl.Card.CardLen] = cardDetail;
 
-        if (User.NowUser.GetNickName() == pUID)
+        if (User.NowUser.GetUid() == pUID)
             cardGO.GetComponent<SpriteRenderer>().sprite = HoldemGameControl.Card.GetRightCardImage(cardDetail);
     }
 
@@ -212,7 +225,10 @@ public class HoldemPlayerManager
         int max_bet = 0;
         for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
-            if(max_bet < playerBettingMoney[i])
+            if (GetPlayerState(i) == false || GetPlayerUID(i) == "")
+                continue;
+
+            if (playerBettingMoney[i] > max_bet)
                 max_bet = playerBettingMoney[i];
         }
         return max_bet;

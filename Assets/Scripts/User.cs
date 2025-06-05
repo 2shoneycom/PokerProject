@@ -43,7 +43,7 @@ public class User
 
     public void DecreaseMoney(string targetUID, int amount)
     {
-        if (targetUID != nickName)
+        if (targetUID != uid)
             return;
 
         //////////////////////////////// DB와 소통
@@ -54,7 +54,7 @@ public class User
 
     public void IncreaseMoney(string targetUID, int amount)
     {
-        if (targetUID != nickName)
+        if (targetUID != uid)
             return;
 
         //////////////////////////////// DB와 소통
@@ -65,7 +65,7 @@ public class User
 
     public void HoldemBettingMoney(string targetUID, int amount)
     {
-        if (targetUID != nickName)
+        if (targetUID != uid)
             return;
 
         //////////////////////////////// DB와 소통

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Photon.Pun;
 using UnityEngine;
 
@@ -18,7 +19,9 @@ public class SeatManager
         _holdem = (HoldemScene)Managers.Scene.CurrentScene;
 
         occupiedCount = 0;
+        SyncSystem.Sync.OnSeatsSynced -= ApplySeatsData;
         SyncSystem.Sync.OnSeatsSynced += ApplySeatsData;
+        SyncSystem.Sync.OnHaveSeat -= TakeSeat;
         SyncSystem.Sync.OnHaveSeat += TakeSeat;
 
         SetSeats(seatSize);
@@ -31,18 +34,20 @@ public class SeatManager
 
     private void SetSeats(int seatSize)
     {
-        seats = new List<string>(seatSize);
+        seats = new List<string>();
         for (int i = 0; i < seatSize; i++)
         {
             seats.Add(DEFAULT_NULL_SEAT);
+            seats.Add(DEFAULT_NULL_SEAT);
+
+            // ui
+            _holdem.UpdateSeatUI(i, DEFAULT_NULL_SEAT);
         }
-        // ui
-        _holdem.UpdateAllSeatUI();
     }
 
-    public void HaveSeat(string player_uid, int seatIndex)
+    public void HaveSeat(string playerUID, string playerNickName, int seatIndex)
     {   
-        if(seats[seatIndex] != DEFAULT_NULL_SEAT)
+        if(seats[seatIndex * 2] != DEFAULT_NULL_SEAT)
         {
             Debug.Log($"{seatIndex}번째 자리는 이미 차지되어있습니다.");
             return;
@@ -54,14 +59,15 @@ public class SeatManager
             return;
         }
 
-        SyncSystem.Sync.SyncHaveSeat(player_uid, seatIndex);
+        SyncSystem.Sync.SyncHaveSeat(playerUID, playerNickName, seatIndex);
     }
 
-    private void TakeSeat(string player_uid, int seatIndex)
+    private void TakeSeat(string playerUID, string playerNickName, int seatIndex)
     {
-        seats[seatIndex] = player_uid;
+        seats[seatIndex * 2] = playerUID;
+        seats[seatIndex * 2 + 1] = playerNickName;
 
-        if (player_uid == User.NowUser.GetNickName())
+        if (playerUID == User.NowUser.GetUid())
             User.NowHoldemPlayer.SetSeatIndex(seatIndex);
 
         // occupiedCount 변수 동기화 위해 옮김
@@ -76,14 +82,15 @@ public class SeatManager
         }
 
         // ui
-        _holdem.UpdateAllSeatUI();
+        _holdem.UpdateSeatUI(seatIndex, playerNickName);
     }
 
     public void LeaveSeat(string player_uid, int seatIndex)
     {
-        if (seats[seatIndex] == player_uid)
+        if (seats[seatIndex * 2] == player_uid)
         {
-            seats[seatIndex] = DEFAULT_NULL_SEAT;
+            seats[seatIndex * 2] = DEFAULT_NULL_SEAT;
+            seats[seatIndex * 2 + 1] = DEFAULT_NULL_SEAT;
             occupiedCount--;
         }
         else
@@ -107,30 +114,43 @@ public class SeatManager
 
     public void ApplySeatsData(string[] syncedSeats)
     {
-        int seatsLength = syncedSeats.Length;
-        for (int i = 0; i < seatsLength; i++)
+        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
-            seats[i] = syncedSeats[i];
+            int index = i * 2;
+            if (syncedSeats[index] != DEFAULT_NULL_SEAT)
+            {
+                seats[index] = syncedSeats[index];
+                seats[index + 1] = syncedSeats[index + 1];
 
-            if (seats[i] != DEFAULT_NULL_SEAT)
                 occupiedCount++;
+
+                _holdem.UpdateSeatUI(i, seats[index + 1]);
+            }
         }
-        // ui
-        _holdem.UpdateAllSeatUI();
     }
 
     public void ConverToPlayers()
     {
-        for (int i = 0; i < seats.Count; i++)
+        for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
-            HoldemGameControl.Players.UpdatePlayerUID(i, seats[i]);
+            HoldemGameControl.Players.UpdatePlayerUID(i, seats[i * 2]);
         }
-        Debug.Log("case 1 종료, nextStage");
+
         HoldemGameControl.Control.NextStage();
     }
 
     public int GetOccupiedCount()
     {
         return occupiedCount;
+    }
+
+    public string GetPlayerNickNameByUID(string pUID)
+    {
+        for (int i = 0; i < seats.Count; i++) 
+        {
+            if (seats[i] == pUID)
+                return seats[i + 1];
+        }
+        return "";
     }
 }

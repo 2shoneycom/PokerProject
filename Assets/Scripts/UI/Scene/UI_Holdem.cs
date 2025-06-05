@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class UI_Holdem : UI_Scene
 {
@@ -52,6 +53,13 @@ public class UI_Holdem : UI_Scene
         UI_Backspace,
         UI_IconFriend,
         UI_TmpWinnerShow,
+        UI_Player1_Panel,
+        UI_Player2_Panel,
+        UI_Player3_Panel,
+        UI_Player4_Panel,
+        UI_Player5_Panel,  
+        UI_Player6_Panel,
+        UI_Player7_Panel,
     }
 
     bool isRoomOpened = false;
@@ -128,14 +136,14 @@ public class UI_Holdem : UI_Scene
 
     public void GameStartButtonOn()
     {
-        Button bt = GetButton((int)Buttons.UI_GameStartButton);
-        bt.gameObject.SetActive(true);
+        GameObject bt = GetButton((int)Buttons.UI_GameStartButton).gameObject;
+        bt.SetActive(true);
 
-        bt.onClick.RemoveAllListeners();
-        bt.onClick.AddListener(GameStartButtonClicked);
+        bt.DisBindEvent(GameStartButtonClicked);
+        bt.BindEvent(GameStartButtonClicked);
     }
 
-    void GameStartButtonClicked()
+    void GameStartButtonClicked(PointerEventData data)
     {
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
 
@@ -149,9 +157,14 @@ public class UI_Holdem : UI_Scene
         GetButton((int)Enum.Parse(typeof(Buttons), type)).interactable = isOn;
     }
 
-    public void UpdatePlayerName(int index, string str)
+    public void UpdatePlayerName(int index, string pNickName)
     {
-        GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{index}_NameText")).text = str;
+        GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{index}_NameText")).text = pNickName;
+    }
+
+    public void UpdatePlayerIcon(int index, string pNickName)
+    {
+        GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{index}_Panel")).SetActive(false);
     }
 
     public void UpdatePotMoney()
@@ -163,11 +176,11 @@ public class UI_Holdem : UI_Scene
     {
         for(int i = 0; i < 7; i++)
         {
-            string img = $"UI_Player{i + 1}_Icon";
+            string go = $"UI_Player{i + 1}_Panel";
             int num = i;
-            GetImage((int)Enum.Parse(typeof(Images), img)).gameObject.BindEvent(PointerEventData =>
+            GetGameObject((int)Enum.Parse(typeof(GameObjects), go)).BindEvent(PointerEventData =>
             {
-                Managers.Seat.HaveSeat(User.NowUser.GetNickName(), num);
+                Managers.Seat.HaveSeat(User.NowUser.GetUid(), User.NowUser.GetNickName(), num);
             });
         }
     }
@@ -254,7 +267,9 @@ public class UI_Holdem : UI_Scene
 
     public void SetWinnerPanel(bool isOn)
     {
-        GetGameObject((int)GameObjects.UI_TmpWinnerShow).SetActive(isOn);
+        GameObject pl = GetGameObject((int)GameObjects.UI_TmpWinnerShow);
+        pl.transform.localScale = Vector3.zero;
+        pl.SetActive(isOn);
 
         if (!isOn)
             return;
@@ -268,7 +283,7 @@ public class UI_Holdem : UI_Scene
 
         for(int i = 0; i < len; i++)
         {
-            panelText.text += wList[i];
+            panelText.text += HoldemGameControl.Players.GetPlayerNickNameByUID(wList[i]);
 
             if (i != len - 1)
             {
@@ -276,8 +291,8 @@ public class UI_Holdem : UI_Scene
             }
         }
 
-        if (isOn)
-            StartCoroutine(WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME));
+        pl.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.InOutQuad);
+        StartCoroutine(WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME));
     }
 
     IEnumerator WaitWinnerPanel(float sec)
