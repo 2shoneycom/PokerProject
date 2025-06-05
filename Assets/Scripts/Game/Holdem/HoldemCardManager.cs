@@ -124,7 +124,7 @@ public class HoldemCardManager
 
     private void SetupPlayerCardPos()       ////////////////////////////////////////////////////
     {
-        for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
             int seatedIndex = HoldemGameControl.Control.ConvertGameToUI(i);
             GameObject destGO = _holdemUI.GetPlayerGameObjcet(seatedIndex);
@@ -238,6 +238,7 @@ public class HoldemCardManager
             cardDeckPos = GameObject.FindGameObjectWithTag("Deck").transform;
 
         GameObject cardGO = Managers.Resource.PhotonInstantiate("Game/Card", cardDeckPos);
+        cardGO.GetComponent<PhotonView>().OwnershipTransfer = OwnershipOption.Takeover;
 
         // 카드 동기화 처리
         if (pUID == MAKE_DEALER_CARD)       // 딜러인 경우
@@ -252,7 +253,6 @@ public class HoldemCardManager
                 }
             }
             CardMoveToPosDealer(i);
-
         }
         else                                // 플레이어인 경우
         {
