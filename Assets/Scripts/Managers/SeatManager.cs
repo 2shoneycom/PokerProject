@@ -94,11 +94,12 @@ public class SeatManager
             Debug.LogError("SeatManager.cs -> LeaveSeat()에서 해당 uid를 찾을 수 없습니다.");
         }
         else
-        {
-            seats.RemoveAt(targetIndex);
+        {   // 글고 지금은 포톤에서 이 함수를 부르고 있는데, 포톤에서 어떤 게임에서 나갓는지 파악하고 호출도 해야할듯, 게임 중인지 아닌지도 판단하고
+            seats.RemoveAt(targetIndex);    // 기존 i 자리에 있던 플레이어의 uid (i) 제거
+            seats.RemoveAt(targetIndex);    // 기존 i 자리에 있던 플레이어의 닉네임 (i + 1) 제거
 
             // UI 업데이트
-            _holdem.UpdateSeatUI(targetIndex, "자리 선택");
+            _holdem.UpdateSeatUI(targetIndex / 2, "자리 선택");
         }
     }
 
