@@ -46,14 +46,14 @@ public class SeatManager
     }
 
     public void HaveSeat(string playerUID, string playerNickName, int seatIndex)
-    {   
-        if(seats[seatIndex * 2] != DEFAULT_NULL_SEAT)
+    {
+        if (seats[seatIndex * 2] != DEFAULT_NULL_SEAT)
         {
             Debug.Log($"{seatIndex}번째 자리는 이미 차지되어있습니다.");
             return;
         }
 
-        if(User.NowHoldemPlayer.SeatIndex != -1)
+        if (User.NowHoldemPlayer.SeatIndex != -1)
         {
             Debug.Log($"이미 {User.NowHoldemPlayer.SeatIndex}번째 자리에 앉으셨습니다.");
             return;
@@ -85,21 +85,34 @@ public class SeatManager
         _holdem.UpdateSeatUI(seatIndex, playerNickName);
     }
 
-    public void LeaveSeat(string player_uid, int seatIndex)
+    public void LeaveSeat(string player_uid)
     {
-        if (seats[seatIndex * 2] == player_uid)
+        int targetIndex = GetSeatIndex(player_uid);
+
+        if (targetIndex == -1)
         {
-            seats[seatIndex * 2] = DEFAULT_NULL_SEAT;
-            seats[seatIndex * 2 + 1] = DEFAULT_NULL_SEAT;
-            occupiedCount--;
+            Debug.LogError("SeatManager.cs -> LeaveSeat()에서 해당 uid를 찾을 수 없습니다.");
         }
         else
+        {   // 글고 지금은 포톤에서 이 함수를 부르고 있는데, 포톤에서 어떤 게임에서 나갓는지 파악하고 호출도 해야할듯, 게임 중인지 아닌지도 판단하고
+            seats.RemoveAt(targetIndex);    // 기존 i 자리에 있던 플레이어의 uid (i) 제거
+            seats.RemoveAt(targetIndex);    // 기존 i 자리에 있던 플레이어의 닉네임 (i + 1) 제거
+
+            // UI 업데이트
+            _holdem.UpdateSeatUI(targetIndex / 2, "자리 선택");
+        }
+    }
+
+    private int GetSeatIndex(string uid)
+    {
+        int idx = seats.FindIndex(seat => seat == uid);
+
+        if (idx == -1)
         {
-//            MyDebug.Instance.DebugLog($"{seatIndex}번째 자리는 앉아있던 자리가 아니므로 떠날 수 없습니다.");
-//            Debug.Log($"{seatIndex}번째 자리는 앉아있던 자리가 아니므로 떠날 수 없습니다.");
+            Debug.LogError("SeatManager.cs -> GetSeatIndex()에서 해당 인덱스를 찾을 수 없습니다.");
         }
 
-//        MyDebug.Instance.DebugLog($"{seats[0]}, {seats[1]}, {seats[2]}, {seats[3]}, {seats[4]}, {seats[5]}, {seats[6]}");
+        return idx;
     }
 
     public void RequestSyncSeats()
@@ -131,7 +144,7 @@ public class SeatManager
 
     public void ConverToPlayers()
     {
-        for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
             HoldemGameControl.Players.UpdatePlayerUID(i, seats[i * 2]);
         }
@@ -146,7 +159,7 @@ public class SeatManager
 
     public string GetPlayerNickNameByUID(string pUID)
     {
-        for (int i = 0; i < seats.Count; i++) 
+        for (int i = 0; i < seats.Count; i++)
         {
             if (seats[i] == pUID)
                 return seats[i + 1];
