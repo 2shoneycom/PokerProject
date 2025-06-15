@@ -443,4 +443,9 @@ public class HoldemGameControl : MonoBehaviour
     {
         StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(PotMoney + amount, isNextStage));
     }
+
+    public void UpdatePlayerBetMoneyUI()
+    {
+        _holdemUI.UpdateBetMoney();
+    }
 }

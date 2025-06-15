@@ -137,6 +137,7 @@ public class HoldemPlayerManager
     {
         playerBettingMoney[index] = amount;
         playerIsBet[index] = true;
+        HoldemGameControl.Control.UpdatePlayerBetMoneyUI();
     }
 
     public bool GetPlayerIsBet(int index)

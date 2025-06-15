@@ -85,6 +85,7 @@ public class HoldemBetManager
         if (HoldemGameControl.Players.IsOneLeft || IsBetEnd())
         {
             // 1명 남앗거나 정상 배팅 종료의 경우
+            Debug.Log("bet end in IsBetEnd");
             SyncSystem.Sync.HoldemBetEnd();
             return;
         }

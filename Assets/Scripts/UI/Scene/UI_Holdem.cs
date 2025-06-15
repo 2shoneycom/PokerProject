@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -34,6 +33,13 @@ public class UI_Holdem : UI_Scene
         UI_PotMoney_Text,
         UI_RoomButton_Text,
         UI_TmpWinnerShow_Text,
+        UI_Player1_BetText,
+        UI_Player2_BetText,
+        UI_Player3_BetText,
+        UI_Player4_BetText,
+        UI_Player5_BetText,
+        UI_Player6_BetText,
+        UI_Player7_BetText,
     }
 
     enum Images
@@ -60,6 +66,13 @@ public class UI_Holdem : UI_Scene
         UI_Player5_Panel,  
         UI_Player6_Panel,
         UI_Player7_Panel,
+        UI_Player1_Bet,
+        UI_Player2_Bet,
+        UI_Player3_Bet,
+        UI_Player4_Bet,
+        UI_Player5_Bet,
+        UI_Player6_Bet,
+        UI_Player7_Bet,
     }
 
     bool isRoomOpened = false;
@@ -132,6 +145,29 @@ public class UI_Holdem : UI_Scene
             GetButton(idx).gameObject.SetActive(isOn);
         }
         GetImage((int)Images.UI_PotMoney_Icon).gameObject.SetActive(isOn);
+
+        if (isOn == false)      // 게임 안할때라는 의미
+        {
+            foreach (GameObjects go in Enum.GetValues(typeof(GameObjects)))
+            {
+                if (go.ToString().Contains("Bet"))
+                {
+                    GetGameObject((int)go).SetActive(isOn);
+                }
+            }
+        }
+        else        // 게임 중이라면 참여하는 플레이어만 on
+        {
+            for(int i = 1; i <= 7; i++)
+            {
+                int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
+                if (HoldemGameControl.Players.GetPlayerUID(gameIndex) != "")
+                {
+                    Debug.Log(HoldemGameControl.Players.GetPlayerUID(gameIndex));
+                    GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
+                }
+            }
+        }
     }
 
     public void GameStartButtonOn()
@@ -170,6 +206,15 @@ public class UI_Holdem : UI_Scene
     public void UpdatePotMoney()
     {
         GetText((int)Texts.UI_PotMoney_Text).text = $"{HoldemGameControl.Control.PotMoney}";
+    }
+
+    public void UpdateBetMoney()
+    {
+        for (int i = 1; i <= 7; i++)
+        {
+            int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = HoldemGameControl.Players.GetPlayerBet(gameIndex).ToString();
+        }
     }
 
     void SeatBind()
