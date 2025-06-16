@@ -16,6 +16,7 @@ public class Managers : MonoBehaviour
     DBManager _db = new DBManager();
     AuthManager _auth = new AuthManager();
     RewardManager _reward = new RewardManager();
+    NickNameManager _nickname = new NickNameManager();
     PhotonManager _photon;
 
     public static ResourceManager Resource { get { return Instance._resource; } }
@@ -27,6 +28,7 @@ public class Managers : MonoBehaviour
     public static AuthManager Auth { get { return Instance._auth; } }
     public static RewardManager Reward { get { return Instance._reward; } }
     public static PhotonManager Photon { get { return Instance._photon; } }
+    public static NickNameManager NickName { get { return Instance._nickname; } }
 
 
     Define.Difficulty difficulty = Define.Difficulty.None;

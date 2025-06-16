@@ -60,7 +60,7 @@ public class UI_PlayerInfo : UI_Scene
         Managers.Login.LogOut(data);
     }
 
-    void SetPlayerInfo()
+    public void SetPlayerInfo()
     {
         GetText((int)Texts.UI_MainInfo_UserName).text = User.NowUser.GetNickName();
         GetText((int)Texts.UI_MainInfo_Money_Text).text = User.NowUser.GetSeedMoney().ToString();

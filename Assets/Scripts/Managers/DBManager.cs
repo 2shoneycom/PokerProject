@@ -15,13 +15,15 @@ public class DataToSave
     public string nickName;
     public long seedMoney;
     public bool reward;
+    public string nickNameUpdatedDate;
 
     public DataToSave() { }
-    public DataToSave(string nickName, long seedMoney, bool reward)
+    public DataToSave(string nickName, long seedMoney, bool reward, string nickNameUpdatedDate = "20000101")
     {
         this.nickName = nickName;
         this.seedMoney = seedMoney;
         this.reward = reward;
+        this.nickNameUpdatedDate = nickNameUpdatedDate;
     }
 }
 
@@ -97,7 +99,8 @@ public class DBManager
     {
         { "nickName", dts.nickName },
         { "seedMoney", dts.seedMoney },
-        { "reward", dts.reward }
+        { "reward", dts.reward },
+        { "nickNameUpdatedDate", dts.nickNameUpdatedDate }
     };
 
         dbRef.Child("Users").Child(Managers.Auth.userId)
@@ -271,5 +274,96 @@ public class DBManager
             Debug.LogError($"데이터 조회 실패: {ex.Message}");
             return (null, 0);
         }
+    }
+
+    public void ChangeNickName(string newNickName)
+    {
+        DateTime utcNow = DateTime.UtcNow;
+        string date = utcNow.ToString("yyyyMMdd");
+
+        var updates = new Dictionary<string, object>
+        {
+            { "nickName", newNickName },
+            { "nickNameUpdatedDate", date }
+        };
+
+        dbRef.Child("Users").Child(Managers.Auth.userId).UpdateChildrenAsync(updates).ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("닉네임 변경 실패: " + task.Exception);
+            }
+            else
+            {
+                Debug.Log("닉네임 및 업데이트 날짜 변경 성공: " + newNickName);
+            }
+        });
+    }
+
+    public void IsNickNameChangeAvailable(Action<bool> callback)
+    {
+        dbRef.Child("Users").Child(Managers.Auth.userId).Child("nickNameUpdatedDate").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("Users 조회 실패: " + task.Exception);
+                callback(false);
+                return;
+            }
+
+            DataSnapshot snapshot = task.Result;
+            if (snapshot.Exists)
+            {
+                Debug.Log("snapshot exitsts");
+                string date = snapshot.Value.ToString();
+                DateTime parsedDate = DateTime.ParseExact(
+                    date,
+                    "yyyyMMdd",
+                    null,
+                    System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal
+                );
+
+                DateTime plus30Days = parsedDate.AddDays(30);
+
+                if (plus30Days <= DateTime.UtcNow.Date)
+                {
+                    Debug.Log("if plus");
+                    callback(true);
+                    return;
+                }
+            }
+
+            callback(false);
+        });
+    }
+
+    public void IsOverlapped(string newNickName, Action<NickNameCheckResult> callback)
+    {
+        string currentUID = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
+
+        dbRef.Child("Users").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("Users 조회 실패: " + task.Exception);
+                callback(NickNameCheckResult.Error);
+                return;
+            }
+
+            foreach (var userSnapshot in task.Result.Children)
+            {
+                string uid = userSnapshot.Key;
+                string nick = userSnapshot.Child("nickName").Value?.ToString();
+
+                // 자기 자신의 UID는 검사에서 제외
+                if (uid != currentUID && nick == newNickName)
+                {
+                    callback(NickNameCheckResult.Duplicated);
+                    return;
+                }
+            }
+
+            callback(NickNameCheckResult.Available);
+        });
     }
 }
