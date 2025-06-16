@@ -77,7 +77,6 @@ public class HoldemPlayerManager
         {
             playerIsBet[i] = false;
             playerIsTurn[i] = false;
-            playerBettingMoney[i] = 0;
         }
     }
 
