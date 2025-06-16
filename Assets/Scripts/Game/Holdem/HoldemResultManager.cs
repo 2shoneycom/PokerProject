@@ -50,13 +50,6 @@ public class HoldemResultManager
                 cardIdx.Add(HoldemGameControl.Players.PlayerCards[i, 0]);
                 cardIdx.Add(HoldemGameControl.Players.PlayerCards[i, 1]);
 
-                string str = "";
-                int num = HoldemGameControl.Players.PlayerCards[i, 0];
-                str += $"플레이어 {i}의 카드 / 카드 1 모양 : {HoldemGameControl.Card.GetCardShape(num)}, 카드 1 숫자 : {HoldemGameControl.Card.GetCardNum(num)}   ";
-                num = HoldemGameControl.Players.PlayerCards[i, 1];
-                str += $"카드 2 모양 : {HoldemGameControl.Card.GetCardShape(num)}, 카드 2 숫자 : {HoldemGameControl.Card.GetCardNum(num)}";
-                Debug.Log(str);
-
                 // 7C5의 조합을 얻어내기
                 var combinations = GetCombinations(cardIdx, 5);
 

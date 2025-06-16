@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 01a443c4f08c7f94cb1a3ed580ecad78
+guid: b71de41e71207af45a6a2f5b50bb2448
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -53,7 +53,7 @@ TextureImporter:
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
-  spriteTessellationDetail: 0
+  spriteTessellationDetail: -1
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -122,43 +122,11 @@ TextureImporter:
   spriteSheet:
     serializedVersion: 2
     sprites: []
-    outline:
-    - - {x: 55, y: -123}
-      - {x: 19, y: -131}
-      - {x: -21, y: -130}
-      - {x: -66, y: -159}
-      - {x: -141, y: -193}
-      - {x: -110, y: -153}
-      - {x: -96, y: -131}
-      - {x: -89, y: -110}
-      - {x: -118, y: -95}
-      - {x: -148, y: -61}
-      - {x: -162, y: -39}
-      - {x: -171, y: -7}
-      - {x: -169, y: 27}
-      - {x: -161, y: 53}
-      - {x: -145, y: 81}
-      - {x: -128, y: 100}
-      - {x: -106, y: 115}
-      - {x: -76, y: 132}
-      - {x: -47, y: 141}
-      - {x: -16, y: 146}
-      - {x: 14, y: 145}
-      - {x: 47, y: 142}
-      - {x: 102, y: 118}
-      - {x: 144, y: 79}
-      - {x: 157, y: 57}
-      - {x: 165, y: 33}
-      - {x: 168, y: 9}
-      - {x: 164, y: -21}
-      - {x: 153, y: -50}
-      - {x: 137, y: -71}
-      - {x: 115, y: -93}
-      - {x: 86, y: -112}
+    outline: []
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    internalID: 0
     vertices: []
     indices: 
     edges: []

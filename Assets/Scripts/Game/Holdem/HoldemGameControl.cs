@@ -56,6 +56,8 @@ public class HoldemGameControl : MonoBehaviour
     bool isPlaying = false;
     public bool IsPlaying { get { return isPlaying; } }
 
+    bool isFirst = true;
+
     int _stageCount = 0;
     public int StageCount
     {
@@ -121,11 +123,6 @@ public class HoldemGameControl : MonoBehaviour
 
     public void NextStage(int state = 0)        // 1은 스테이지 세부 사항 카운트 증가
     {
-        Debug.Log($"NextStage -> cur Stage : {_stageCount},  cur Detail : {_stageDetail} / state : {state}");
-
-        if ((_stageCount == 5 || _stageCount == 6) && _stageDetail > 7)
-            return;
-
         if (state == 0)
         {
             StageCount++;
@@ -142,7 +139,6 @@ public class HoldemGameControl : MonoBehaviour
 
     void ProcessStage()
     {
-        Debug.Log($"ProcessStage 시작 : stagecount : {StageCount} / stagedetail : {StageDetail}");
         switch (StageCount)
         {
             // 자리 Setting
@@ -285,12 +281,10 @@ public class HoldemGameControl : MonoBehaviour
                 // 타이머 끄기
                 StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
 
-                Debug.Log("Result Time!");
-
                 EndGame();
 
                 // UI 보여주기 & 플레이어 카드 공개
-                StartCoroutine(SyncSystem.Sync.SyncHoldemResultUI(true));
+                StartCoroutine(SyncSystem.Sync.SyncHoldemResultUI());
 
                 break;
 
@@ -313,12 +307,19 @@ public class HoldemGameControl : MonoBehaviour
 
     void DecideDealer()
     {
-        int ranNum = -1;
-        do
+        if (isFirst)
         {
-            ranNum = Random.Range(0, MAX_PLAYER_NUM);
-        } while (Players.GetPlayerUID(ranNum) == "");
-        _playerD = ranNum;
+            int ranNum = -1;
+            do
+            {
+                ranNum = Random.Range(0, MAX_PLAYER_NUM);
+            } while (Players.GetPlayerUID(ranNum) == "");
+            _playerD = ranNum;
+        }
+        else
+        {
+            _playerD = GetNextPlayerIndex(_playerD);
+        }
     }
 
     public void SetDealer(int index)
@@ -332,7 +333,6 @@ public class HoldemGameControl : MonoBehaviour
 
         _playerBB = GetNextPlayerIndex(_playerSB);
 
-        Debug.Log("case 2 종료, nextStage");
         NextStage();
     }
 
@@ -406,12 +406,12 @@ public class HoldemGameControl : MonoBehaviour
         SyncSystem.Sync.SyncHoldemWinnerList(winnerList.ToArray());
     }
 
-    public void ShowResult(bool isOn)
+    public void ShowResult()
     {
         // 플레이어 카드 보이기
         Players.ShowPlayerCard();
 
-        _holdemUI.SetWinnerPanel(isOn);
+        _holdemUI.SetWinnerPanel(true);
     }
 
     public void ClearGame()
@@ -427,15 +427,28 @@ public class HoldemGameControl : MonoBehaviour
         // 플레이어 카드 삭제
         Players.ClearGameSetting();
 
+        _holdemUI.UpdateBetMoney();
+
         // 인원수 체크를 하고 2 이상이면 바로 시작
         if (Managers.Seat.GetOccupiedCount() >= 2)
         {
             StartGame();
+        }
+        else
+        {
+            isFirst = true;
+            _holdemUI.UISwitch(false);
+            _holdemUI.BetUISwitch(false);
         }
     }
 
     public void Request_SyncHoldemPotMoney(int amount, bool isNextStage = false)     // 코루틴 호출시키기 위한 함수
     {
         StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(PotMoney + amount, isNextStage));
+    }
+
+    public void UpdatePlayerBetMoneyUI()
+    {
+        _holdemUI.UpdateBetMoney();
     }
 }

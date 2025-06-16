@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class UI_Holdem : UI_Scene
 {
@@ -33,6 +33,13 @@ public class UI_Holdem : UI_Scene
         UI_PotMoney_Text,
         UI_RoomButton_Text,
         UI_TmpWinnerShow_Text,
+        UI_Player1_BetText,
+        UI_Player2_BetText,
+        UI_Player3_BetText,
+        UI_Player4_BetText,
+        UI_Player5_BetText,
+        UI_Player6_BetText,
+        UI_Player7_BetText,
     }
 
     enum Images
@@ -52,6 +59,20 @@ public class UI_Holdem : UI_Scene
         UI_Backspace,
         UI_IconFriend,
         UI_TmpWinnerShow,
+        UI_Player1_Panel,
+        UI_Player2_Panel,
+        UI_Player3_Panel,
+        UI_Player4_Panel,
+        UI_Player5_Panel,  
+        UI_Player6_Panel,
+        UI_Player7_Panel,
+        UI_Player1_Bet,
+        UI_Player2_Bet,
+        UI_Player3_Bet,
+        UI_Player4_Bet,
+        UI_Player5_Bet,
+        UI_Player6_Bet,
+        UI_Player7_Bet,
     }
 
     bool isRoomOpened = false;
@@ -72,6 +93,7 @@ public class UI_Holdem : UI_Scene
         SeatBind();
         BetButtonBind();
         UISwitch(false);
+        BetUISwitch(false);
 
         GetGameObject((int)GameObjects.UI_TmpWinnerShow).SetActive(false);
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
@@ -126,16 +148,41 @@ public class UI_Holdem : UI_Scene
         GetImage((int)Images.UI_PotMoney_Icon).gameObject.SetActive(isOn);
     }
 
-    public void GameStartButtonOn()
+    public void BetUISwitch(bool isOn)
     {
-        Button bt = GetButton((int)Buttons.UI_GameStartButton);
-        bt.gameObject.SetActive(true);
+        if (isOn == false)      // 게임 안할때라는 의미
+        {
+            foreach (GameObjects go in Enum.GetValues(typeof(GameObjects)))
+            {
+                if (go.ToString().Contains("Bet"))
+                {
+                    GetGameObject((int)go).SetActive(isOn);
+                }
+            }
+        }
+        else        // 게임 중이라면 참여하는 플레이어만 on
+        {
+            for (int i = 1; i <= 7; i++)
+            {
+                int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
+                if (HoldemGameControl.Players.GetPlayerUID(gameIndex) == "")
+                    continue;
 
-        bt.onClick.RemoveAllListeners();
-        bt.onClick.AddListener(GameStartButtonClicked);
+                GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
+            }
+        }
     }
 
-    void GameStartButtonClicked()
+    public void GameStartButtonOn()
+    {
+        GameObject bt = GetButton((int)Buttons.UI_GameStartButton).gameObject;
+        bt.SetActive(true);
+
+        bt.DisBindEvent(GameStartButtonClicked);
+        bt.BindEvent(GameStartButtonClicked);
+    }
+
+    void GameStartButtonClicked(PointerEventData data)
     {
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
 
@@ -149,9 +196,14 @@ public class UI_Holdem : UI_Scene
         GetButton((int)Enum.Parse(typeof(Buttons), type)).interactable = isOn;
     }
 
-    public void UpdatePlayerName(int index, string str)
+    public void UpdatePlayerName(int index, string pNickName)
     {
-        GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{index}_NameText")).text = str;
+        GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{index}_NameText")).text = pNickName;
+    }
+
+    public void UpdatePlayerIcon(int index, string pNickName)
+    {
+        GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{index}_Panel")).SetActive(false);
     }
 
     public void UpdatePotMoney()
@@ -159,15 +211,24 @@ public class UI_Holdem : UI_Scene
         GetText((int)Texts.UI_PotMoney_Text).text = $"{HoldemGameControl.Control.PotMoney}";
     }
 
+    public void UpdateBetMoney()
+    {
+        for (int i = 1; i <= 7; i++)
+        {
+            int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = HoldemGameControl.Players.GetPlayerBet(gameIndex).ToString();
+        }
+    }
+
     void SeatBind()
     {
         for(int i = 0; i < 7; i++)
         {
-            string img = $"UI_Player{i + 1}_Icon";
+            string go = $"UI_Player{i + 1}_Panel";
             int num = i;
-            GetImage((int)Enum.Parse(typeof(Images), img)).gameObject.BindEvent(PointerEventData =>
+            GetGameObject((int)Enum.Parse(typeof(GameObjects), go)).BindEvent(PointerEventData =>
             {
-                Managers.Seat.HaveSeat(User.NowUser.GetNickName(), num);
+                Managers.Seat.HaveSeat(User.NowUser.GetUid(), User.NowUser.GetNickName(), num);
             });
         }
     }
@@ -254,7 +315,9 @@ public class UI_Holdem : UI_Scene
 
     public void SetWinnerPanel(bool isOn)
     {
-        GetGameObject((int)GameObjects.UI_TmpWinnerShow).SetActive(isOn);
+        GameObject pl = GetGameObject((int)GameObjects.UI_TmpWinnerShow);
+        pl.transform.localScale = Vector3.zero;
+        pl.SetActive(isOn);
 
         if (!isOn)
             return;
@@ -268,7 +331,7 @@ public class UI_Holdem : UI_Scene
 
         for(int i = 0; i < len; i++)
         {
-            panelText.text += wList[i];
+            panelText.text += HoldemGameControl.Players.GetPlayerNickNameByUID(wList[i]);
 
             if (i != len - 1)
             {
@@ -276,8 +339,8 @@ public class UI_Holdem : UI_Scene
             }
         }
 
-        if (isOn)
-            StartCoroutine(WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME));
+        pl.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.InOutQuad);
+        StartCoroutine(WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME));
     }
 
     IEnumerator WaitWinnerPanel(float sec)
