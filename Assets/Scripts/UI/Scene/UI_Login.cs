@@ -43,8 +43,8 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
 
         GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(false);
         BindEvent(GetButton((int)Buttons.UI_ReconnectButton).gameObject, ReconnectButtonClicked);
-        Managers.Login.LoginSceneLoaded(this);
-        Managers.Auth.LoginSceneLoaded(this);
+        //Managers.Login.LoginSceneLoaded(this);
+        //Managers.Auth.LoginSceneLoaded(this);
     }
 
     public void SetConnectionInfoText(string info)
@@ -63,8 +63,8 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
             return;
 
         DisableAllButton();
-        //Managers.Photon.ConnectToPhoton(this);
-        LoginScene.Instance.RequestLogin();
+        Managers.Photon.ConnectToPhoton(this);
+        //LoginScene.Instance.RequestLogin();
     }
 
     void DisableAllButton()
