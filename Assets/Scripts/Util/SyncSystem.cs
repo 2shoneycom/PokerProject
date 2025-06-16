@@ -289,7 +289,7 @@ class SyncSystem : MonoBehaviourPun
 
     public void HoldemBetProcess(int curPlayer, string betType, int betAmount = 0)
     {
-        photonView.RPC("RPC_HoldemBetProcess", RpcTarget.MasterClient, curPlayer, betType, betAmount);
+        photonView.RPC("RPC_HoldemBetProcess", RpcTarget.All, curPlayer, betType, betAmount);
     }
 
     [PunRPC]

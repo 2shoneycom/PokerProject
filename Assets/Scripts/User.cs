@@ -64,7 +64,7 @@ public class User
         HoldemSyncSeedMoney();
     }
 
-    public void HoldemBettingMoney(string targetUID, int amount)
+    public void HoldemBettingMoney(string targetUID, int amount, bool ttt = true)
     {
         if (targetUID != uid)
             return;
@@ -72,7 +72,7 @@ public class User
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
         Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
-        NowHoldemPlayer.SetBetMoney(NowHoldemPlayer.BetMoney + amount);
+        NowHoldemPlayer.SetBetMoney(NowHoldemPlayer.BetMoney + amount, ttt);
         HoldemSyncSeedMoney();
     }
 

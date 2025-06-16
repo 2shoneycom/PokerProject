@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Chat.UtilityScripts;
 using UnityEngine;
 
 public class HoldemPlayer
@@ -27,11 +28,14 @@ public class HoldemPlayer
         seatedIndex = idx;
     }
 
-    public void SetBetMoney(int amount)
+    public void SetBetMoney(int amount, bool ttt = true)
     {
         betMoney = amount;
 
-        SyncSystem.Sync.SyncHoldemMyBetting(GameIndex, amount);
+        if (ttt)
+        {
+            SyncSystem.Sync.SyncHoldemMyBetting(GameIndex, amount);
+        }
     }
 
     public void ClearSetting()

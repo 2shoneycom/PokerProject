@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Chat.UtilityScripts;
 using Photon.Pun;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEditor;
@@ -161,10 +162,11 @@ public class HoldemBetManager
     {
         HoldemGameControl.Players.UpdatePlayerTurn(curPlayer, false);
 
-        if(betType != "Die")
+        if (betType != "Die")
         {
             HoldemGameControl.Players.UpdatePlayerBetting(curPlayer, betAmount);
-            HoldemGameControl.Control.PotMoney = HoldemGameControl.Control.PotMoney + betAmount;
+            int tmp = HoldemGameControl.Control.PotMoney;
+            HoldemGameControl.Control.PotMoney = tmp + betAmount;
         }
         else
         {
@@ -250,7 +252,7 @@ public class HoldemBetManager
 
         if(betType != "Die")
         {
-            User.NowUser.HoldemBettingMoney(User.NowUser.GetUid(), curBetAmount);
+            User.NowUser.HoldemBettingMoney(User.NowUser.GetUid(), curBetAmount, ttt: false);
         }
         SyncSystem.Sync.HoldemBetProcess(CurBetPlayer, betType, curBetAmount);
     }
