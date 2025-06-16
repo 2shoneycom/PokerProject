@@ -427,6 +427,8 @@ public class HoldemGameControl : MonoBehaviour
         // 플레이어 카드 삭제
         Players.ClearGameSetting();
 
+        _holdemUI.UpdateBetMoney();
+
         // 인원수 체크를 하고 2 이상이면 바로 시작
         if (Managers.Seat.GetOccupiedCount() >= 2)
         {
@@ -436,6 +438,7 @@ public class HoldemGameControl : MonoBehaviour
         {
             isFirst = true;
             _holdemUI.UISwitch(false);
+            _holdemUI.BetUISwitch(false);
         }
     }
 

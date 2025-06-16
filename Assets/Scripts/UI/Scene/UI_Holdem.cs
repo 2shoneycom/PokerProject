@@ -93,6 +93,7 @@ public class UI_Holdem : UI_Scene
         SeatBind();
         BetButtonBind();
         UISwitch(false);
+        BetUISwitch(false);
 
         GetGameObject((int)GameObjects.UI_TmpWinnerShow).SetActive(false);
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
@@ -145,7 +146,10 @@ public class UI_Holdem : UI_Scene
             GetButton(idx).gameObject.SetActive(isOn);
         }
         GetImage((int)Images.UI_PotMoney_Icon).gameObject.SetActive(isOn);
+    }
 
+    public void BetUISwitch(bool isOn)
+    {
         if (isOn == false)      // 게임 안할때라는 의미
         {
             foreach (GameObjects go in Enum.GetValues(typeof(GameObjects)))
@@ -158,14 +162,13 @@ public class UI_Holdem : UI_Scene
         }
         else        // 게임 중이라면 참여하는 플레이어만 on
         {
-            for(int i = 1; i <= 7; i++)
+            for (int i = 1; i <= 7; i++)
             {
                 int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
-                if (HoldemGameControl.Players.GetPlayerUID(gameIndex) != "")
-                {
-                    Debug.Log(HoldemGameControl.Players.GetPlayerUID(gameIndex));
-                    GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
-                }
+                if (HoldemGameControl.Players.GetPlayerUID(gameIndex) == "")
+                    continue;
+
+                GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
             }
         }
     }

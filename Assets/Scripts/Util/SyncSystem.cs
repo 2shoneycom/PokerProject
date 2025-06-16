@@ -287,15 +287,15 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Bet.HandleBet(curplayer);
     }
 
-    public void HoldemBetProcess(int curPlayer, string betType)
+    public void HoldemBetProcess(int curPlayer, string betType, int betAmount = 0)
     {
-        photonView.RPC("RPC_HoldemBetProcess", RpcTarget.MasterClient, curPlayer, betType);
+        photonView.RPC("RPC_HoldemBetProcess", RpcTarget.MasterClient, curPlayer, betType, betAmount);
     }
 
     [PunRPC]
-    public void RPC_HoldemBetProcess(int curPlayer, string betType)
+    public void RPC_HoldemBetProcess(int curPlayer, string betType, int betAmount = 0)
     {
-        HoldemGameControl.Bet.BetProcess(curPlayer, betType);
+        HoldemGameControl.Bet.BetProcess(curPlayer, betType, betAmount);
     }
 
     public void HoldemBetEnd()

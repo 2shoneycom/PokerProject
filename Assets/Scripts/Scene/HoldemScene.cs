@@ -44,6 +44,11 @@ public class HoldemScene : BaseScene
             _holdemUI.UpdatePlayerIcon(index + 1, nickname);
     }
 
+    public void UpdateBetUI(bool isOn)
+    {
+        _holdemUI.BetUISwitch(isOn);
+    }
+
     public void ReadyForGameStart()
     {
         _holdemUI.GameStartButtonOn();

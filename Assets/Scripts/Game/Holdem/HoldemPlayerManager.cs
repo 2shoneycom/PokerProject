@@ -135,6 +135,7 @@ public class HoldemPlayerManager
 
     public void UpdatePlayerBetting(int index, int amount)      // User가 자신의 HoldemPlayer에서 SetBetMoney을 호출할때 마다 동기화
     {
+        Debug.Log($"Player {index} betting amount : {amount}");
         playerBettingMoney[index] = amount;
         playerIsBet[index] = true;
         HoldemGameControl.Control.UpdatePlayerBetMoneyUI();

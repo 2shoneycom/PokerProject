@@ -128,6 +128,8 @@ public class HoldemBetManager
         if(HoldemGameControl.Players.GetPlayerIsBet(CurBetPlayer) && 
             User.NowHoldemPlayer.BetMoney == HoldemGameControl.Players.FindHighestBet())
         {
+            Debug.Log($"highest bet money : {HoldemGameControl.Players.FindHighestBet()}");
+            Debug.Log($"my bet money : {User.NowHoldemPlayer.BetMoney}");
             return true;
         }
         return false;
@@ -155,81 +157,21 @@ public class HoldemBetManager
             PlayerBetSelected("Die");
     }
 
-    public void BetProcess(int curPlayer, string betType)
+    public void BetProcess(int curPlayer, string betType, int betAmount)
     {
-        if (!PhotonNetwork.IsMasterClient)
-            return;
-
-        SyncSystem.Sync.SyncHoldemPlayerIsBet(curPlayer, true);
-
-        int highestBetMoney = HoldemGameControl.Players.FindHighestBet();
-        int curPlayerBetMoney = HoldemGameControl.Players.GetPlayerBet(curPlayer);
-        int curBetAmount = highestBetMoney - curPlayerBetMoney;
-
-        switch (betType)
-        {
-            case "Die":
-                Debug.Log($"Player {curPlayer} Die");
-
-                // deadplayernum 증가
-                SyncSystem.Sync.SyncHoldemDeadPlayerNum(HoldemGameControl.Players.GetDeadPlayerNum() + 1);
-                // isalive false로
-                SyncSystem.Sync.SyncHoldemPlayerIsAlive(curPlayer, false);
-                break;
-
-            case "Call":
-                // 현재 레이즈 금액 체크, 현재 베팅 금액과 같을시 check
-                if(curBetAmount == 0)
-                {
-                    Debug.Log($"Player {curPlayer} Checked");
-                }
-                else
-                {
-                    Debug.Log($"Player {curPlayer} Call");
-                }
-                break;
-
-            case "Double":
-                // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 레이즈 머니 만큼 더 레이즈
-                Debug.Log($"Player {curPlayer} Double");
-
-                if (curBetAmount == 0)
-                {
-                    curBetAmount = GetBaseBetAmount(Managers.CurrentDifficulty, false);
-                }
-                else
-                {
-                    curBetAmount *= 2;
-                }
-                break;
-
-            case "Half":
-                // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 팟머니 * 0.5 만큼 더 레이즈
-                Debug.Log($"Player {curPlayer} Half");
-
-                curBetAmount = curBetAmount + (HoldemGameControl.Control.PotMoney + curBetAmount) / 2;
-                break;
-
-            case "Quater":
-                // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 팟머니 * 0.25 만큼 더 레이즈
-                Debug.Log($"Player {curPlayer} Quater");
-
-                curBetAmount = curBetAmount + (HoldemGameControl.Control.PotMoney + curBetAmount) / 4;
-                break;
-
-            case "AllIn":
-                // 올인 / 현재 플레이어 중 최소 금액 찾고, 내 시드 머니가 그거보다 많으면 그거만큼 배팅
-                Debug.Log($"Player {curPlayer} AllIn");
-
-                break;
-        }
+        HoldemGameControl.Players.UpdatePlayerTurn(curPlayer, false);
 
         if(betType != "Die")
         {
-            SyncSystem.Sync.HoldemBetMoneyToTarget(HoldemGameControl.Players.GetPlayerUID(curPlayer), curBetAmount);
-            HoldemGameControl.Control.Request_SyncHoldemPotMoney(curBetAmount);
+            HoldemGameControl.Players.UpdatePlayerBetting(curPlayer, betAmount);
+            HoldemGameControl.Control.PotMoney = HoldemGameControl.Control.PotMoney + betAmount;
         }
-        SyncSystem.Sync.HoldemNextStage_V2(1);
+        else
+        {
+            HoldemGameControl.Players.SetDeadPlayerNum(HoldemGameControl.Players.GetDeadPlayerNum() + 1);
+            HoldemGameControl.Players.UpdatePlayerState(curPlayer, false);
+        }
+        HoldemGameControl.Control.NextStage(1);
     }
 
     public void CurrentStageBetEnd()
@@ -244,7 +186,72 @@ public class HoldemBetManager
 
     public void PlayerBetSelected(string betType)
     {
-        SyncSystem.Sync.SyncHoldemIsTurn(CurBetPlayer, false);
-        SyncSystem.Sync.HoldemBetProcess(CurBetPlayer, betType);
+        int highestBetMoney = HoldemGameControl.Players.FindHighestBet();
+        int curPlayerBetMoney = HoldemGameControl.Players.GetPlayerBet(CurBetPlayer);
+        int curBetAmount = highestBetMoney - curPlayerBetMoney;
+
+        switch (betType)
+        {
+            case "Die":
+                Debug.Log($"Player {CurBetPlayer} Die");
+
+                //// deadplayernum 증가
+                //SyncSystem.Sync.SyncHoldemDeadPlayerNum(HoldemGameControl.Players.GetDeadPlayerNum() + 1);
+                //// isalive false로
+                //SyncSystem.Sync.SyncHoldemPlayerIsAlive(CurBetPlayer, false);
+                break;
+
+            case "Call":
+                // 현재 레이즈 금액 체크, 현재 베팅 금액과 같을시 check
+                if (curBetAmount == 0)
+                {
+                    //Debug.Log($"Player {curPlayer} Checked");
+                }
+                else
+                {
+                    //Debug.Log($"Player {curPlayer} Call");
+                }
+                break;
+
+            case "Double":
+                // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 레이즈 머니 만큼 더 레이즈
+                //Debug.Log($"Player {curPlayer} Double");
+
+                if (curBetAmount == 0)
+                {
+                    curBetAmount = GetBaseBetAmount(Managers.CurrentDifficulty, false);
+                }
+                else
+                {
+                    curBetAmount *= 2;
+                }
+                break;
+
+            case "Half":
+                // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 팟머니 * 0.5 만큼 더 레이즈
+               // Debug.Log($"Player {curPlayer} Half");
+
+                curBetAmount = curBetAmount + (HoldemGameControl.Control.PotMoney + curBetAmount) / 2;
+                break;
+
+            case "Quater":
+                // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 팟머니 * 0.25 만큼 더 레이즈
+                //Debug.Log($"Player {curPlayer} Quater");
+
+                curBetAmount = curBetAmount + (HoldemGameControl.Control.PotMoney + curBetAmount) / 4;
+                break;
+
+            case "AllIn":
+                // 올인 / 현재 플레이어 중 최소 금액 찾고, 내 시드 머니가 그거보다 많으면 그거만큼 배팅
+                //Debug.Log($"Player {curPlayer} AllIn");
+
+                break;
+        }
+
+        if(betType != "Die")
+        {
+            User.NowUser.HoldemBettingMoney(User.NowUser.GetUid(), curBetAmount);
+        }
+        SyncSystem.Sync.HoldemBetProcess(CurBetPlayer, betType, curBetAmount);
     }
 }
