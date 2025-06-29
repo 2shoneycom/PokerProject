@@ -134,7 +134,7 @@ public class HoldemGameControl : MonoBehaviour
             ProcessStage();
     }
 
-    void ProcessStage()
+    public void ProcessStage()
     {
         switch (StageCount)
         {

@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -135,10 +136,71 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         // 모든 룸 참가자가 GameRoom 씬을 로드하게함
         Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
         // 씬메니저로 로드하면 연결 정보가 사라짐.
+
+        // 방에 들어왔으면 내 포톤 플레이어 정보 설정
+        SetMyPhotonPlayerInfo(PhotonNetwork.LocalPlayer);
     }
 
     #endregion
 
+    public void LeaveRoom()
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.LeaveRoom();
+        }
+        else
+        {
+            Debug.LogError("PhotonManger.cs -> LeaveRoom(), 현재 방에 들어와있는 상태가 아닙니다.");
+        }
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            TakeOwnerShip();
+            HoldemGameControl.Control.ProcessStage();
+        }
+    }
+
+    private void TakeOwnerShip()
+    {
+        foreach (var view in FindObjectsOfType<PhotonView>())
+        {
+            if (view.Owner == null || view.OwnerActorNr == 0)
+            {
+                view.TransferOwnership(PhotonNetwork.LocalPlayer);
+            }
+        }
+    }
+
+    private void SetMyPhotonPlayerInfo(Player newPlayer)
+    {
+        Hashtable props = new Hashtable
+        {
+            { "uid", User.NowUser.GetUid() }
+        };
+        newPlayer.SetCustomProperties(props);
+    }
+
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        Debug.Log($"나간 사람 ActorNumber: {otherPlayer.ActorNumber}");
+        Debug.Log($"나간 사람 CustomProperties: {otherPlayer.CustomProperties["uid"]}");
+
+        if (otherPlayer.CustomProperties.ContainsKey("uid"))
+        {
+            string uid = otherPlayer.CustomProperties["uid"].ToString();
+            Managers.Seat.LeaveSeat(uid);
+        }
+        else
+        {
+            Debug.LogWarning("나간 사람의 CustomProperties에 uid가 없습니다.");
+        }
+    }
+    
+    
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         if(PhotonNetwork.IsMasterClient)                            // Room 입장과 Scene 입장은 별개이므로 N초의 로딩 시간 적용

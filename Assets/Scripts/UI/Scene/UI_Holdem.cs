@@ -72,7 +72,7 @@ public class UI_Holdem : UI_Scene
         UI_Player2_Panel,
         UI_Player3_Panel,
         UI_Player4_Panel,
-        UI_Player5_Panel,  
+        UI_Player5_Panel,
         UI_Player6_Panel,
         UI_Player7_Panel,
         UI_Player1_Bet,
@@ -89,7 +89,7 @@ public class UI_Holdem : UI_Scene
 
     public override void Init()
     {
-//        base.Init();
+        //        base.Init();
 
         Managers.UI.SetWorldSpaceUI(gameObject);
 
@@ -108,7 +108,7 @@ public class UI_Holdem : UI_Scene
 
         GetGameObject((int)GameObjects.UI_TmpWinnerShow).SetActive(false);
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
-        BindEvent(GetGameObject((int)GameObjects.UI_Backspace), BackspaceEvent);
+        BindEvent(GetGameObject((int)GameObjects.UI_Backspace), LeaveRoomClicked);
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);
 
         SetRoomButton(isRoomOpened);
@@ -160,7 +160,7 @@ public class UI_Holdem : UI_Scene
     {
         foreach (int idx in Enum.GetValues(typeof(Buttons)))
         {
-            if (idx == (int)Buttons.UI_RoomButton || idx == (int)Buttons.UI_GameStartButton) 
+            if (idx == (int)Buttons.UI_RoomButton || idx == (int)Buttons.UI_GameStartButton)
                 continue;
 
             GetButton(idx).interactable = false;
@@ -262,7 +262,7 @@ public class UI_Holdem : UI_Scene
 
     void SeatBind()
     {
-        for(int i = 0; i < 7; i++)
+        for (int i = 0; i < 7; i++)
         {
             string go = $"UI_Player{i + 1}_Panel";
             int num = i;
@@ -338,20 +338,6 @@ public class UI_Holdem : UI_Scene
         HoldemGameControl.Bet.PlayerBetSelected(betType);
     }
 
-    void BackspaceEvent(PointerEventData data)
-    {
-        if (HoldemGameControl.Control.IsPlaying)
-        {
-
-        }
-        else
-        {
-
-        }
-
-        Managers.Scene.LoadScene(Define.Scene.Lobby);
-    }
-
     void OpenRoomClicked(PointerEventData data)
     {
 
@@ -383,7 +369,7 @@ public class UI_Holdem : UI_Scene
         List<string> wList = HoldemGameControl.Players.GetWinnerList();
         int len = wList.Count;
 
-        for(int i = 0; i < len; i++)
+        for (int i = 0; i < len; i++)
         {
             panelText.text += HoldemGameControl.Players.GetPlayerNickNameByUID(wList[i]);
 
@@ -403,5 +389,11 @@ public class UI_Holdem : UI_Scene
 
         SetWinnerPanel(false);
         HoldemGameControl.Control.NextStage();
+    }
+
+    private void LeaveRoomClicked(PointerEventData data)
+    {
+        HoldemScene holdemScene = new HoldemScene();
+        holdemScene.RequestLeaveRoom();
     }
 }
