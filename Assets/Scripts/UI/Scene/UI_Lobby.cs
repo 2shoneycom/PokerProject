@@ -62,6 +62,7 @@ public class UI_Lobby : UI_Scene
         BindEvent(GetImage((int)Images.UI_IconSetting).gameObject, SettingClicked);
         BindEvent(GetImage((int)Images.UI_IconGift).gameObject, GiftClicked);
         //BindEvent(GetButton((int)Buttons.UI_ButtonBlackJack).gameObject, LoginManager.Instance.LogOut);
+        BindEvent(GetImage((int)Images.UI_IconWeb).gameObject, WebClicked);
     }
 
     void HoldemClicked(PointerEventData data)
@@ -132,5 +133,11 @@ public class UI_Lobby : UI_Scene
     void MoveToFriendScene(PointerEventData data)
     {
         Managers.Scene.LoadScene(Define.Scene.Friend);
+    }
+
+    private void WebClicked(PointerEventData data)
+    {
+        LobbyScene lobbyScene = new LobbyScene();
+        lobbyScene.RequestWebLink();
     }
 }

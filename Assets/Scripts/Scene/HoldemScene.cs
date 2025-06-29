@@ -63,4 +63,11 @@ public class HoldemScene : BaseScene
     {
         Debug.Log("Holdem Scene Clear");
     }
+
+    public void RequestLeaveRoom()
+    {
+        // 방을 나가고 로비씬으로 이동
+        Managers.Photon.LeaveRoom();
+        Managers.Scene.LoadScene(Define.Scene.Lobby);
+    }
 }

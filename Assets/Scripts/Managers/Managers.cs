@@ -2,6 +2,7 @@ using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using WebSocketSharp.Server;
 
 public class Managers : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class Managers : MonoBehaviour
     RewardManager _reward = new RewardManager();
     NickNameManager _nickname = new NickNameManager();
     PhotonManager _photon;
+    WebManager _web = new WebManager();
 
     public static ResourceManager Resource { get { return Instance._resource; } }
     public static SceneManagerEx Scene { get { return Instance._scene; } }
@@ -28,6 +30,7 @@ public class Managers : MonoBehaviour
     public static AuthManager Auth { get { return Instance._auth; } }
     public static RewardManager Reward { get { return Instance._reward; } }
     public static PhotonManager Photon { get { return Instance._photon; } }
+    public static WebManager Web { get { return Instance._web;  }}
     public static NickNameManager NickName { get { return Instance._nickname; } }
 
 
