@@ -27,7 +27,7 @@ public class HoldemCardManager
 
     List<int> cardBuffer;
     List<char> cardShape;       // 0-12 : Clover , 13-25 : Diamond, 26-38 : Heart, 39-51 : Spade
-    List<Sprite> cardSprites;   // same with upper
+    List<Sprite> cardSprites;   // same with above
     List<int> cardNum;          // 0-12 : Clover's 1 to 13, 13-25 : Diamond's 1 to 13 ,,,,
 
     List<GameObject> leavePlayerCard;
@@ -41,7 +41,6 @@ public class HoldemCardManager
     Vector3[,] playerCardPos;
     public int CardLen { get { return HoldemGameControl.Control.StageCount == 5 ? 0 : 1; } }
 
-    HoldemScene _holdemScene;
     UI_Holdem _holdemUI;
 
     public static Action<string> OnAddCard;
@@ -66,7 +65,6 @@ public class HoldemCardManager
 
     void Setup()
     {
-        _holdemScene = (HoldemScene)Managers.Scene.CurrentScene;
         _holdemUI = (UI_Holdem)Managers.UI.SceneUI;
 
         dealerCardPos = new Vector3[DEALER_CARD_NUM];
@@ -337,5 +335,10 @@ public class HoldemCardManager
             dealerCardList[i] = null;
         }
         leavePlayerCard.Clear();
+    }
+
+    public void GiveHoldemCardManagerSyncData(Player newPlayer)
+    {
+
     }
 }

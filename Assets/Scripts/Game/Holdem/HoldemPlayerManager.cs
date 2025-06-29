@@ -1,4 +1,5 @@
 using Photon.Pun;
+using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -126,6 +127,7 @@ public class HoldemPlayerManager
     public void UpdatePlayerSeedMoney(int index, int seedMoney)
     {
         playerSeedMoney[index] = seedMoney;
+        HoldemGameControl.Control.UpdatePlayerSeedMoneyUI();
     }
 
     public int GetPlayerBet(int index)
@@ -133,9 +135,8 @@ public class HoldemPlayerManager
         return playerBettingMoney[index];
     }
 
-    public void UpdatePlayerBetting(int index, int amount)      // User가 자신의 HoldemPlayer에서 SetBetMoney을 호출할때 마다 동기화
+    public void UpdatePlayerBetting(int index, int amount)
     {
-        Debug.Log($"Player {index} betting amount : {amount}");
         playerBettingMoney[index] += amount;
         playerIsBet[index] = true;
         HoldemGameControl.Control.UpdatePlayerBetMoneyUI();
@@ -222,6 +223,20 @@ public class HoldemPlayerManager
         }
     }
 
+    public int GetLowestPlayerSeedMoney()
+    {
+        int min_bet = int.MaxValue;
+        for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if (GetPlayerState(i) == false || GetPlayerUID(i) == "")
+                continue;
+
+            if (playerSeedMoney[i] < min_bet)
+                min_bet = playerSeedMoney[i];
+        }
+        return min_bet;
+    }
+
     public int FindHighestBet()
     {
         int max_bet = 0;
@@ -265,5 +280,10 @@ public class HoldemPlayerManager
                 Managers.Resource.PhotonDestroy(cards.Item2);
             }
         }
+    }
+
+    public void GiveHoldemPlayerManagerSyncData(Player newPlayer)
+    {
+
     }
 }

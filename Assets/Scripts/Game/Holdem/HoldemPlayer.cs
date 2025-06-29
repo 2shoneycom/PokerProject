@@ -28,14 +28,9 @@ public class HoldemPlayer
         seatedIndex = idx;
     }
 
-    public void SetBetMoney(int amount, bool ttt = true)
+    public void SetBetMoney(int amount)
     {
         betMoney = amount;
-
-        if (ttt)
-        {
-            SyncSystem.Sync.SyncHoldemMyBetting(GameIndex, amount);
-        }
     }
 
     public void ClearSetting()

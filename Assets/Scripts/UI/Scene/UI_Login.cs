@@ -27,6 +27,8 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
     Button _lobbyButton = null;
     public Button LobbyButton {  get { return _lobbyButton; } }
 
+    float time = 0;
+
     public override void Init()
     {
         base.Init();

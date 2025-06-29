@@ -49,7 +49,9 @@ public class HoldemBetManager
         string pUID = HoldemGameControl.Players.GetPlayerUID(playerIndex);
         int dAmount = GetBaseBetAmount(Managers.CurrentDifficulty, isSB);
         SyncSystem.Sync.HoldemBetMoneyToTarget(pUID, dAmount);
-        SyncSystem.Sync.SyncHoldemPlayerIsBet(playerIndex, true);
+
+        SyncSystem.Sync.SyncHoldemMyBetting(playerIndex, dAmount);
+        //SyncSystem.Sync.SyncHoldemPlayerIsBet(playerIndex, true);
     }
 
     //임의로 정한 값
@@ -121,7 +123,8 @@ public class HoldemBetManager
 
     bool IsBetEnd()
     {
-        if(HoldemGameControl.Players.NowPlayerNum - HoldemGameControl.Players.GetDeadPlayerNum() == 1){
+        if(HoldemGameControl.Players.NowPlayerNum - HoldemGameControl.Players.GetDeadPlayerNum() == 1)
+        {
             SyncSystem.Sync.SyncHoldemIsOneLeft(true);
             return true;
         }
@@ -149,7 +152,15 @@ public class HoldemBetManager
 
     public IEnumerator AutoDieTimer(float duration)
     {
-        yield return new WaitForSeconds(duration);
+        while (duration > 0) 
+        {
+            duration -= Time.deltaTime;
+            _holdemUI.SetTimerText(duration);
+            yield return null;
+        }
+
+        duration = 0;
+        _holdemUI.SetTimerText(duration);
 
         // 현재 플레이어가 n초 동안 버튼을 누르지 않았을 경우 Die 처리
         Debug.Log($"Player {curBetPlayer} didn't respond. Automatically choosing Die.");
@@ -165,8 +176,7 @@ public class HoldemBetManager
         if (betType != "Die")
         {
             HoldemGameControl.Players.UpdatePlayerBetting(curPlayer, betAmount);
-            int tmp = HoldemGameControl.Control.PotMoney;
-            HoldemGameControl.Control.PotMoney = tmp + betAmount;
+            HoldemGameControl.Control.PotMoney = HoldemGameControl.Control.PotMoney + betAmount;
         }
         else
         {
@@ -247,12 +257,13 @@ public class HoldemBetManager
                 // 올인 / 현재 플레이어 중 최소 금액 찾고, 내 시드 머니가 그거보다 많으면 그거만큼 배팅
                 //Debug.Log($"Player {curPlayer} AllIn");
 
+                curBetAmount = HoldemGameControl.Players.GetLowestPlayerSeedMoney();
                 break;
         }
 
         if(betType != "Die")
         {
-            User.NowUser.HoldemBettingMoney(User.NowUser.GetUid(), curBetAmount, ttt: false);
+            User.NowUser.HoldemBettingMoney(User.NowUser.GetUid(), curBetAmount);
         }
         SyncSystem.Sync.HoldemBetProcess(CurBetPlayer, betType, curBetAmount);
     }
