@@ -103,6 +103,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         StartCoroutine(Loading(0.5f));
     }
 
+    public void JoinPoker()
+    {
+        _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
+        StartCoroutine(Loading(0.5f));
+    }
+
     IEnumerator Loading(float sec)
     {
         yield return new WaitForSeconds(sec);
@@ -134,9 +140,22 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {   // 룸 참가에 성공한 경우
         _loadingUI.SetConnectionInfoText("Success to Enter Room");
         // 모든 룸 참가자가 GameRoom 씬을 로드하게함
-        Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
-        // 씬메니저로 로드하면 연결 정보가 사라짐.
+        Define.GameType gameType = Managers.CurrentGameType;
 
+        switch (gameType)
+        {
+            case Define.GameType.Holdem:
+                Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
+                break;
+            case Define.GameType.Poker:
+                Managers.Scene.PhotonLoadScene(Define.Scene.Poker);
+                break;
+            case Define.GameType.BlackJack:
+                break;
+            default:
+                break;
+        }
+        
         // 방에 들어왔으면 내 포톤 플레이어 정보 설정
         SetMyPhotonPlayerInfo(PhotonNetwork.LocalPlayer);
     }

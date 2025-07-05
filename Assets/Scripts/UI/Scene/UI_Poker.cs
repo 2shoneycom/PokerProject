@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using DG.Tweening;
 
-public class UI_Holdem : UI_Scene
+public class UI_Poker : UI_Scene
 {
     enum Buttons
     {
@@ -28,8 +28,6 @@ public class UI_Holdem : UI_Scene
         UI_Player3_NameText,
         UI_Player4_NameText,
         UI_Player5_NameText,
-        UI_Player6_NameText,
-        UI_Player7_NameText,
         UI_PotMoney_Text,
         UI_RoomButton_Text,
         UI_TmpWinnerShow_Text,
@@ -38,15 +36,11 @@ public class UI_Holdem : UI_Scene
         UI_Player3_BetText,
         UI_Player4_BetText,
         UI_Player5_BetText,
-        UI_Player6_BetText,
-        UI_Player7_BetText,
         UI_Player1_SeedMoneyText,
         UI_Player2_SeedMoneyText,
         UI_Player3_SeedMoneyText,
         UI_Player4_SeedMoneyText,
         UI_Player5_SeedMoneyText,
-        UI_Player6_SeedMoneyText,
-        UI_Player7_SeedMoneyText,
         UI_TimerText,
     }
 
@@ -57,8 +51,6 @@ public class UI_Holdem : UI_Scene
         UI_Player3_Icon,
         UI_Player4_Icon,
         UI_Player5_Icon,
-        UI_Player6_Icon,
-        UI_Player7_Icon,
         UI_PotMoney_Icon,
     }
 
@@ -73,15 +65,11 @@ public class UI_Holdem : UI_Scene
         UI_Player3_Panel,
         UI_Player4_Panel,
         UI_Player5_Panel,
-        UI_Player6_Panel,
-        UI_Player7_Panel,
         UI_Player1_Bet,
         UI_Player2_Bet,
         UI_Player3_Bet,
         UI_Player4_Bet,
         UI_Player5_Bet,
-        UI_Player6_Bet,
-        UI_Player7_Bet,
         UI_Block,
     }
 
@@ -89,7 +77,7 @@ public class UI_Holdem : UI_Scene
 
     public override void Init()
     {
-        //        base.Init();
+        // base.Init();
 
         Managers.UI.SetWorldSpaceUI(gameObject);
 
@@ -183,13 +171,13 @@ public class UI_Holdem : UI_Scene
         }
         else        // 게임 중이라면 참여하는 플레이어만 on
         {
-            for (int i = 1; i <= 7; i++)
+            for (int i = 1; i <= PokerGameControl.MAX_PLAYER_NUM; i++)
             {
-                int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
-                if (HoldemGameControl.Players.GetPlayerUID(gameIndex) == "")
-                    continue;
+                //int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
+                //if (PokerGameControl.Players.GetPlayerUID(gameIndex) == "")
+                //    continue;
 
-                GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
+                //GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
             }
         }
     }
@@ -208,7 +196,7 @@ public class UI_Holdem : UI_Scene
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
 
         // 게임 시작
-        SyncSystem.Sync.HoldemStartSync();
+        //SyncSystem.Sync.HoldemStartSync();
     }
 
     public void BetButtonInteractiveSwitch(string betType, bool isOn)
@@ -229,15 +217,15 @@ public class UI_Holdem : UI_Scene
 
     public void UpdatePotMoney()
     {
-        GetText((int)Texts.UI_PotMoney_Text).text = $"{HoldemGameControl.Control.PotMoney}";
+        GetText((int)Texts.UI_PotMoney_Text).text = $"{PokerGameControl.Control.PotMoney}";
     }
 
     public void UpdateBetMoney()
     {
         for (int i = 1; i <= 7; i++)
         {
-            int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
-            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = HoldemGameControl.Players.GetPlayerBet(gameIndex).ToString();
+            int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
+            //GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = PokerGameControl.Players.GetPlayerBet(gameIndex).ToString();
         }
     }
 
@@ -245,8 +233,8 @@ public class UI_Holdem : UI_Scene
     {
         for (int i = 1; i <= 7; i++)
         {
-            int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
-            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = HoldemGameControl.Players.GetPlayerSeedMoney(gameIndex).ToString();
+            int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
+            //GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = HoldemGameControl.Players.GetPlayerSeedMoney(gameIndex).ToString();
         }
     }
 
@@ -262,7 +250,7 @@ public class UI_Holdem : UI_Scene
 
     void SeatBind()
     {
-        for (int i = 0; i < 7; i++)
+        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
             string go = $"UI_Player{i + 1}_Panel";
             int num = i;
@@ -323,19 +311,19 @@ public class UI_Holdem : UI_Scene
 
     void RequestBet(string betType)
     {
-        if (HoldemGameControl.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
-        {
-            if (betType == "Die")       // 자신의 턴이 아니면 die만 켜져있어서 die만 누를테지만 혹시 모르니
-            {
-                if (HoldemGameControl.Players.GetPlayerDieReserve(User.NowGamePlayer.GameIndex) == false)
-                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, true);
-                else
-                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, false);
-            }
-            return;     // 자신의 턴이 아닐때 die가 아니면 모두 리턴
-        }
+        //if (PokerGameControl.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
+        //{
+        //    if (betType == "Die")       // 자신의 턴이 아니면 die만 켜져있어서 die만 누를테지만 혹시 모르니
+        //    {
+        //        if (PokerGameControl.Players.GetPlayerDieReserve(User.NowGamePlayer.GameIndex) == false)
+        //            SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, true);
+        //        else
+        //            SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, false);
+        //    }
+        //    return;     // 자신의 턴이 아닐때 die가 아니면 모두 리턴
+        //}
 
-        HoldemGameControl.Bet.PlayerBetSelected(betType);
+        //PokerGameControl.Bet.PlayerBetSelected(betType);
     }
 
     void OpenRoomClicked(PointerEventData data)
@@ -393,7 +381,7 @@ public class UI_Holdem : UI_Scene
 
     private void LeaveRoomClicked(PointerEventData data)
     {
-        HoldemScene holdemScene = (HoldemScene)Managers.Scene.CurrentScene;
-        holdemScene.RequestLeaveRoom();
+        //HoldemScene holdemScene = new HoldemScene();
+        //holdemScene.RequestLeaveRoom();
     }
 }

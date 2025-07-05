@@ -12,6 +12,7 @@ public class Define
         Lobby,
         Friend,
         PlayerInfo,
+        Poker,
     }
 
     public enum UIEvent
@@ -33,5 +34,13 @@ public class Define
         Beginner,
         Amateur,
         Pro,
+    }
+
+    public enum GameType
+    {
+        None,
+        Holdem,
+        Poker,
+        BlackJack,
     }
 }

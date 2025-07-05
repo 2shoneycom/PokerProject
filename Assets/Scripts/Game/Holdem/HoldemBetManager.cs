@@ -130,10 +130,10 @@ public class HoldemBetManager
         }
 
         if(HoldemGameControl.Players.GetPlayerIsBet(CurBetPlayer) && 
-            User.NowHoldemPlayer.BetMoney == HoldemGameControl.Players.FindHighestBet())
+            User.NowGamePlayer.BetMoney == HoldemGameControl.Players.FindHighestBet())
         {
             Debug.Log($"highest bet money : {HoldemGameControl.Players.FindHighestBet()}");
-            Debug.Log($"my bet money : {User.NowHoldemPlayer.BetMoney}");
+            Debug.Log($"my bet money : {User.NowGamePlayer.BetMoney}");
             return true;
         }
         return false;
@@ -146,7 +146,7 @@ public class HoldemBetManager
             _holdemUI.BetButtonInteractiveSwitch(BetType[i], false);
         }
 
-        if (HoldemGameControl.Players.GetPlayerState(User.NowHoldemPlayer.GameIndex))      // Die예약을 위해 죽지 않앗다면 die는 항상 활성화
+        if (HoldemGameControl.Players.GetPlayerState(User.NowGamePlayer.GameIndex))      // Die예약을 위해 죽지 않앗다면 die는 항상 활성화
             _holdemUI.BetButtonInteractiveSwitch("Die", true);
     }
 

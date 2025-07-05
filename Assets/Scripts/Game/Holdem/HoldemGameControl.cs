@@ -23,7 +23,7 @@ public class HoldemGameControl : MonoBehaviour
         {
             instance = this;
             _betManager = new HoldemBetManager();
-            _holdemaPlayers = new HoldemPlayerManager();
+            _playerManager = new HoldemPlayerManager();
             _cardManager = new HoldemCardManager();
             _resultManager = new HoldemResultManager();
         }
@@ -36,8 +36,8 @@ public class HoldemGameControl : MonoBehaviour
     public const int MAX_PLAYER_NUM = 7;
     public const float RESULT_SHOW_TIME = 5.0f;
 
-    HoldemPlayerManager _holdemaPlayers;
-    public static HoldemPlayerManager Players { get { return Control._holdemaPlayers; } }
+    HoldemPlayerManager _playerManager;
+    public static HoldemPlayerManager Players { get { return Control._playerManager; } }
 
     HoldemBetManager _betManager;
     public static HoldemBetManager Bet { get { return Control._betManager; } }
@@ -98,7 +98,7 @@ public class HoldemGameControl : MonoBehaviour
         if (isPlaying)
             return;
 
-        if (User.NowHoldemPlayer.SeatIndex == -1)
+        if (User.NowGamePlayer.SeatIndex == -1)
             return;
 
         isPlaying = true;
@@ -417,7 +417,7 @@ public class HoldemGameControl : MonoBehaviour
         isPlaying = false;
 
         // 자신 게임 관련 초기화 (사실 베팅금만 초기화)
-        User.NowHoldemPlayer.ClearSetting();
+        User.NowGamePlayer.ClearSetting();
 
         // 딜러 카드 삭제 및 관련 초기화
         Card.ClearDealerCard();

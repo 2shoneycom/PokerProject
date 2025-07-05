@@ -12,11 +12,12 @@ public class SeatManager
 
     public const string DEFAULT_NULL_SEAT = "자리 선택";
 
-    HoldemScene _holdem = null;
+    GameScene curGameScene = null;
+
 
     public void Init(int seatSize)      // holdemscene에서 init해줌
     {
-        _holdem = (HoldemScene)Managers.Scene.CurrentScene;
+        curGameScene = (GameScene)Managers.Scene.CurrentScene;
 
         occupiedCount = 0;
         SyncSystem.Sync.OnSeatsSynced -= ApplySeatsData;
@@ -32,6 +33,8 @@ public class SeatManager
         }
     }
 
+    
+
     private void SetSeats(int seatSize)
     {
         seats = new List<string>();
@@ -41,7 +44,7 @@ public class SeatManager
             seats.Add(DEFAULT_NULL_SEAT);
 
             // ui
-            _holdem.UpdateSeatUI(i, DEFAULT_NULL_SEAT);
+            curGameScene.UpdateSeatUI(i, DEFAULT_NULL_SEAT);
         }
     }
 
@@ -53,9 +56,9 @@ public class SeatManager
             return;
         }
 
-        if (User.NowHoldemPlayer.SeatIndex != -1)
+        if (User.NowGamePlayer.SeatIndex != -1)
         {
-            Debug.Log($"이미 {User.NowHoldemPlayer.SeatIndex}번째 자리에 앉으셨습니다.");
+            Debug.Log($"이미 {User.NowGamePlayer.SeatIndex}번째 자리에 앉으셨습니다.");
             return;
         }
 
@@ -68,21 +71,21 @@ public class SeatManager
         seats[seatIndex * 2 + 1] = playerNickName;
 
         if (playerUID == User.NowUser.GetUid())
-            User.NowHoldemPlayer.SetSeatIndex(seatIndex);
+            User.NowGamePlayer.SetSeatIndex(seatIndex);
 
         // occupiedCount 변수 동기화 위해 옮김
         occupiedCount++;
-        if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient && HoldemGameControl.Control.IsPlaying == false)
+        if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient && Managers.IsNowPlayingGame == false)
         {
             /* 
             앉은 사람 2명 이상이고 내가 방장이면,
             UI에 게임 스타트 버튼 띄우기 요청
             */
-            _holdem.ReadyForGameStart();
+            curGameScene.ReadyForGameStart();
         }
 
         // ui
-        _holdem.UpdateSeatUI(seatIndex, playerNickName);
+        curGameScene.UpdateSeatUI(seatIndex, playerNickName);
     }
 
     public void LeaveSeat(string player_uid)
@@ -95,11 +98,11 @@ public class SeatManager
         }
         else
         {   // 글고 지금은 포톤에서 이 함수를 부르고 있는데, 포톤에서 어떤 게임에서 나갓는지 파악하고 호출도 해야할듯, 게임 중인지 아닌지도 판단하고
-            seats.RemoveAt(targetIndex);    // 기존 i 자리에 있던 플레이어의 uid (i) 제거
-            seats.RemoveAt(targetIndex);    // 기존 i 자리에 있던 플레이어의 닉네임 (i + 1) 제거
+            seats[targetIndex] = DEFAULT_NULL_SEAT;    // 기존 i 자리에 있던 플레이어의 uid (i) 제거
+            seats[targetIndex + 1] = DEFAULT_NULL_SEAT;    // 기존 i 자리에 있던 플레이어의 닉네임 (i + 1) 제거
 
             // UI 업데이트
-            _holdem.UpdateSeatUI(targetIndex / 2, "자리 선택");
+            curGameScene.UpdateSeatUI(targetIndex / 2, "자리 선택");
         }
     }
 
@@ -127,7 +130,7 @@ public class SeatManager
 
     public void ApplySeatsData(string[] syncedSeats)
     {
-        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        for (int i = 0; i < Managers.GetCurGameMaxPlayer; i++)
         {
             int index = i * 2;
             if (syncedSeats[index] != DEFAULT_NULL_SEAT)
@@ -137,19 +140,19 @@ public class SeatManager
 
                 occupiedCount++;
 
-                _holdem.UpdateSeatUI(i, seats[index + 1]);
+                curGameScene.UpdateSeatUI(i, seats[index + 1]);
             }
         }
     }
 
     public void ConverToPlayers()
     {
-        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        for (int i = 0; i < Managers.GetCurGameMaxPlayer; i++)
         {
             HoldemGameControl.Players.UpdatePlayerUID(i, seats[i * 2]);
         }
         User.NowUser.HoldemSyncSeedMoney();
-        _holdem.UpdateBetUI(true);
+        curGameScene.UpdateBetUI(true);
         HoldemGameControl.Control.NextStage();
     }
 
