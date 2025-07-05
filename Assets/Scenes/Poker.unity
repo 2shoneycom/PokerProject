@@ -487,6 +487,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1415656961592275891, guid: 893be5bac6bd16941b28dde27d743a3a, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 79.000015
+      objectReference: {fileID: 0}
+    - target: {fileID: 1649265023953027619, guid: 893be5bac6bd16941b28dde27d743a3a, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 79
+      objectReference: {fileID: 0}
     - target: {fileID: 6137016801696214832, guid: 893be5bac6bd16941b28dde27d743a3a, type: 3}
       propertyPath: m_Name
       value: UI_Poker
@@ -570,6 +578,10 @@ PrefabInstance:
     - target: {fileID: 8791890777714979650, guid: 893be5bac6bd16941b28dde27d743a3a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8996641440217205951, guid: 893be5bac6bd16941b28dde27d743a3a, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -50
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
