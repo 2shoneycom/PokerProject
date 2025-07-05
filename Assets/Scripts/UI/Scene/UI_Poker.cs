@@ -194,7 +194,7 @@ public class UI_Poker : UI_Scene
     void GameStartButtonClicked(PointerEventData data)
     {
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
-
+        PokerGameControl.Control.StartGame();
         // 게임 시작
         //SyncSystem.Sync.HoldemStartSync();
     }

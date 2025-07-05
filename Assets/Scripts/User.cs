@@ -111,4 +111,9 @@ public class User
             SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
     }
 
+    public void PokerSyncSeedMoney()
+    {
+        if (PokerGameControl.Control.IsPlaying) return;
+            //SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
+    }
 }

@@ -26,7 +26,7 @@ public class PokerScene : GameScene
     IEnumerator Loading(float sec)
     {
         yield return new WaitForSeconds(sec);
-        SeatInit();
+        //SeatInit();
     }
 
     void SeatInit()

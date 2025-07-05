@@ -83,13 +83,13 @@ public class PokerGameControl : MonoBehaviour
         set
         {
             _potMoney = value;
-            _holdemUI.UpdatePotMoney();
+            _pokerUI.UpdatePotMoney();
         }
     }
 
     void Start()
     {
-        _holdemUI = (UI_Holdem)Managers.UI.SceneUI;
+        _pokerUI = (UI_Poker)Managers.UI.SceneUI;
     }
 
     public void StartGame()
@@ -102,13 +102,13 @@ public class PokerGameControl : MonoBehaviour
 
         isPlaying = true;
 
-        _holdemUI.UISwitch(true);
+        _pokerUI.UISwitch(true);
 
-        Players.GameSetting();
+        //Players.GameSetting();
         Card.Init();
-        Bet.Init(_holdemUI);
+        //Bet.Init(_pokerUI);
 
-        User.NowUser.HoldemSyncSeedMoney();
+        //User.NowUser.PokerSyncSeedMoney();
         PotMoney = 0;
         StageCount = 0;
         StageDetail = 0;
@@ -133,54 +133,63 @@ public class PokerGameControl : MonoBehaviour
             ProcessStage();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+            _pokerUI.GameStartButtonOn();
+        if (Input.GetKeyDown(KeyCode.W))
+            StartCoroutine(Card.DealingCard());
+    }
+
     public void ProcessStage()
     {
+        return;
         switch (StageCount)
         {
 
         }
     }
 
-    int GetNextPlayerIndex(int index)
-    {
-        do
-        {
-            index = (index + 1) % MAX_PLAYER_NUM;
-        } while (Players.GetPlayerUID(index) == "");
-        return index;
-    }
+    //int GetNextPlayerIndex(int index)
+    //{
+    //    do
+    //    {
+    //        index = (index + 1) % MAX_PLAYER_NUM;
+    //    } while (Players.GetPlayerUID(index) == "");
+    //    return index;
+    //}
 
-    void DecideDealer()
-    {
-        if (isFirst)
-        {
-            int ranNum = -1;
-            do
-            {
-                ranNum = Random.Range(0, MAX_PLAYER_NUM);
-            } while (Players.GetPlayerUID(ranNum) == "");
-            _playerD = ranNum;
-            isFirst = false;
-        }
-        else
-        {
-            _playerD = GetNextPlayerIndex(_playerD);
-        }
-    }
+    //void DecideDealer()
+    //{
+    //    if (isFirst)
+    //    {
+    //        int ranNum = -1;
+    //        do
+    //        {
+    //            ranNum = Random.Range(0, MAX_PLAYER_NUM);
+    //        } while (Players.GetPlayerUID(ranNum) == "");
+    //        _playerD = ranNum;
+    //        isFirst = false;
+    //    }
+    //    else
+    //    {
+    //        _playerD = GetNextPlayerIndex(_playerD);
+    //    }
+    //}
 
-    public void SetDealer(int index)
-    {
-        _playerD = index;
+    //public void SetDealer(int index)
+    //{
+    //    _playerD = index;
 
-        if (Players.NowPlayerNum == 2)
-            _playerSB = _playerD;
-        else
-            _playerSB = GetNextPlayerIndex(_playerD);
+    //    if (Players.NowPlayerNum == 2)
+    //        _playerSB = _playerD;
+    //    else
+    //        _playerSB = GetNextPlayerIndex(_playerD);
 
-        _playerBB = GetNextPlayerIndex(_playerSB);
+    //    _playerBB = GetNextPlayerIndex(_playerSB);
 
-        NextStage();
-    }
+    //    NextStage();
+    //}
 
     public int ConvertUItoGame(int index)
     {
@@ -204,112 +213,112 @@ public class PokerGameControl : MonoBehaviour
         }
     }
 
-    public void AutoDieTimerSwitch(bool isOn)
-    {
-        if (!IsPlaying)
-            return;
+    //public void AutoDieTimerSwitch(bool isOn)
+    //{
+    //    if (!IsPlaying)
+    //        return;
 
-        if (isOn)
-        {
-            if (dieTimer != null)        // 왜인지 모르겟는데 타이머가 2번 작동함
-            {
-                StopCoroutine(dieTimer);
-                Debug.Log("Duplicate Time Handle");
-            }
-            Debug.Log("Timer start");
-            _holdemUI.TimerSwitch(isOn);
-            dieTimer = StartCoroutine(Bet.AutoDieTimer(HoldemBetManager.AUTO_DIE_TIMER));
-        }
-        else
-        {
-            if (dieTimer != null)
-            {
-                _holdemUI.TimerSwitch(isOn);
-                StopCoroutine(dieTimer);
-                Debug.Log("Time stop");
-            }
-        }
-    }
+    //    if (isOn)
+    //    {
+    //        if (dieTimer != null)        // 왜인지 모르겟는데 타이머가 2번 작동함
+    //        {
+    //            StopCoroutine(dieTimer);
+    //            Debug.Log("Duplicate Time Handle");
+    //        }
+    //        Debug.Log("Timer start");
+    //        _holdemUI.TimerSwitch(isOn);
+    //        dieTimer = StartCoroutine(Bet.AutoDieTimer(HoldemBetManager.AUTO_DIE_TIMER));
+    //    }
+    //    else
+    //    {
+    //        if (dieTimer != null)
+    //        {
+    //            _holdemUI.TimerSwitch(isOn);
+    //            StopCoroutine(dieTimer);
+    //            Debug.Log("Time stop");
+    //        }
+    //    }
+    //}
 
-    void EndGame()
-    {
-        // 우승자 리스트 가져오기
-        List<string> winnerList = Result.GetWinner();
-        for (int i = 0; i < winnerList.Count; i++)
-        {
-            foreach (string winnerUID in winnerList)
-            {
-                // 우승자에게 돈주기
-                SyncSystem.Sync.IncreaseMoneyToTarget(winnerUID, PotMoney / winnerList.Count);
+    //void EndGame()
+    //{
+    //    // 우승자 리스트 가져오기
+    //    List<string> winnerList = Result.GetWinner();
+    //    for (int i = 0; i < winnerList.Count; i++)
+    //    {
+    //        foreach (string winnerUID in winnerList)
+    //        {
+    //            // 우승자에게 돈주기
+    //            SyncSystem.Sync.IncreaseMoneyToTarget(winnerUID, PotMoney / winnerList.Count);
 
-                Debug.Log("우승자: " + winnerUID);
-            }
-        }
-        // 팟머니 0으로
-        StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(0));
-        SyncSystem.Sync.SyncHoldemWinnerList(winnerList.ToArray());
-    }
+    //            Debug.Log("우승자: " + winnerUID);
+    //        }
+    //    }
+    //    // 팟머니 0으로
+    //    StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(0));
+    //    SyncSystem.Sync.SyncHoldemWinnerList(winnerList.ToArray());
+    //}
 
-    public void ShowResult()
-    {
-        // 플레이어 카드 보이기
-        Players.ShowPlayerCard();
+    //public void ShowResult()
+    //{
+    //    // 플레이어 카드 보이기
+    //    Players.ShowPlayerCard();
 
-        _holdemUI.SetWinnerPanel(true);
-    }
+    //    _holdemUI.SetWinnerPanel(true);
+    //}
 
-    public void ClearGame()
-    {
-        isPlaying = false;
+    //public void ClearGame()
+    //{
+    //    isPlaying = false;
 
-        // 자신 게임 관련 초기화 (사실 베팅금만 초기화)
-        User.NowGamePlayer.ClearSetting();
+    //    // 자신 게임 관련 초기화 (사실 베팅금만 초기화)
+    //    User.NowGamePlayer.ClearSetting();
 
-        // 딜러 카드 삭제 및 관련 초기화
-        Card.ClearDealerCard();
+    //    // 딜러 카드 삭제 및 관련 초기화
+    //    Card.ClearDealerCard();
 
-        // 플레이어 카드 삭제
-        Players.ClearGameSetting();
+    //    // 플레이어 카드 삭제
+    //    Players.ClearGameSetting();
 
-        _holdemUI.UpdateBetMoney();
+    //    _holdemUI.UpdateBetMoney();
 
-        // 인원수 체크를 하고 2 이상이면 바로 시작
-        if (Managers.Seat.GetOccupiedCount() >= 2)
-        {
-            StartGame();
-        }
-        else
-        {
-            isFirst = true;
-            _holdemUI.UISwitch(false);
-            _holdemUI.BetUISwitch(false);
-        }
-    }
+    //    // 인원수 체크를 하고 2 이상이면 바로 시작
+    //    if (Managers.Seat.GetOccupiedCount() >= 2)
+    //    {
+    //        StartGame();
+    //    }
+    //    else
+    //    {
+    //        isFirst = true;
+    //        _holdemUI.UISwitch(false);
+    //        _holdemUI.BetUISwitch(false);
+    //    }
+    //}
 
-    public void UpdatePlayerSeedMoneyUI()
-    {
-        _holdemUI.UpdateSeedMoney();
-    }
+    //public void UpdatePlayerSeedMoneyUI()
+    //{
+    //    _holdemUI.UpdateSeedMoney();
+    //}
 
-    public void UpdatePlayerBetMoneyUI()
-    {
-        _holdemUI.UpdateBetMoney();
-    }
+    //public void UpdatePlayerBetMoneyUI()
+    //{
+    //    _holdemUI.UpdateBetMoney();
+    //}
 
-    public IEnumerator PlayerEnterHoldemRoom(float time, Player newPlayer)
-    {
-        yield return new WaitForSeconds(time);
+    //public IEnumerator PlayerEnterHoldemRoom(float time, Player newPlayer)
+    //{
+    //    yield return new WaitForSeconds(time);
 
-        if (IsPlaying)
-        {
-            GiveHoldemGameControlSyncData(newPlayer);
-            Players.GiveHoldemPlayerManagerSyncData(newPlayer);
-            Card.GiveHoldemCardManagerSyncData(newPlayer);
-        }
-    }
+    //    if (IsPlaying)
+    //    {
+    //        GiveHoldemGameControlSyncData(newPlayer);
+    //        Players.GiveHoldemPlayerManagerSyncData(newPlayer);
+    //        Card.GiveHoldemCardManagerSyncData(newPlayer);
+    //    }
+    //}
 
-    void GiveHoldemGameControlSyncData(Player newPlayer)
-    {
+    //void GiveHoldemGameControlSyncData(Player newPlayer)
+    //{
 
-    }
+    //}
 }
