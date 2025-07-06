@@ -36,6 +36,7 @@ public class User
 
     public void SetHoldemPlay()
     {
+        //SetUid(Random.Range(100000, 1000000).ToString());
         //SetNickName(Random.Range(10000, 100000).ToString());
         //SetSeedMoney(100000);
         holdemPlayer = new HoldemPlayer();
@@ -43,7 +44,7 @@ public class User
 
     public void DecreaseMoney(string targetUID, int amount)
     {
-        if (targetUID != nickName)
+        if (targetUID != uid)
             return;
 
         //////////////////////////////// DB와 소통
@@ -54,7 +55,7 @@ public class User
 
     public void IncreaseMoney(string targetUID, int amount)
     {
-        if (targetUID != nickName)
+        if (targetUID != uid)
             return;
 
         //////////////////////////////// DB와 소통
@@ -63,15 +64,15 @@ public class User
         HoldemSyncSeedMoney();
     }
 
-    public void HoldemBettingMoney(string targetUID, int amount)
+    public void HoldemBettingMoney(string targetUID, int amount, bool ttt = true)
     {
-        if (targetUID != nickName)
+        if (targetUID != uid)
             return;
 
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
         Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
-        NowHoldemPlayer.SetBetMoney(NowHoldemPlayer.BetMoney + amount);
+        NowHoldemPlayer.SetBetMoney(NowHoldemPlayer.BetMoney + amount, ttt);
         HoldemSyncSeedMoney();
     }
 

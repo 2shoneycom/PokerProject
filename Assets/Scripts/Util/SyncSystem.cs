@@ -19,14 +19,13 @@ class SyncSystem : MonoBehaviourPun
     }
 
     public Action<string[]> OnSeatsSynced;
-    public Action<string, int> OnHaveSeat;
+    public Action<string, string, int> OnHaveSeat;
 
     void Awake()
     {
         if (instance == null)
         {
             instance = this;
-            //DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -288,15 +287,15 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Bet.HandleBet(curplayer);
     }
 
-    public void HoldemBetProcess(int curPlayer, string betType)
+    public void HoldemBetProcess(int curPlayer, string betType, int betAmount = 0)
     {
-        photonView.RPC("RPC_HoldemBetProcess", RpcTarget.MasterClient, curPlayer, betType);
+        photonView.RPC("RPC_HoldemBetProcess", RpcTarget.All, curPlayer, betType, betAmount);
     }
 
     [PunRPC]
-    public void RPC_HoldemBetProcess(int curPlayer, string betType)
+    public void RPC_HoldemBetProcess(int curPlayer, string betType, int betAmount = 0)
     {
-        HoldemGameControl.Bet.BetProcess(curPlayer, betType);
+        HoldemGameControl.Bet.BetProcess(curPlayer, betType, betAmount);
     }
 
     public void HoldemBetEnd()
@@ -393,28 +392,28 @@ class SyncSystem : MonoBehaviourPun
         OnSeatsSynced?.Invoke(seats);
     }
 
-    public void SyncHaveSeat(string uid, int seatIndex)
+    public void SyncHaveSeat(string uid, string nickname, int seatIndex)
     {
-        photonView.RPC("RPC_HaveSeat", RpcTarget.All, uid, seatIndex);
+        photonView.RPC("RPC_HaveSeat", RpcTarget.All, uid, nickname, seatIndex);
     }
 
     [PunRPC]
-    private void RPC_HaveSeat(string uid, int seatIndex)
+    private void RPC_HaveSeat(string uid, string nickname, int seatIndex)
     {
-        OnHaveSeat?.Invoke(uid, seatIndex);
+        OnHaveSeat?.Invoke(uid, nickname, seatIndex);
     }
 
     #endregion
 
-    public IEnumerator SyncHoldemResultUI(bool isOn)
+    public IEnumerator SyncHoldemResultUI()
     {
         yield return null;
-        photonView.RPC("RPC_SyncHoldemResultUI", RpcTarget.All, isOn);
+        photonView.RPC("RPC_SyncHoldemResultUI", RpcTarget.All);
     }
 
     [PunRPC]
-    private void RPC_SyncHoldemResultUI(bool isOn)
+    private void RPC_SyncHoldemResultUI()
     {
-        HoldemGameControl.Control.ShowResult(isOn);
+        HoldemGameControl.Control.ShowResult();
     }
 }
