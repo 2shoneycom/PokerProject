@@ -250,32 +250,6 @@ public class DBManager
         });
     }
 
-    public async Task<(string, long)> GetPlayerInfo(string uid)
-    {
-        try
-        {
-            DataSnapshot snapshot = await dbRef.Child("Users").Child(uid).GetValueAsync();
-
-            if (snapshot.Exists)
-            {
-                string jsonData = snapshot.GetRawJsonValue();
-                DataToSave loadedData = JsonUtility.FromJson<DataToSave>(jsonData);
-                Debug.Log("user data load success");
-                return (loadedData.nickName, loadedData.seedMoney);
-            }
-            else
-            {
-                Debug.Log("데이터가 존재하지 않음");
-                return (null, 0); // 기본값 반환
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"데이터 조회 실패: {ex.Message}");
-            return (null, 0);
-        }
-    }
-
     public void ChangeNickName(string newNickName)
     {
         DateTime utcNow = DateTime.UtcNow;
