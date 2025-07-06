@@ -55,7 +55,23 @@ public class HoldemBetManager
     //임의로 정한 값
     public int GetBaseBetAmount(Define.Difficulty diff, bool isSB)
     {
-        int baseBet = 500;
+        int baseBet;
+
+        switch (diff)
+        {
+            case Define.Difficulty.Beginner:
+                baseBet = 500;
+                break;
+            case Define.Difficulty.Amateur:
+                baseBet = 5000;
+                break;
+            case Define.Difficulty.Pro:
+                baseBet = 50000;
+                break;
+            default:
+                baseBet = 500; // 기본값 설정
+                break;
+        }
 
         if (isSB)
             return baseBet;

@@ -300,7 +300,8 @@ public class UI_Holdem : UI_Scene
 
     void OpenRoomClicked(PointerEventData data)
     {
-
+        int betMoney = Managers.Photon.GetCurrentRoomBetMoney();
+        Managers.Photon.JoinOtherHoldemRoom(betMoney);
     }
 
     void MoveRoomClicked(PointerEventData data)

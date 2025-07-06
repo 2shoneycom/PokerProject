@@ -1,7 +1,8 @@
-using Photon.Pun;
-using Photon.Realtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
@@ -30,6 +31,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {   // 포톤 마스터 서버에 접속 성공한 경우 자동 실행됨.
         _loginUI.SetConnectionInfoText("연결 성공!");
+        PhotonNetwork.JoinLobby();
         Managers.Scene.LoadScene(Define.Scene.Lobby);
     }
 
@@ -52,8 +54,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
+        Debug.Log($"OnRoomListUpdate called. Room count: {roomList.Count}");
         foreach (RoomInfo room in roomList)
         {
+            Debug.Log($"Room: {room.Name}, PlayerCount: {room.PlayerCount}, Removed: {room.RemovedFromList}");
             if (room.RemovedFromList)
             {
                 // 방 목록에서 제거된 방 처리
@@ -65,6 +69,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 // 사용 가능한 방 표시 및 업데이트
                 if (availableRooms.ContainsKey(room.Name))
                 {
+                    Debug.Log($"Room {room.Name} betMoney: {room.CustomProperties["betMoney"]}");
                     availableRooms[room.Name] = room;
                 }
                 else
@@ -76,18 +81,32 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void CreateRoom()
+    public void CreateHoldem(int betMoney) 
+    {
+        _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
+        StartCoroutine(LoadingCreateHoldem(0.5f, betMoney));
+    }
+
+    IEnumerator LoadingCreateHoldem(float sec, int betMoney)
+    {
+        yield return new WaitForSeconds(sec);
+        CreateRoom(betMoney);
+    }
+
+    void CreateRoom(int betMoney)
     {
         if (PhotonNetwork.IsConnected)
         {
             _loadingUI.SetConnectionInfoText("Creating New Room..");
-            string roomName = "Room " + Random.Range(1000, 9999);
+            string roomName = "Room " + UnityEngine.Random.Range(1000, 9999);
             RoomOptions roomOptions = new RoomOptions
             {
                 MaxPlayers = 10,
                 IsVisible = true, // 방이 리스트에 나타나게 설정
                 IsOpen = true,    // 새로운 플레이어가 들어올 수 있도록 설정
-                CleanupCacheOnLeave = false
+                CleanupCacheOnLeave = false,
+                CustomRoomProperties = new ExitGames.Client.Photon.Hashtable { { "betMoney", betMoney} },
+                CustomRoomPropertiesForLobby = new string[] {"betMoney"}
             };
             PhotonNetwork.CreateRoom(roomName, roomOptions);
         }
@@ -97,24 +116,24 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void JoinHoldem()
+    public void JoinHoldem(int betMoney)
     {
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
-        StartCoroutine(Loading(0.5f));
+        StartCoroutine(LoadingJoinHoldem(0.5f, betMoney));
     }
 
-    IEnumerator Loading(float sec)
+    IEnumerator LoadingJoinHoldem(float sec, int betMoney)
     {
         yield return new WaitForSeconds(sec);
-        JoinRoom();
+        JoinRoom(betMoney);
     }
 
-    void JoinRoom()
+    void JoinRoom(int betMoney)
     {
         if (PhotonNetwork.IsConnected)
         {
-            _loadingUI.SetConnectionInfoText("Entering Room..");
-            PhotonNetwork.JoinRandomRoom();
+            _loadingUI.SetConnectionInfoText("Searching Room ({betMoney})...");
+            JoinOrCreateRoom(betMoney);
         }
         else
         {
@@ -122,12 +141,45 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public override void OnJoinRandomFailed(short returnCode, string message)
-    {   // 랜덤 룸 접속에 실패한 경우 (서버 연결 안끊김)
-        _loadingUI.SetConnectionInfoText("No Available Room..");
-        Debug.Log("No available room");
-        // 최대 7명을 수용 가능한 빈 방 생성
-        CreateRoom();
+    void JoinOrCreateRoom(int betMoney)
+    {
+        List<RoomInfo> matchingRooms = new List<RoomInfo>();
+
+        foreach (RoomInfo room in availableRooms.Values)
+        {
+            if (room.CustomProperties.ContainsKey("betMoney"))
+            {
+                object betObj = room.CustomProperties["betMoney"];
+                if (betObj == null)
+                {
+                    Debug.Log($"Room {room.Name} betMoney is null.");
+                    continue;
+                }
+
+                int roomBetMoney = Convert.ToInt32(betObj);
+                Debug.Log($"Room {room.Name} betMoney: {roomBetMoney}");
+
+                if (roomBetMoney == betMoney && room.PlayerCount < room.MaxPlayers)
+                {
+                    matchingRooms.Add(room);
+                }
+            }
+        }
+
+        Debug.Log($"matchingRooms.Count = {matchingRooms.Count}");
+
+        if (matchingRooms.Count > 0)
+        {
+            int rand = UnityEngine.Random.Range(0, matchingRooms.Count);
+            PhotonNetwork.JoinRoom(matchingRooms[rand].Name);
+            _loadingUI.SetConnectionInfoText($"Entering Room ({betMoney})...");
+        }
+        else
+        {
+            _loadingUI.SetConnectionInfoText("No Available Room.. Creating New Room...");
+            Debug.Log("No available room for betMoney " + betMoney);
+            CreateRoom(betMoney);
+        }
     }
 
     public override void OnJoinedRoom()
@@ -139,6 +191,76 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         // 방에 들어왔으면 내 포톤 플레이어 정보 설정
         SetMyPhotonPlayerInfo(PhotonNetwork.LocalPlayer);
+    }
+
+    public void JoinOtherHoldemRoom(int betMoney)
+    {
+        _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
+        StartCoroutine(LoadingJoinOtherHoldem(0.5f, betMoney));
+    }
+
+    IEnumerator LoadingJoinOtherHoldem(float sec, int betMoney)
+    {
+        yield return new WaitForSeconds(sec);
+        JoinOtherRoom(betMoney);
+    }
+
+    void JoinOtherRoom(int betMoney)
+    {
+        if (PhotonNetwork.IsConnected)
+        {
+            _loadingUI.SetConnectionInfoText($"Searching Other Room ({betMoney})...");
+
+            List<RoomInfo> matchingRooms = new List<RoomInfo>();
+
+            foreach (RoomInfo room in availableRooms.Values)
+            {
+                if (room.CustomProperties.ContainsKey("betMoney"))
+                {
+                    object betObj = room.CustomProperties["betMoney"];
+                    int roomBetMoney = Convert.ToInt32(betObj);
+
+                    if (roomBetMoney == betMoney &&
+                        room.PlayerCount < room.MaxPlayers &&
+                        PhotonNetwork.CurrentRoom != null &&
+                        room.Name != PhotonNetwork.CurrentRoom.Name) // 현재 방 제외
+                    {
+                        matchingRooms.Add(room);
+                    }
+                }
+            }
+
+            if (matchingRooms.Count > 0)
+            {
+                int rand = UnityEngine.Random.Range(0, matchingRooms.Count);
+                PhotonNetwork.JoinRoom(matchingRooms[rand].Name);
+                _loadingUI.SetConnectionInfoText($"Entering Other Room ({betMoney})...");
+            }
+            else
+            {
+                _loadingUI.SetConnectionInfoText("No Other Room.. Creating New Room...");
+                Debug.Log($"No other available room for betMoney {betMoney}. Creating new room.");
+
+                CreateRoom(betMoney);
+            }
+        }
+        else
+        {
+            Reconnect();
+        }
+    }
+
+    public int GetCurrentRoomBetMoney()
+    {
+        if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("betMoney"))
+        {
+            return (int)PhotonNetwork.CurrentRoom.CustomProperties["betMoney"];
+        }
+        else
+        {
+            Debug.LogWarning("현재 방 정보가 없거나 betMoney 프로퍼티가 없음");
+            return -1;
+        }
     }
 
     #endregion
