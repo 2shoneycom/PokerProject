@@ -173,11 +173,11 @@ public class UI_Poker : UI_Scene
         {
             for (int i = 1; i <= PokerGameControl.MAX_PLAYER_NUM; i++)
             {
-                //int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
-                //if (PokerGameControl.Players.GetPlayerUID(gameIndex) == "")
-                //    continue;
+                int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
+                if (PokerGameControl.Players.GetPlayerUID(gameIndex) == "")
+                    continue;
 
-                //GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
+                GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
             }
         }
     }
@@ -194,9 +194,8 @@ public class UI_Poker : UI_Scene
     void GameStartButtonClicked(PointerEventData data)
     {
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
-        PokerGameControl.Control.StartGame();
         // 게임 시작
-        //SyncSystem.Sync.HoldemStartSync();
+        SyncSystem.Sync.PokerStartSync();
     }
 
     public void BetButtonInteractiveSwitch(string betType, bool isOn)
@@ -222,19 +221,19 @@ public class UI_Poker : UI_Scene
 
     public void UpdateBetMoney()
     {
-        for (int i = 1; i <= 7; i++)
+        for (int i = 1; i <= PokerGameControl.MAX_PLAYER_NUM; i++)
         {
             int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
-            //GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = PokerGameControl.Players.GetPlayerBet(gameIndex).ToString();
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = PokerGameControl.Players.GetPlayerBet(gameIndex).ToString();
         }
     }
 
     public void UpdateSeedMoney()
     {
-        for (int i = 1; i <= 7; i++)
+        for (int i = 1; i <= PokerGameControl.MAX_PLAYER_NUM; i++)
         {
             int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
-            //GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = HoldemGameControl.Players.GetPlayerSeedMoney(gameIndex).ToString();
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = PokerGameControl.Players.GetPlayerSeedMoney(gameIndex).ToString();
         }
     }
 

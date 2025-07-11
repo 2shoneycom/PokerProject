@@ -15,7 +15,7 @@ public class SeatManager
     GameScene curGameScene = null;
 
 
-    public void Init(int seatSize)      // holdemscene에서 init해줌
+    public void Init(int seatSize)      // GameScene에서 init해줌
     {
         curGameScene = (GameScene)Managers.Scene.CurrentScene;
 
@@ -145,7 +145,7 @@ public class SeatManager
         }
     }
 
-    public void ConverToPlayers()
+    public void HoldemConvertToPlayers()
     {
         for (int i = 0; i < Managers.GetCurGameMaxPlayer; i++)
         {
@@ -154,6 +154,17 @@ public class SeatManager
         User.NowUser.HoldemSyncSeedMoney();
         curGameScene.UpdateBetUI(true);
         HoldemGameControl.Control.NextStage();
+    }
+
+    public void PokerConvertToPlayers()
+    {
+        for (int i = 0; i < Managers.GetCurGameMaxPlayer; i++)
+        {
+            PokerGameControl.Players.UpdatePlayerUID(i, seats[i * 2]);
+        }
+        User.NowUser.PokerSyncSeedMoney();
+        curGameScene.UpdateBetUI(true);
+        PokerGameControl.Control.NextStage();
     }
 
     public int GetOccupiedCount()

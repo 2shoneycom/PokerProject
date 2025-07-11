@@ -46,6 +46,7 @@ public class Managers : MonoBehaviour
         get { return m_instance.difficulty; }
         set { m_instance.difficulty = value; }
     }
+
     public static bool IsNowPlayingGame
     {
         get {

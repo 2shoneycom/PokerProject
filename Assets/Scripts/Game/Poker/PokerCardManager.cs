@@ -18,7 +18,7 @@ public class PokerCardManager
     const float ICON_OFFSET = 3f;
     const float CARD_OFFSET = 3.7f;
 
-    WaitForSeconds cardMoveDelay = new WaitForSeconds(0.2f);
+    WaitForSeconds cardMoveDelay = new WaitForSeconds(0.3f);
 
     List<int> cardBuffer;
     List<char> cardShape;       // 0-12 : Clover , 13-25 : Diamond, 26-38 : Heart, 39-51 : Spade
@@ -30,13 +30,6 @@ public class PokerCardManager
     Transform cardDeckPos;
 
     Vector3[,] playerCardPos;
-    //public int CardLen { get { return PokerGameControl.Control.StageCount == 5 ? 0 : 1; } }
-
-    int tmp = 0;
-    int TMPLEN
-    {
-        get { return tmp++; }
-    }
 
     UI_Poker _pokerUI;
 
@@ -100,11 +93,11 @@ public class PokerCardManager
         }
     }
 
-    private void SetupPlayerCardPos()       ////////////////////////////////////////////////////
+    private void SetupPlayerCardPos()
     {
         for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
-            int seatedIndex = HoldemGameControl.Control.ConvertGameToUI(i);
+            int seatedIndex = PokerGameControl.Control.ConvertGameToUI(i);
             GameObject destGO = _pokerUI.GetPlayerGameObjcet(seatedIndex);
             RectTransform reference = destGO.GetComponent<RectTransform>();
             // 기준 RectTransform의 가로 길이
@@ -181,10 +174,9 @@ public class PokerCardManager
     public IEnumerator DealingCard(int toPlayer = -1)
     {
         yield return cardMoveDelay;
-        OnAddCard?.Invoke("");
-        //string pUID = PokerGameControl.Players.GetPlayerUID(toPlayer);
+        string pUID = PokerGameControl.Players.GetPlayerUID(toPlayer);
 
-        //SyncSystem.Sync.HoldemAddCard(pUID);
+        SyncSystem.Sync.PokerAddCard(pUID);
     }
 
     public void AddCardToPlayerStarter(string playerUID = "")
@@ -200,7 +192,13 @@ public class PokerCardManager
             return;
 
         AddCardToPlayer(popedCard, playerUID);
-        //SyncSystem.Sync.HoldemNextStage_V2(1);
+        if (4 <= PokerGameControl.Control.CardLen)
+            SyncSystem.Sync.PokerNextStage_V2(1);
+        else
+            SyncSystem.Sync.PokerNextStage_V2(2);
+        //SyncSystem.Sync.PokerProcessStage();
+        //SyncSystem.Sync.SyncPokerCardLen(PokerGameControl.Control.CardLen + 1, PokerGameControl.CardLenState.ProcessStage);
+        //PokerGameControl.Control.CallSyncCardLen(PokerGameControl.Control.CardLen + 1, PokerGameControl.CardLenState.ProcessStage);
     }
 
     private void AddCardToPlayer(int popedCard, string pUID)
@@ -211,18 +209,27 @@ public class PokerCardManager
         GameObject cardGO = Managers.Resource.PhotonInstantiate("Game/Card", cardDeckPos);
         cardGO.GetComponent<PhotonView>().OwnershipTransfer = OwnershipOption.Takeover;
 
-        //SyncSystem.Sync.SyncHoldemPlayerCard(pUID, cardGO, popedCard);
+        bool isOpenCard = 4 <= PokerGameControl.Control.CardLen && PokerGameControl.Control.CardLen < 7;
+
+        SyncSystem.Sync.SyncPokerPlayerCard(pUID, cardGO, popedCard, isOpenCard);
 
         CardMoveToPosPlayer(cardGO, pUID);
     }
 
     void CardMoveToPosPlayer(GameObject cardGO, string pUID)
     {
-        Vector3 destPos = playerCardPos[0, TMPLEN];
+        int playerIndex = PokerGameControl.Players.GetPlayerGameIndexByUID(pUID);
+        Vector3 destPos = playerCardPos[playerIndex, PokerGameControl.Control.CardLen];
 
         cardGO.transform.DOMove(destPos, CARD_ANIMATION_TIME);
         cardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);
         cardGO.transform.DOScale(Vector3.one * 3.5f, CARD_ANIMATION_TIME);
+    }
+
+    public void CardMoveToPos(GameObject cardGO, int playerIndex, int cardIndex)
+    {
+        Vector3 destPos = playerCardPos[playerIndex, cardIndex];
+        cardGO.transform.position = destPos;
     }
 
     public int[] GetCardDeck()
@@ -239,7 +246,7 @@ public class PokerCardManager
             cardBuffer.Add(cardDeck[i]);
         }
 
-        HoldemGameControl.Control.NextStage();
+        PokerGameControl.Control.NextStage();
     }
 
     public int GetCardNum(int index)
@@ -262,7 +269,7 @@ public class PokerCardManager
         leavePlayerCard.Clear();
     }
 
-    public void GiveHoldemCardManagerSyncData(Player newPlayer)
+    public void GivePokerCardManagerSyncData(Player newPlayer)
     {
 
     }

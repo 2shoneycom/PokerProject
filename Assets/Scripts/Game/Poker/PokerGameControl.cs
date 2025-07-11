@@ -34,7 +34,6 @@ public class PokerGameControl : MonoBehaviour
     public const int MAX_PLAYER_NUM = 5;
     public const float RESULT_SHOW_TIME = 5.0f;
 
-
     PokerPlayerManager _playerManager;
     public static PokerPlayerManager Players { get { return Control._playerManager; } }
 
@@ -49,12 +48,10 @@ public class PokerGameControl : MonoBehaviour
 
 
     UI_Poker _pokerUI;
-
+    UI_PokerCardPopup _cardPopup;
 
     bool isPlaying = false;
     public bool IsPlaying { get { return isPlaying; } }
-
-    bool isFirst = true;
 
     int _stageCount = 0;
     public int StageCount
@@ -70,11 +67,30 @@ public class PokerGameControl : MonoBehaviour
         set { _stageDetail = value; }
     }
 
+    int _nowCardLen = 0;
+    public int CardLen 
+    { 
+        get 
+        { 
+            switch (StageCount)
+            {
+                case 9:
+                    return 4;
+                case 12:
+                    return 5;
+                case 15:
+                    return 6;
+                case 18:
+                    return 7;
+                default:
+                    return _nowCardLen;
+            }
+        } 
+    }
+
     private Coroutine dieTimer;
 
-    int _playerD;
-    int _playerSB;
-    int _playerBB;
+    int _curPlayer;
     int _potMoney;
 
     public int PotMoney
@@ -94,7 +110,7 @@ public class PokerGameControl : MonoBehaviour
 
     public void StartGame()
     {
-        if (isPlaying)
+        if (IsPlaying)
             return;
 
         if (User.NowGamePlayer.SeatIndex == -1)
@@ -104,14 +120,15 @@ public class PokerGameControl : MonoBehaviour
 
         _pokerUI.UISwitch(true);
 
-        //Players.GameSetting();
+        Players.GameSetting();
         Card.Init();
         //Bet.Init(_pokerUI);
 
-        //User.NowUser.PokerSyncSeedMoney();
+        User.NowUser.PokerSyncSeedMoney();
         PotMoney = 0;
         StageCount = 0;
         StageDetail = 0;
+        _nowCardLen = 0;
 
         if (PhotonNetwork.IsMasterClient)
             ProcessStage();
@@ -124,72 +141,177 @@ public class PokerGameControl : MonoBehaviour
             StageCount++;
             StageDetail = 0;
         }
+        else if (state == 1)
+        {
+            _nowCardLen = 0;
+            StageDetail++;
+        }
         else
         {
-            StageDetail++;
+            _nowCardLen++;
         }
 
         if (PhotonNetwork.IsMasterClient)
             ProcessStage();
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Q))
-            _pokerUI.GameStartButtonOn();
-        if (Input.GetKeyDown(KeyCode.W))
-            StartCoroutine(Card.DealingCard());
-    }
-
     public void ProcessStage()
     {
-        return;
         switch (StageCount)
         {
+            // 자리 Setting
+            case 0:
+                StartCoroutine(SyncSystem.Sync.SyncPokerPlayerUID());
+                break;
 
+            // 카드 Shuffle
+            case 1:
+                Card.ShuffleCard();
+
+                StartCoroutine(SyncSystem.Sync.SyncPokerDeck());
+                break;
+
+            // 첫번째 시작 플레이어 랜덤 선택
+            case 2:
+                DecideFirstPlayer();
+
+                StartCoroutine(SyncSystem.Sync.SyncPokerFirstPlayerIndex(_curPlayer));
+                break;
+
+            // 선택된 플레이어부터 기본금 배팅
+            case 3:
+                // 테스트용///////////////////////////////
+                StartCoroutine(SyncSystem.Sync.PokerNextStage());
+                break;
+
+            // 선택된 플레이어부터 4장씩 받기 (일단 비공개)
+            case 4:
+                {
+                    if (StageDetail >= MAX_PLAYER_NUM)
+                    {
+                        StartCoroutine(SyncSystem.Sync.PokerNextStage());
+                        break;
+                    }
+
+                    int toPlayer = (_curPlayer + StageDetail) % MAX_PLAYER_NUM;
+                    string pUID = Players.GetPlayerUID(toPlayer);
+                    if (pUID == "")
+                    {
+                        StartCoroutine(SyncSystem.Sync.PokerNextStage(1));
+                        break;
+                    }
+                    if (CardLen >= 4)
+                    {
+                        StartCoroutine(SyncSystem.Sync.PokerNextStage(1));
+                        break;
+                    }
+
+                    StartCoroutine(Card.DealingCard(toPlayer));
+                    break;
+                }
+
+            // 애니메이션 로딩
+            case 5:
+                StartCoroutine(AnimLoadingTime(2f));
+                break;
+
+            // 필요없는 1장, 공개할 카드 1장 선택
+            case 6:
+                StartCoroutine(SyncSystem.Sync.PokerMakeCardSelPopup());
+                break;
+
+            // 전달받은 선택을 토대로 카드 정리
+            case 7:
+                StartCoroutine(SyncSystem.Sync.PokerArrangeSelectedCard());
+                break;
+
+            //공개된 카드 중 가장 패가 낮은 플레이어 선택
+            case 8:
+                // 테스트용///////////////////////////////
+                StartCoroutine(SyncSystem.Sync.PokerNextStage());
+                break;
+
+            //선택된 플레이어부터 1장씩 받음 (공개)
+            case 9:
+            case 12:
+            case 15:
+                {
+                    if (StageDetail >= MAX_PLAYER_NUM)
+                    {
+                        StartCoroutine(SyncSystem.Sync.PokerNextStage());
+                        break;
+                    }
+
+                    int toPlayer = (_curPlayer + StageDetail) % MAX_PLAYER_NUM;
+                    string pUID = Players.GetPlayerUID(toPlayer);
+                    if (pUID == "")
+                    {
+                        StartCoroutine(SyncSystem.Sync.PokerNextStage(1));
+                        break;
+                    }
+
+                    StartCoroutine(Card.DealingCard(toPlayer));
+                }
+
+                break;
+
+            //선택된 플레이어부터 베팅 시작 (4th 스트리트)
+            case 10:
+            //선택된 플레이어부터 베팅 시작 (5th 스트리트)
+            case 13:
+            //선택된 플레이어부터 베팅 시작 (6th 스트리트)
+            case 16:
+            //선택된 플레이어부터 마지막 베팅 시작 (7th 스트리트)
+            case 19:
+
+                break;
+
+            //공개된 카드 중 가장 패가 높은 플레이어 선택
+            case 11:
+            case 14:
+            case 17:
+                break;
+
+
+            //선택된 플레이어부터 1장씩 받음 (비공개)
+            case 18:
+                break;
+
+            // 결과 발표
+            case 20:
+                break;
+
+            // 새로운 게임 준비
+            case 21:
+                break;
         }
     }
 
-    //int GetNextPlayerIndex(int index)
-    //{
-    //    do
-    //    {
-    //        index = (index + 1) % MAX_PLAYER_NUM;
-    //    } while (Players.GetPlayerUID(index) == "");
-    //    return index;
-    //}
+    int GetNextPlayerIndex(int index)
+    {
+        do
+        {
+            index = (index + 1) % MAX_PLAYER_NUM;
+        } while (Players.GetPlayerUID(index) == "");
+        return index;
+    }
 
-    //void DecideDealer()
-    //{
-    //    if (isFirst)
-    //    {
-    //        int ranNum = -1;
-    //        do
-    //        {
-    //            ranNum = Random.Range(0, MAX_PLAYER_NUM);
-    //        } while (Players.GetPlayerUID(ranNum) == "");
-    //        _playerD = ranNum;
-    //        isFirst = false;
-    //    }
-    //    else
-    //    {
-    //        _playerD = GetNextPlayerIndex(_playerD);
-    //    }
-    //}
+    void DecideFirstPlayer()
+    {
+        int ranNum = -1;
+        do
+        {
+            ranNum = Random.Range(0, MAX_PLAYER_NUM);
+        } while (Players.GetPlayerUID(ranNum) == "");
+        _curPlayer = ranNum;
+    }
 
-    //public void SetDealer(int index)
-    //{
-    //    _playerD = index;
+    public void SetFirstPlayer(int index)
+    {
+        _curPlayer = index;
 
-    //    if (Players.NowPlayerNum == 2)
-    //        _playerSB = _playerD;
-    //    else
-    //        _playerSB = GetNextPlayerIndex(_playerD);
-
-    //    _playerBB = GetNextPlayerIndex(_playerSB);
-
-    //    NextStage();
-    //}
+        NextStage();
+    }
 
     public int ConvertUItoGame(int index)
     {
@@ -212,6 +334,34 @@ public class PokerGameControl : MonoBehaviour
             default: return index;
         }
     }
+
+    IEnumerator AnimLoadingTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+        StartCoroutine(SyncSystem.Sync.PokerNextStage());
+    }
+
+    public void CardSelPopupOn()
+    {
+        if (!IsPlaying)
+            return;
+
+        _cardPopup = Managers.UI.ShowPopupUI<UI_PokerCardPopup>();
+    }
+
+    public void SelectedCardIndex(int delCardIndex, int openCardIndex)
+    {
+        SyncSystem.Sync.SyncPokerPlayerCardSel(User.NowGamePlayer.GameIndex, delCardIndex, openCardIndex);
+        StartCoroutine(RPCLoadingTime(0.2f));
+    }
+
+    IEnumerator RPCLoadingTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+        _cardPopup.ClosePopupUI();
+        NextStage();
+    }
+
 
     //public void AutoDieTimerSwitch(bool isOn)
     //{
@@ -295,15 +445,15 @@ public class PokerGameControl : MonoBehaviour
     //    }
     //}
 
-    //public void UpdatePlayerSeedMoneyUI()
-    //{
-    //    _holdemUI.UpdateSeedMoney();
-    //}
+    public void UpdatePlayerSeedMoneyUI()
+    {
+        _pokerUI.UpdateSeedMoney();
+    }
 
-    //public void UpdatePlayerBetMoneyUI()
-    //{
-    //    _holdemUI.UpdateBetMoney();
-    //}
+    public void UpdatePlayerBetMoneyUI()
+    {
+        _pokerUI.UpdateBetMoney();
+    }
 
     //public IEnumerator PlayerEnterHoldemRoom(float time, Player newPlayer)
     //{

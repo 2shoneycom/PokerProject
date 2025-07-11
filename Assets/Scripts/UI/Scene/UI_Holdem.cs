@@ -340,7 +340,8 @@ public class UI_Holdem : UI_Scene
 
     void OpenRoomClicked(PointerEventData data)
     {
-
+        isRoomOpened = true;
+        SetRoomButton(true);
     }
 
     void MoveRoomClicked(PointerEventData data)

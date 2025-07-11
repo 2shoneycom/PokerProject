@@ -113,7 +113,7 @@ public class User
 
     public void PokerSyncSeedMoney()
     {
-        if (PokerGameControl.Control.IsPlaying) return;
-            //SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
+        if (PokerGameControl.Control.IsPlaying)
+            SyncSystem.Sync.SyncPokerPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
     }
 }
