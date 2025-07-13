@@ -32,6 +32,8 @@ public class UI_HoldemPopup : UI_Popup
         }
     }
 
+    private Define.GameType _gameType = Define.GameType.Holdem;
+
     public override void Init()
     {
         base.Init();
@@ -56,12 +58,12 @@ public class UI_HoldemPopup : UI_Popup
 
     void EnterBeginnerRoom(PointerEventData data)
     {
-        Managers.Photon.JoinHoldem(500);
+        Managers.Photon.JoinGame(500, _gameType);
     }
 
     void CreateBeginnerRoom(PointerEventData data)
     {
-        Managers.Photon.CreateHoldem(500);
+        Managers.Photon.CreateGame(500, _gameType);
     }
 
     void AmateurButton(PointerEventData data)
@@ -75,12 +77,12 @@ public class UI_HoldemPopup : UI_Popup
 
     void EnterAmateurRoom(PointerEventData data)
     {
-        Managers.Photon.JoinHoldem(5000);
+        Managers.Photon.JoinGame(5000, _gameType);
     }
 
     void CreateAmateurRoom(PointerEventData data)
     {
-        Managers.Photon.CreateHoldem(5000);
+        Managers.Photon.CreateGame(5000, _gameType);
     }
 
     void ProButton(PointerEventData data)
@@ -94,12 +96,12 @@ public class UI_HoldemPopup : UI_Popup
 
     void EnterProRoom(PointerEventData data)
     {
-        Managers.Photon.JoinHoldem(50000);
+        Managers.Photon.JoinGame(50000, _gameType);
     }
 
     void CreateProRoom(PointerEventData data)
     {
-        Managers.Photon.CreateHoldem(50000);
+        Managers.Photon.CreateGame(50000, _gameType);
     }
 
     void SetEnterPanel(Buttons button)

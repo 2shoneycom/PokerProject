@@ -34,4 +34,12 @@ public class Define
         Amateur,
         Pro,
     }
+
+    public enum GameType
+    {
+        None,
+        Holdem,
+        Seven,
+        Black,
+    }
 }

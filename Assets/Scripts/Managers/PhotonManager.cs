@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
+using static Define;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
@@ -11,6 +12,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private Dictionary<string, RoomInfo> availableRooms = new Dictionary<string, RoomInfo>();
     UI_Loading _loadingUI;
     UI_Login _loginUI;
+
+    private bool isWaitingForJoinOtherGame = false;
+    private int currentBetMoney;
+    private Define.GameType currentGameType;
 
     void Start()
     {
@@ -81,32 +86,63 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void CreateHoldem(int betMoney) 
+    public void CreateGame(int betMoney, Define.GameType gameType) 
     {
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
-        StartCoroutine(LoadingCreateHoldem(0.5f, betMoney));
+        StartCoroutine(LoadingCreateGame(0.5f, betMoney, gameType));
     }
 
-    IEnumerator LoadingCreateHoldem(float sec, int betMoney)
+    IEnumerator LoadingCreateGame(float sec, int betMoney, Define.GameType gameType)
     {
         yield return new WaitForSeconds(sec);
-        CreateRoom(betMoney);
+        if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InLobby)
+        {
+            CreateRoom(betMoney, gameType);
+        }
+        else
+        {
+            // 연결되어있지 않으면 Reconnect 후 콜백에서 CreateRoom 호출
+            StartCoroutine(WaitForLobbyAndCreateRoom(betMoney, gameType));
+        }
     }
 
-    void CreateRoom(int betMoney)
+    IEnumerator WaitForLobbyAndCreateRoom(int betMoney, Define.GameType gameType)
     {
-        if (PhotonNetwork.IsConnected)
+        if (!PhotonNetwork.IsConnected)
+        {
+            Reconnect();
+        }
+
+        while (!PhotonNetwork.IsConnectedAndReady)
+            yield return null;
+
+        if (!PhotonNetwork.InLobby)
+        {
+            PhotonNetwork.JoinLobby();
+            while (!PhotonNetwork.InLobby)
+                yield return null;
+        }
+
+        CreateRoom(betMoney, gameType);
+    }
+
+    void CreateRoom(int betMoney, Define.GameType gameType)
+    {
+        if (PhotonNetwork.IsConnectedAndReady)
         {
             _loadingUI.SetConnectionInfoText("Creating New Room..");
-            string roomName = "Room " + UnityEngine.Random.Range(1000, 9999);
+            string roomName = gameType.ToString() + betMoney + UnityEngine.Random.Range(1000, 9999);
             RoomOptions roomOptions = new RoomOptions
             {
                 MaxPlayers = 10,
-                IsVisible = true, // 방이 리스트에 나타나게 설정
-                IsOpen = true,    // 새로운 플레이어가 들어올 수 있도록 설정
+                IsVisible = false, // 방이 리스트에 나타나게 설정
+                IsOpen = false,    // 새로운 플레이어가 들어올 수 있도록 설정
                 CleanupCacheOnLeave = false,
-                CustomRoomProperties = new ExitGames.Client.Photon.Hashtable { { "betMoney", betMoney} },
-                CustomRoomPropertiesForLobby = new string[] {"betMoney"}
+                CustomRoomProperties = new ExitGames.Client.Photon.Hashtable {
+                    { "betMoney", betMoney },
+                    { "gameType", gameType.ToString() }
+                },
+                CustomRoomPropertiesForLobby = new string[] {"betMoney", "gameType"}
             };
             PhotonNetwork.CreateRoom(roomName, roomOptions);
         }
@@ -116,50 +152,78 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void JoinHoldem(int betMoney)
+    public void OpenRoomToPublic()
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.CurrentRoom.IsVisible = true;
+            PhotonNetwork.CurrentRoom.IsOpen = true;
+            Debug.Log("방이 공개되었습니다.");
+        }
+    }
+
+    public void JoinGame(int betMoney, Define.GameType gameType)
     {
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
-        StartCoroutine(LoadingJoinHoldem(0.5f, betMoney));
+        StartCoroutine(LoadingJoinGame(0.5f, betMoney, gameType));
     }
 
-    IEnumerator LoadingJoinHoldem(float sec, int betMoney)
+    IEnumerator LoadingJoinGame(float sec, int betMoney, Define.GameType gameType)
     {
         yield return new WaitForSeconds(sec);
-        JoinRoom(betMoney);
-    }
-
-    void JoinRoom(int betMoney)
-    {
-        if (PhotonNetwork.IsConnected)
+        if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InLobby)
         {
-            _loadingUI.SetConnectionInfoText("Searching Room ({betMoney})...");
-            JoinOrCreateRoom(betMoney);
+            JoinOrCreateRoom(betMoney, gameType);
         }
         else
         {
-            Reconnect();
+            StartCoroutine(WaitForLobbyAndJoinRoom(betMoney, gameType));
         }
     }
 
-    void JoinOrCreateRoom(int betMoney)
+    IEnumerator WaitForLobbyAndJoinRoom(int betMoney, Define.GameType gameType)
+    {
+        Reconnect();
+
+        while (!PhotonNetwork.IsConnectedAndReady)
+        {
+            yield return null;
+        }
+
+        if (!PhotonNetwork.InLobby)
+        {
+            PhotonNetwork.JoinLobby();
+            while (!PhotonNetwork.InLobby)
+                yield return null;
+        }
+
+        JoinOrCreateRoom(betMoney, gameType);
+    }
+
+    void JoinOrCreateRoom(int betMoney, Define.GameType gameType)
     {
         List<RoomInfo> matchingRooms = new List<RoomInfo>();
 
         foreach (RoomInfo room in availableRooms.Values)
         {
-            if (room.CustomProperties.ContainsKey("betMoney"))
+            if (room.CustomProperties.ContainsKey("betMoney") && room.CustomProperties.ContainsKey("gameType"))
             {
                 object betObj = room.CustomProperties["betMoney"];
-                if (betObj == null)
+                object gameTypeObj = room.CustomProperties["gameType"];
+
+                if (betObj == null || gameTypeObj == null)
                 {
-                    Debug.Log($"Room {room.Name} betMoney is null.");
+                    Debug.Log($"Room {room.Name} betMoney or gameType is null.");
                     continue;
                 }
 
                 int roomBetMoney = Convert.ToInt32(betObj);
-                Debug.Log($"Room {room.Name} betMoney: {roomBetMoney}");
+                string roomGameTypeStr = gameTypeObj.ToString();
+                Define.GameType roomGameType = (Define.GameType)Enum.Parse(typeof(Define.GameType), roomGameTypeStr);
 
-                if (roomBetMoney == betMoney && room.PlayerCount < room.MaxPlayers)
+                Debug.Log($"Room {room.Name} betMoney: {roomBetMoney}, gameType: {roomGameType}");
+
+                if (roomBetMoney == betMoney && roomGameType == gameType && room.PlayerCount < room.MaxPlayers)
                 {
                     matchingRooms.Add(room);
                 }
@@ -167,63 +231,146 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
 
         Debug.Log($"matchingRooms.Count = {matchingRooms.Count}");
-
         if (matchingRooms.Count > 0)
         {
             int rand = UnityEngine.Random.Range(0, matchingRooms.Count);
             PhotonNetwork.JoinRoom(matchingRooms[rand].Name);
-            _loadingUI.SetConnectionInfoText($"Entering Room ({betMoney})...");
+            Debug.Log($"Entering Room ({betMoney}, {gameType})...");
         }
         else
         {
-            _loadingUI.SetConnectionInfoText("No Available Room.. Creating New Room...");
-            Debug.Log("No available room for betMoney " + betMoney);
-            CreateRoom(betMoney);
+            Debug.Log($"No available room for betMoney {betMoney}, gameType {gameType}");
+            CreateRoom(betMoney, gameType);
         }
     }
 
     public override void OnJoinedRoom()
-    {   // 룸 참가에 성공한 경우
-        _loadingUI.SetConnectionInfoText("Success to Enter Room");
-        // 모든 룸 참가자가 GameRoom 씬을 로드하게함
-        Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
-        // 씬메니저로 로드하면 연결 정보가 사라짐.
+    {
+        // 룸 참가에 성공한 경우
+        Debug.Log("Success to Enter Room");
+
+        // 방의 gameType 가져오기
+        Define.GameType gameType = Define.GameType.Holdem; // 기본값
+
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("gameType"))
+        {
+            string gameTypeStr = PhotonNetwork.CurrentRoom.CustomProperties["gameType"].ToString();
+            gameType = (Define.GameType)Enum.Parse(typeof(Define.GameType), gameTypeStr);
+        }
+
+        // gameType에 따라 다른 씬 로드
+        switch (gameType)
+        {
+            case Define.GameType.Holdem:
+                Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
+                break;
+            case Define.GameType.Seven:
+                //Managers.Scene.PhotonLoadScene(Define.Scene.Seven);
+                break;
+            case Define.GameType.Black:
+                //Managers.Scene.PhotonLoadScene(Define.Scene.Black);
+                break;
+            default:
+                Debug.LogError($"Unknown gameType: {gameType}");
+                break;
+        }
 
         // 방에 들어왔으면 내 포톤 플레이어 정보 설정
         SetMyPhotonPlayerInfo(PhotonNetwork.LocalPlayer);
     }
 
-    public void JoinOtherHoldemRoom(int betMoney)
+    public void JoinOtherGame(int betMoney, Define.GameType gameType)
     {
-        _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
-        StartCoroutine(LoadingJoinOtherHoldem(0.5f, betMoney));
+        if (PhotonNetwork.InRoom)
+        {
+            isWaitingForJoinOtherGame = true;
+            currentBetMoney = betMoney;
+            currentGameType = gameType;
+
+            PhotonNetwork.LeaveRoom();
+            Debug.Log("Leaving current room...");
+        }
+        else
+        {
+            JoinOtherRoom(betMoney, gameType);
+        }
     }
 
-    IEnumerator LoadingJoinOtherHoldem(float sec, int betMoney)
+    public override void OnLeftRoom()
+    {
+        Debug.Log("Successfully left the room.");
+
+        if (isWaitingForJoinOtherGame)
+        {
+            isWaitingForJoinOtherGame = false;
+            StartCoroutine(LoadingJoinOtherRoom(0.5f, currentBetMoney, currentGameType));
+        }
+    }
+
+    IEnumerator LoadingJoinOtherRoom(float sec, int betMoney, Define.GameType gameType)
     {
         yield return new WaitForSeconds(sec);
-        JoinOtherRoom(betMoney);
+
+        if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InLobby)
+        {
+            JoinOtherRoom(betMoney, gameType);
+        }
+        else
+        {
+            StartCoroutine(WaitForLobbyAndJoinOtherRoom(betMoney, gameType));
+        }
     }
 
-    void JoinOtherRoom(int betMoney)
+    IEnumerator WaitForLobbyAndJoinOtherRoom(int betMoney, Define.GameType gameType)
     {
-        if (PhotonNetwork.IsConnected)
+        Reconnect();
+
+        while (!PhotonNetwork.IsConnectedAndReady)
         {
-            _loadingUI.SetConnectionInfoText($"Searching Other Room ({betMoney})...");
+            yield return null;
+        }
+
+        if (!PhotonNetwork.InLobby)
+        {
+            PhotonNetwork.JoinLobby();
+            while (!PhotonNetwork.InLobby)
+                yield return null;
+        }
+
+        JoinOtherRoom(betMoney, gameType);
+    }
+
+    void JoinOtherRoom(int betMoney, Define.GameType gameType)
+    {
+        if (PhotonNetwork.IsConnectedAndReady)
+        {
+            Debug.Log($"Searching Other Room ({betMoney}, {gameType})...");
 
             List<RoomInfo> matchingRooms = new List<RoomInfo>();
 
             foreach (RoomInfo room in availableRooms.Values)
             {
-                if (room.CustomProperties.ContainsKey("betMoney"))
+                if (room.CustomProperties.ContainsKey("betMoney") && room.CustomProperties.ContainsKey("gameType"))
                 {
                     object betObj = room.CustomProperties["betMoney"];
+                    object gameTypeObj = room.CustomProperties["gameType"];
+
+                    if (betObj == null || gameTypeObj == null)
+                    {
+                        Debug.Log($"Room {room.Name} betMoney or gameType is null.");
+                        continue;
+                    }
+
                     int roomBetMoney = Convert.ToInt32(betObj);
+                    string roomGameTypeStr = gameTypeObj.ToString();
+
+                    Define.GameType roomGameType = (Define.GameType)Enum.Parse(typeof(Define.GameType), roomGameTypeStr);
 
                     if (roomBetMoney == betMoney &&
+                        roomGameType == gameType &&
                         room.PlayerCount < room.MaxPlayers &&
                         PhotonNetwork.CurrentRoom != null &&
-                        room.Name != PhotonNetwork.CurrentRoom.Name) // 현재 방 제외
+                        room.Name != PhotonNetwork.CurrentRoom.Name)
                     {
                         matchingRooms.Add(room);
                     }
@@ -234,14 +381,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             {
                 int rand = UnityEngine.Random.Range(0, matchingRooms.Count);
                 PhotonNetwork.JoinRoom(matchingRooms[rand].Name);
-                _loadingUI.SetConnectionInfoText($"Entering Other Room ({betMoney})...");
+                Debug.Log($"Entering Other Room ({betMoney}, {gameType})...");
             }
             else
             {
-                _loadingUI.SetConnectionInfoText("No Other Room.. Creating New Room...");
-                Debug.Log($"No other available room for betMoney {betMoney}. Creating new room.");
+                Debug.Log($"No other available room for betMoney {betMoney}, gameType {gameType}. Creating new room.");
 
-                CreateRoom(betMoney);
+                CreateRoom(betMoney, gameType);
             }
         }
         else
@@ -260,6 +406,29 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             Debug.LogWarning("현재 방 정보가 없거나 betMoney 프로퍼티가 없음");
             return -1;
+        }
+    }
+
+    public Define.GameType GetCurrentRoomGameType()
+    {
+        if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("gameType"))
+        {
+            string gameTypeStr = PhotonNetwork.CurrentRoom.CustomProperties["gameType"].ToString();
+            try
+            {
+                Define.GameType gameType = (Define.GameType)Enum.Parse(typeof(Define.GameType), gameTypeStr);
+                return gameType;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"gameType 변환 오류: {gameTypeStr}, {e.Message}");
+                return Define.GameType.None;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("현재 방 정보가 없거나 gameType 프로퍼티가 없음");
+            return Define.GameType.None;
         }
     }
 
