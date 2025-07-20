@@ -65,6 +65,7 @@ public class User
                 break;
             case Define.GameType.Poker:
                 Managers.DB.DBUpdateMoney(uid, -amount, "poker");
+                PokerSyncSeedMoney();
                 break;
             case Define.GameType.BlackJack:
                 break;
@@ -86,7 +87,8 @@ public class User
                 HoldemSyncSeedMoney();
                 break;
             case Define.GameType.Poker:
-                Managers.DB.DBUpdateMoney(uid, -amount, "poker");
+                Managers.DB.DBUpdateMoney(uid, amount, "poker");
+                PokerSyncSeedMoney();
                 break;
             case Define.GameType.BlackJack:
                 break;
@@ -109,6 +111,18 @@ public class User
     {
         if (HoldemGameControl.Control.IsPlaying)
             SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
+    }
+
+    public void PokerBettingMoney(string targetUID, int amount)
+    {
+        if (targetUID != uid)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney -= amount;
+        Managers.DB.DBUpdateMoney(uid, -amount, "seven");
+        NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
+        PokerSyncSeedMoney();
     }
 
     public void PokerSyncSeedMoney()

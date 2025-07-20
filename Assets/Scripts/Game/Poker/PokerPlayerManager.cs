@@ -17,6 +17,7 @@ public class PokerPlayerManager
     int[] playerSeedMoney;
     int[] playerBettingMoney;
     bool[] playerIsBet;
+    bool[] playerIsCall;
     bool[] playerIsAlive;
     bool[] playerIsTurn;
     bool[] playerDieReserve;
@@ -41,6 +42,7 @@ public class PokerPlayerManager
         playerSeedMoney = new int[PokerGameControl.MAX_PLAYER_NUM];
         playerBettingMoney = new int[PokerGameControl.MAX_PLAYER_NUM];
         playerIsBet = new bool[PokerGameControl.MAX_PLAYER_NUM];
+        playerIsCall = new bool[PokerGameControl.MAX_PLAYER_NUM];
         playerIsAlive = new bool[PokerGameControl.MAX_PLAYER_NUM];
         playerIsTurn = new bool[PokerGameControl.MAX_PLAYER_NUM];
         playerDieReserve = new bool[PokerGameControl.MAX_PLAYER_NUM];
@@ -61,6 +63,7 @@ public class PokerPlayerManager
         {
             playerBettingMoney[i] = 0;
             playerIsBet[i] = false;
+            playerIsCall[i] = false;
             playerIsAlive[i] = true;
             playerIsTurn[i] = false;
             playerDieReserve[i] = false;
@@ -88,6 +91,7 @@ public class PokerPlayerManager
         for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
             playerIsBet[i] = false;
+            playerIsCall[i] = false;
             playerIsTurn[i] = false;
         }
     }
@@ -146,10 +150,11 @@ public class PokerPlayerManager
         return playerBettingMoney[index];
     }
 
-    public void UpdatePlayerBetting(int index, int amount)
+    public void UpdatePlayerBetting(int index, int amount, bool isCall = false)
     {
         playerBettingMoney[index] += amount;
         playerIsBet[index] = true;
+        playerIsCall[index] = isCall;
         PokerGameControl.Control.UpdatePlayerBetMoneyUI();
     }
 
@@ -161,6 +166,16 @@ public class PokerPlayerManager
     public void UpdatePlayerIsBet(int index, bool val)
     {
         playerIsBet[index] = val;
+    }
+
+    public bool GetPlayerIsCall(int index)
+    {
+        return playerIsCall[index];
+    }
+
+    public void UpdatePlayerIsCall(int index, bool val)
+    {
+        playerIsCall[index] = val;
     }
 
     public bool GetPlayerState(int index)
@@ -295,78 +310,99 @@ public class PokerPlayerManager
         cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(cardDetail);
     }
 
+    public bool FindBetEndTerm()
+    {
+        for(int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if (GetPlayerUID(i) == "" || GetPlayerState(i) == false)
+                continue;
 
-    //public List<string> GetWinnerList()
-    //{
-    //    return winnerList;
-    //}
+            if (GetPlayerIsCall(i) == false)
+                return false;
+        }
+        return true;
+    }
 
-    //public void SetWinnerList(string[] wList)
-    //{
-    //    for (int i = 0; i < wList.Length; i++)
-    //    {
-    //        winnerList.Add(wList[i]);
-    //    }
-    //}
+    public List<string> GetWinnerList()
+    {
+        return winnerList;
+    }
 
-    //public int GetLowestPlayerSeedMoney()
-    //{
-    //    int min_bet = int.MaxValue;
-    //    for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
-    //    {
-    //        if (GetPlayerState(i) == false || GetPlayerUID(i) == "")
-    //            continue;
+    public void SetWinnerList(string[] wList)
+    {
+        for (int i = 0; i < wList.Length; i++)
+        {
+            winnerList.Add(wList[i]);
+        }
+    }
 
-    //        if (playerSeedMoney[i] < min_bet)
-    //            min_bet = playerSeedMoney[i];
-    //    }
-    //    return min_bet;
-    //}
+    public int GetLowestPlayerSeedMoney()
+    {
+        int min_bet = int.MaxValue;
+        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if (GetPlayerState(i) == false || GetPlayerUID(i) == "")
+                continue;
 
-    //public int FindHighestBet()
-    //{
-    //    int max_bet = 0;
-    //    for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
-    //    {
-    //        if (GetPlayerState(i) == false || GetPlayerUID(i) == "")
-    //            continue;
+            if (playerSeedMoney[i] < min_bet)
+                min_bet = playerSeedMoney[i];
+        }
+        return min_bet;
+    }
 
-    //        if (playerBettingMoney[i] > max_bet)
-    //            max_bet = playerBettingMoney[i];
-    //    }
-    //    return max_bet;
-    //}
+    public int FindHighestBet()
+    {
+        int max_bet = 0;
+        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if (GetPlayerState(i) == false || GetPlayerUID(i) == "")
+                continue;
 
-    //public void ShowPlayerCard()
-    //{
-    //    for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
-    //    {
-    //        (GameObject, GameObject) cards = playerCardGO[i];
+            if (playerBettingMoney[i] > max_bet)
+                max_bet = playerBettingMoney[i];
+        }
+        return max_bet;
+    }
 
-    //        if (GetPlayerUID(i) != "" && playerIsAlive[i])
-    //        {
-    //            cards.Item1.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(playerCardDetails[i, 0]);
-    //            cards.Item2.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(playerCardDetails[i, 1]);
-    //        }
-    //    }
-    //}
+    public int GetPlayerCardDetail(int playerIndex, int cardIndex)
+    {
+        return playerCardDetails[playerIndex, cardIndex];
+    }
 
-    //public void ClearGameSetting()
-    //{
-    //    for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
-    //    {
-    //        (GameObject, GameObject) cards = playerCardGO[i];
+    public void ShowPlayerCard()
+    {
+        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if (GetPlayerUID(i) == "" || playerIsAlive[i] == false)
+                continue;
 
-    //        if (cards.Item1 == null)
-    //            continue;
+            GameObject cardGO = playerCardGO[i][0];
+            cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(playerCardDetails[i, 0]);
+            cardGO = playerCardGO[i][1];
+            cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(playerCardDetails[i, 1]);
+            cardGO = playerCardGO[i][7];
+            cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(playerCardDetails[i, 7]);
+        }
+    }
 
-    //        if (cards.Item1.GetPhotonView().IsMine)
-    //        {
-    //            Managers.Resource.PhotonDestroy(cards.Item1);
-    //            Managers.Resource.PhotonDestroy(cards.Item2);
-    //        }
-    //    }
-    //}
+    public void ClearGameSetting()
+    {
+        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if (GetPlayerUID(i) == "")
+                continue;
+
+            for(int j = 0; j < PokerCardManager.PLAYER_CARD_NUM; j++)
+            {
+                if (j == 3) continue;
+
+                GameObject cardGO = playerCardGO[i][j];
+
+                if (cardGO.GetPhotonView().IsMine)
+                    Managers.Resource.PhotonDestroy(cardGO);
+            }
+        }
+    }
 
     //public void GiveHoldemPlayerManagerSyncData(Player newPlayer)
     //{

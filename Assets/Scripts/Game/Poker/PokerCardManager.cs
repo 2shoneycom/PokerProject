@@ -196,9 +196,6 @@ public class PokerCardManager
             SyncSystem.Sync.PokerNextStage_V2(1);
         else
             SyncSystem.Sync.PokerNextStage_V2(2);
-        //SyncSystem.Sync.PokerProcessStage();
-        //SyncSystem.Sync.SyncPokerCardLen(PokerGameControl.Control.CardLen + 1, PokerGameControl.CardLenState.ProcessStage);
-        //PokerGameControl.Control.CallSyncCardLen(PokerGameControl.Control.CardLen + 1, PokerGameControl.CardLenState.ProcessStage);
     }
 
     private void AddCardToPlayer(int popedCard, string pUID)
