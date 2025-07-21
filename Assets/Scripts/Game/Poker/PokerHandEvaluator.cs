@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PokerHandEvaluator
 {
-    public List<int> idxs = new List<int>();
+    public List<int> idxs;
     private List<char> shapes = new List<char>();   // idxs 배열을 Card System 쪽에 있는 무늬 판별기에 넣고 무늬를 얻어옴.
     private List<int> nums = new List<int>();        // idxs 배열을 Card System 쪽에 있는 숫자 판별기에 넣고 숫자를 얻어옴.
     private int handRank;   // 이 5장의 족보 순위 ex) 0: highcard, 1: onepair ... 8: straight flush
@@ -16,13 +16,14 @@ public class PokerHandEvaluator
 
     public Tuple<int, float> EvaluateHand()
     {
-        cardlen = idxs.Count();
+        cardlen = idxs.Count;
+        Debug.Log($"cardlen(=idxs.Count)는 {cardlen}개");
 
-        // Start에서 Card System 쪽에 있는 숫자를 보고 무늬, 숫자 판단하는 거 가져오는 코드
+        // Start에서 Card System 쪽에 있는 숫자를 보고 문양 숫자 판단하는 거 가져오는 코드
         for (int i = 0; i < cardlen; i++)
         {
-            nums[i] = PokerGameControl.Card.GetCardNum(idxs[i]);
-            shapes[i] = PokerGameControl.Card.GetCardShape(idxs[i]);
+            nums.Add(PokerGameControl.Card.GetCardNum(idxs[i]));
+            shapes.Add(PokerGameControl.Card.GetCardShape(idxs[i]));
         }
 
         handRank = -1;
@@ -44,12 +45,20 @@ public class PokerHandEvaluator
             }
 
             // nums 내림차순 정렬
-            List.Sort(nums);
-            List.Reverse(nums);
+            nums.Sort();
+            nums.Reverse();
+
+            for (int j = 0; j < cardlen; j++)
+            {
+                Debug.Log($"{j}번째 카드 -> {nums[j]}");
+            }
 
             // 플러쉬, 스트레이트 여부는 미리 구해놓기
-            SetFlush();
-            if (cardlen >= 5) SetStraight();
+            if (cardlen >= 5)
+            {
+                SetFlush();
+                SetStraight();
+            }
 
             // 본격 족보 판단
             var (curRank, curScore) = GetRank();
@@ -94,9 +103,9 @@ public class PokerHandEvaluator
         }
     }
 
-    private Tuple<int, int> GetRank()
+    private Tuple<int, float> GetRank()
     {
-        int scr = -1;
+        float scr = -1;
 
         scr = cardlen >= 5 ? IsStraightFlush() : scr;
         if (scr > 0)
@@ -155,13 +164,13 @@ public class PokerHandEvaluator
         }
 
         // 하이 카드
-        // Debug.Log("하이카드입니다.");
         scr = 0;
         for (int i = 0; i < cardlen; i++)
         {
             scr *= 100;
             scr += nums[i];
         }
+        scr += (float)(0.1 * ShapesToInt(shapes[0]));
         return Tuple.Create(0, scr);
     }
 
@@ -173,7 +182,7 @@ public class PokerHandEvaluator
         if (is_flush && is_straight)
         {
             scr = nums[0];    // 스트레이트 계열은 제일 높은 한 장만 보면 됨
-            scr += 0.1 * ShapesToInt(shapes[0]);    // 플러쉬 계열은 한 장의 문양만 보면 됨
+            scr += (float)(0.1 * ShapesToInt(shapes[0]));    // 플러쉬 계열은 한 장의 문양만 보면 됨
         }
 
         return scr;
@@ -233,7 +242,7 @@ public class PokerHandEvaluator
                 scr += nums[i];
             }
         }
-        scr += 0.1 * ShapesToInt(shapes[0]);    // 플러쉬 계열은 한 장의 문양만 보면 됨
+        scr += (float)(0.1 * ShapesToInt(shapes[0]));    // 플러쉬 계열은 한 장의 문양만 보면 됨
 
         return scr;
     }
@@ -246,7 +255,7 @@ public class PokerHandEvaluator
         {
             scr = nums[0];    // 스트레이트는 제일 높은 한 장만 비교하면 됨
         }
-        scr += 0.1 * ShapesToInt(shapes[0]);    // 제일 높은 한 장의 문양만 보면 됨 (아마?)
+        scr += (float)(0.1 * ShapesToInt(shapes[0]));    // 제일 높은 한 장의 문양만 보면 됨 (아마?)
         return scr;
     }
 
@@ -284,19 +293,19 @@ public class PokerHandEvaluator
         {
             // 앞의 두 쌍이 같은 경우 ex) 7,7,4,4,1
             scr = 10000 * nums[0] + 100 * nums[2] + nums[4];
-            scr += 0.1 * math.Max(ShapesToInt(shapes[0]), ShapesToInt(shapes[1]));  // 높은 쌍(7,7)에서 높은 문양을 점수로 사용
+            scr += (float)(0.1 * Math.Max(ShapesToInt(shapes[0]), ShapesToInt(shapes[1])));  // 높은 쌍(7,7)에서 높은 문양을 점수로 사용
         }
         else if (cardlen >= 5 && nums[0] == nums[1] && nums[3] == nums[4])
         {
             // 앞의 한 쌍, 뒤의 한 쌍이 같은 경우 ex) 7,7,4,1,1
             scr = 10000 * nums[0] + 100 * nums[3] + nums[2];
-            scr += 0.1 * math.Max(ShapesToInt(shapes[0]), ShapesToInt(shapes[1]));  // 높은 쌍(7,7)에서 높은 문양을 점수로 사용
+            scr += (float)(0.1 * Math.Max(ShapesToInt(shapes[0]), ShapesToInt(shapes[1])));  // 높은 쌍(7,7)에서 높은 문양을 점수로 사용
         }
         else if (cardlen >= 5 && nums[1] == nums[2] && nums[3] == nums[4])
         {
             // 뒤의 두 쌍이 같은 경우 ex) 7,4,4,1,1
             scr = 10000 * nums[1] + 100 * nums[3] + nums[0];
-            scr += 0.1 * math.Max(ShapesToInt(shapes[1]), ShapesToInt(shapes[2]));  // 높은 쌍(4,4)에서 높은 문양을 점수로 사용
+            scr += (float)(0.1 * Math.Max(ShapesToInt(shapes[1]), ShapesToInt(shapes[2])));  // 높은 쌍(4,4)에서 높은 문양을 점수로 사용
         }
 
         return scr;
@@ -311,31 +320,32 @@ public class PokerHandEvaluator
         {
             // ex) 7,7,5,3,1
             scr = 1000000 * nums[0] + 10000 * nums[2] + 100 * nums[3] + nums[4];
-            scr += 0.1 * math.Max(ShapesToInt(shapes[0]), ShapesToInt(shapes[1]));  // 페어에서 높은 문양을 점수로 사용
+            scr += (float)(0.1 * Math.Max(ShapesToInt(shapes[0]), ShapesToInt(shapes[1])));  // 페어에서 높은 문양을 점수로 사용
         }
         else if (cardlen >= 3 && nums[1] == nums[2])
         {
             // ex) 7,5,5,3,1
             scr = 1000000 * nums[1] + 10000 * nums[0] + 100 * nums[3] + nums[4];
-            scr += 0.1 * math.Max(ShapesToInt(shapes[1]), ShapesToInt(shapes[2]));  // 페어에서 높은 문양을 점수로 사용
+            scr += (float)(0.1 * Math.Max(ShapesToInt(shapes[1]), ShapesToInt(shapes[2])));  // 페어에서 높은 문양을 점수로 사용
         }
         else if (cardlen >= 4 && nums[2] == nums[3])
         {
             // ex) 7,5,3,3,1
             scr = 1000000 * nums[2] + 10000 * nums[0] + 100 * nums[1] + nums[4];
-            scr += 0.1 * math.Max(ShapesToInt(shapes[2]), ShapesToInt(shapes[3]));  // 페어에서 높은 문양을 점수로 사용
+            scr += (float)(0.1 * Math.Max(ShapesToInt(shapes[2]), ShapesToInt(shapes[3])));  // 페어에서 높은 문양을 점수로 사용
         }
         else if (cardlen >= 5 && nums[3] == nums[4])
         {
             // ex) 13,10,9,5,5
             scr = 1000000 * nums[3] + 10000 * nums[0] + 100 * nums[1] + nums[2];
-            scr += 0.1 * math.Max(ShapesToInt(shapes[3]), ShapesToInt(shapes[4]));  // 페어에서 높은 문양을 점수로 사용
+            scr += (float)(0.1 * Math.Max(ShapesToInt(shapes[3]), ShapesToInt(shapes[4])));  // 페어에서 높은 문양을 점수로 사용
         }
 
         return scr;
     }
 
-    public int ShapesToInt(char shape) {
+    public int ShapesToInt(char shape)
+    {
         int retVal = -1;
 
         switch (shape)

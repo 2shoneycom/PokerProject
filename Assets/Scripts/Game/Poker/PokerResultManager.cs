@@ -61,11 +61,13 @@ public class PokerResultManager
                     cardIdx.Add(PokerGameControl.Players.GetPlayerCardDetail(i, j));
                 }
             }
+            // log 3
 
             if (cardLen < PokerGameControl.MAX_PLAYER_NUM)
             {
                 evaluator.idxs = cardIdx;
                 var (curRank, curScore) = evaluator.EvaluateHand();
+                // log 4
 
                 // 가장 낮은 족보를 가진 플레이어를 고르는 경우
                 if (isReversed)
