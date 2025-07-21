@@ -31,7 +31,7 @@ public class HoldemResultManager
         int maxScore = -1;
 
         List<int> dealerCardIdx = HoldemGameControl.Card.GetDealerCardDetail().ToList();  // 딜러 카드 5장의 인덱스
-
+    
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
         for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
