@@ -8,7 +8,7 @@ using System;
 
 public class PokerResultManager
 {
-    public string GetWinner(int cardLen)
+    public string GetWinner(int cardLen, bool isReversed = false)
     {
         List<String> winners = new List<String>();  // 승자 리스트
 
@@ -27,9 +27,9 @@ public class PokerResultManager
         }
 
         PokerHandEvaluator evaluator = new PokerHandEvaluator();
-        int maxRank = -1;
-        int maxScore = -1;
-
+        int maxRank = isReversed ? Int32.MaxValue : -1;
+        float maxScore = isReversed ? Int32.MaxValue : -1;
+        Debug.Log("log 1 ");
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
         for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
@@ -38,14 +38,15 @@ public class PokerResultManager
                 continue;
 
             // 족보 판단 디버그용!!!!!!
-            int myRank = -1;
-            int myScore = -1;
+            int myRank = isReversed ? Int32.MaxValue : -1;
+            float myScore = isReversed ? Int32.MaxValue : -1;
 
             List<int> cardIdx = new List<int>();
+            Debug.Log("log 2 ");
 
-            if (cardLen == PokerGameControl.MAX_PLAYER_NUM)
+            if (cardLen == PokerCardManager.PLAYER_CARD_NUM)
             {
-                for (int j = 0; j < PokerGameControl.MAX_PLAYER_NUM; j++)
+                for (int j = 0; j < PokerCardManager.PLAYER_CARD_NUM; j++)
                 {
                     if (j == 3) continue;
 
@@ -61,31 +62,62 @@ public class PokerResultManager
                     cardIdx.Add(PokerGameControl.Players.GetPlayerCardDetail(i, j));
                 }
             }
+            Debug.Log("log 3 ");
+            Debug.Log(cardLen);
 
-            if (cardLen < PokerGameControl.MAX_PLAYER_NUM)
+            if (cardLen < PokerCardManager.PLAYER_CARD_NUM)
             {
                 evaluator.idxs = cardIdx;
                 var (curRank, curScore) = evaluator.EvaluateHand();
+                Debug.Log("log 4 ");
 
-                if (curRank > maxRank || (curRank == maxRank && curScore > maxScore))
+                // 가장 낮은 족보를 가진 플레이어를 고르는 경우
+                if (isReversed)
                 {
-                    maxRank = curRank;
-                    maxScore = curScore;
-                    winners.Clear();
-                    winners.Add(pUID);
-                }
-                else if (curRank == maxRank && curScore == maxScore)
-                {
-                    // 동점자 발생
-                    winners.Add(pUID);
-                }
+                    if (curRank < maxRank || (curRank == maxRank && curScore < maxScore))
+                    {
+                        maxRank = curRank;
+                        maxScore = curScore;
+                        winners.Clear();
+                        winners.Add(pUID);
+                    }
+                    else if (curRank == maxRank && curScore == maxScore)
+                    {
+                        // 동점자 발생 (세븐에서는 발생할 일 없음, 여기 지워도 됨)
+                        winners.Add(pUID);
+                    }
 
-                // 족보 판단 디버그용!!!!!!
-                if (curRank > myRank || (curRank == myRank && curScore > myScore))
-                {
-                    myRank = curRank;
-                    myScore = curScore;
+                    // 족보 판단 디버그용!!!!!!
+                    if (curRank < myRank || (curRank == myRank && curScore < myScore))
+                    {
+                        myRank = curRank;
+                        myScore = curScore;
+                    }
                 }
+                else
+                {
+                    if (curRank > maxRank || (curRank == maxRank && curScore > maxScore))
+                    {
+                        maxRank = curRank;
+                        maxScore = curScore;
+                        winners.Clear();
+                        winners.Add(pUID);
+                    }
+                    else if (curRank == maxRank && curScore == maxScore)
+                    {
+                        // 동점자 발생 (세븐에서는 발생할 일 없음, 여기 지워도 됨)
+                        winners.Add(pUID);
+                    }
+
+                    // 족보 판단 디버그용!!!!!!
+                    if (curRank > myRank || (curRank == myRank && curScore > myScore))
+                    {
+                        myRank = curRank;
+                        myScore = curScore;
+                    }
+                }
+                Debug.Log("log 5 ");
+
             }
             else
             {
@@ -107,7 +139,7 @@ public class PokerResultManager
                     }
                     else if (curRank == maxRank && curScore == maxScore)
                     {
-                        // 동점자 발생
+                        // 동점자 발생 (세븐에서는 발생할 일 없음, 여기 지워도 됨)
                         winners.Add(pUID);
                     }
 
@@ -128,20 +160,10 @@ public class PokerResultManager
 
         winners = winners.Distinct().ToList();
 
-        // 세븐에서는 동점자가 있을 시 문양 판단으로 단 1명의 승자를 가려야함
-        return RealWinnerDecider(winners);
-
         Debug.Log("우승자의 족보는");
         DebugLog(maxRank);
 
         return winners[0];
-    }
-
-
-    // 문양 판단으로 단 1명의 승자 가리는 함수
-    public string RealWinnerDecider(List<String> winners)
-    {
-        return null;
     }
 
     public static IEnumerable<IEnumerable<T>> GetCombinations<T>(List<T> list, int choose)

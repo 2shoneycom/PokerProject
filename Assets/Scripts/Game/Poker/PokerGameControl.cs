@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -246,8 +247,9 @@ public class PokerGameControl : MonoBehaviour
             case 8:
                 //////////////////////////////////// test
                 {
-                    string curPlayer = Result.GetWinner(3);
+                    string curPlayer = Result.GetWinner(3, true);
                     _curPlayer = Players.GetPlayerGameIndexByUID(curPlayer);
+                    Debug.Log(Players.GetPlayerNickNameByUID(curPlayer));
                     StartCoroutine(SyncSystem.Sync.SyncPokerCurrentPlayer(_curPlayer));
                 }
                 break;
@@ -452,7 +454,8 @@ public class PokerGameControl : MonoBehaviour
     void EndGame()
     {
         // 우승자 리스트 가져오기
-        List<string> winnerList = Result.GetWinner();
+        List<string> winnerList = new List<string>();
+        winnerList.Add(Result.GetWinner(PokerCardManager.PLAYER_CARD_NUM));
         for (int i = 0; i < winnerList.Count; i++)
         {
             foreach (string winnerUID in winnerList)
