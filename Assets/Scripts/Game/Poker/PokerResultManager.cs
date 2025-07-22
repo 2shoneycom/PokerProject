@@ -8,7 +8,7 @@ using System;
 
 public class PokerResultManager
 {
-    public string GetWinner(int cardLen, bool isReversed)
+    public string GetWinner(int cardLen, bool isReversed = false)
     {
         List<String> winners = new List<String>();  // 승자 리스트
 
@@ -29,7 +29,7 @@ public class PokerResultManager
         PokerHandEvaluator evaluator = new PokerHandEvaluator();
         int maxRank = isReversed ? Int32.MaxValue : -1;
         float maxScore = isReversed ? Int32.MaxValue : -1;
-
+        Debug.Log("log 1 ");
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
         for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
@@ -42,10 +42,11 @@ public class PokerResultManager
             float myScore = isReversed ? Int32.MaxValue : -1;
 
             List<int> cardIdx = new List<int>();
+            Debug.Log("log 2 ");
 
-            if (cardLen == PokerGameControl.MAX_PLAYER_NUM)
+            if (cardLen == PokerCardManager.PLAYER_CARD_NUM)
             {
-                for (int j = 0; j < PokerGameControl.MAX_PLAYER_NUM; j++)
+                for (int j = 0; j < PokerCardManager.PLAYER_CARD_NUM; j++)
                 {
                     if (j == 3) continue;
 
@@ -61,13 +62,14 @@ public class PokerResultManager
                     cardIdx.Add(PokerGameControl.Players.GetPlayerCardDetail(i, j));
                 }
             }
-            // log 3
+            Debug.Log("log 3 ");
+            Debug.Log(cardLen);
 
-            if (cardLen < PokerGameControl.MAX_PLAYER_NUM)
+            if (cardLen < PokerCardManager.PLAYER_CARD_NUM)
             {
                 evaluator.idxs = cardIdx;
                 var (curRank, curScore) = evaluator.EvaluateHand();
-                // log 4
+                Debug.Log("log 4 ");
 
                 // 가장 낮은 족보를 가진 플레이어를 고르는 경우
                 if (isReversed)
@@ -114,6 +116,8 @@ public class PokerResultManager
                         myScore = curScore;
                     }
                 }
+                Debug.Log("log 5 ");
+
             }
             else
             {

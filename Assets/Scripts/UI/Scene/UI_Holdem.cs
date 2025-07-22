@@ -277,6 +277,7 @@ public class UI_Holdem : UI_Scene
     {
         if (!isRoomOpened)
         {
+            DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
             ColorUtility.TryParseHtmlString("#FF0000", out Color targetColor);
             GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
 
@@ -285,6 +286,7 @@ public class UI_Holdem : UI_Scene
         }
         else
         {
+            DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
             ColorUtility.TryParseHtmlString("#CFBFBF", out Color targetColor);
             GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
 

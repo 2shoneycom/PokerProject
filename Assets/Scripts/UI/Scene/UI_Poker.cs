@@ -310,19 +310,22 @@ public class UI_Poker : UI_Scene
 
     void RequestBet(string betType)
     {
-        //if (PokerGameControl.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
-        //{
-        //    if (betType == "Die")       // 자신의 턴이 아니면 die만 켜져있어서 die만 누를테지만 혹시 모르니
-        //    {
-        //        if (PokerGameControl.Players.GetPlayerDieReserve(User.NowGamePlayer.GameIndex) == false)
-        //            SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, true);
-        //        else
-        //            SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, false);
-        //    }
-        //    return;     // 자신의 턴이 아닐때 die가 아니면 모두 리턴
-        //}
+        if (!PokerGameControl.Control.IsPlaying) 
+            return;
 
-        //PokerGameControl.Bet.PlayerBetSelected(betType);
+        if (PokerGameControl.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
+        {
+            if (betType == "Die")       // 자신의 턴이 아니면 die만 켜져있어서 die만 누를테지만 혹시 모르니
+            {
+                if (PokerGameControl.Players.GetPlayerDieReserve(User.NowGamePlayer.GameIndex) == false)
+                    SyncSystem.Sync.SyncPokerDieReserve(User.NowGamePlayer.GameIndex, true);
+                else
+                    SyncSystem.Sync.SyncPokerDieReserve(User.NowGamePlayer.GameIndex, false);
+            }
+            return;     // 자신의 턴이 아닐때 die가 아니면 모두 리턴
+        }
+
+        PokerGameControl.Bet.PlayerBetSelected(betType);
     }
 
     void OpenRoomClicked(PointerEventData data)
@@ -353,12 +356,12 @@ public class UI_Poker : UI_Scene
 
         panelText.text = "Winner : ";
 
-        List<string> wList = HoldemGameControl.Players.GetWinnerList();
+        List<string> wList = PokerGameControl.Players.GetWinnerList();
         int len = wList.Count;
 
         for (int i = 0; i < len; i++)
         {
-            panelText.text += HoldemGameControl.Players.GetPlayerNickNameByUID(wList[i]);
+            panelText.text += PokerGameControl.Players.GetPlayerNickNameByUID(wList[i]);
 
             if (i != len - 1)
             {
@@ -367,20 +370,22 @@ public class UI_Poker : UI_Scene
         }
 
         pl.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.InOutQuad);
-        StartCoroutine(WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME));
+        StartCoroutine(WaitWinnerPanel(PokerGameControl.RESULT_SHOW_TIME));
     }
 
     IEnumerator WaitWinnerPanel(float sec)
     {
+        Debug.Log("Winner Timer Start");
         yield return new WaitForSeconds(sec);
 
+        Debug.Log("Winner Timer End");
         SetWinnerPanel(false);
-        HoldemGameControl.Control.NextStage();
+        PokerGameControl.Control.NextStage();
     }
 
     private void LeaveRoomClicked(PointerEventData data)
     {
-        //HoldemScene holdemScene = new HoldemScene();
-        //holdemScene.RequestLeaveRoom();
+        PokerScene pokerScene = (PokerScene)Managers.Scene.CurrentScene;
+        pokerScene.RequestLeaveRoom();
     }
 }
