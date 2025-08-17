@@ -32,9 +32,4 @@ public class LobbyScene : BaseScene
     {
         Debug.Log("Lobby Scene Clear");
     }
-
-    public void RequestWebLink()
-    {
-        Managers.Web.LinkToWeb();
-    }
 }

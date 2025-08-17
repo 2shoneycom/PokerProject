@@ -57,7 +57,7 @@ public class Managers : MonoBehaviour
                 case Define.GameType.Poker:
                     return PokerGameControl.Control.IsPlaying;
                 case Define.GameType.BlackJack:
-                    //return BlackJackGameControl.Control.IsPlaying;
+                    return JackGameControl.Control.IsPlaying;
                 default:
                     return false;
             }
@@ -75,7 +75,7 @@ public class Managers : MonoBehaviour
                 case Define.GameType.Poker:
                     return PokerGameControl.MAX_PLAYER_NUM;
                 case Define.GameType.BlackJack:
-                //return BlackJackGameControl.Control.IsPlaying;
+                    return JackGameControl.MAX_PLAYER_NUM;
                 default:
                     return 0;
             }

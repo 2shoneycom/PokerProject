@@ -39,8 +39,7 @@ public class UI_AddFriendPopup : UI_Popup
         // 실제 친구 추가 정보를 참고하여
         for (int i = 0; i < 3; i++)
         {
-            GameObject friendGO = Managers.UI.MakeSubItem<UI_SearchFriendList>(go.transform).gameObject;
-            UI_SearchFriendList friend = friendGO.GetOrAddComponent<UI_SearchFriendList>();
+            UI_SearchFriendList friend = Managers.UI.MakeSubItem<UI_SearchFriendList>(go.transform);
         }
     }
 }

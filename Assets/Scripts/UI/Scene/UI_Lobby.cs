@@ -140,7 +140,6 @@ public class UI_Lobby : UI_Scene
 
     private void WebClicked(PointerEventData data)
     {
-        LobbyScene lobbyScene = new LobbyScene();
-        lobbyScene.RequestWebLink();
+        Managers.Web.LinkToWeb();
     }
 }

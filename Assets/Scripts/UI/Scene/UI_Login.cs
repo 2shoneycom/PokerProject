@@ -43,6 +43,7 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
 
         GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(false);
         BindEvent(GetButton((int)Buttons.UI_ReconnectButton).gameObject, ReconnectButtonClicked);
+
         Managers.Login.LoginSceneLoaded(this);
         Managers.Auth.LoginSceneLoaded(this);
     }
@@ -62,16 +63,17 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
         if (!_lobbyButton.interactable)
             return;
 
-        DisableAllButton();
+        SwitchAllButton(false);
         //Managers.Photon.ConnectToPhoton(this);
-        LoginScene.Instance.RequestLogin();
+        LoginScene loginScene = (LoginScene)Managers.Scene.CurrentScene;
+        loginScene.RequestLogin();
     }
 
-    void DisableAllButton()
+    public void SwitchAllButton(bool isOn)
     {
         for (int i = 0; i < Enum.GetValues(typeof(Buttons)).Length; i++)
         {
-            GetButton(i).gameObject.SetActive(false);
+            GetButton(i).gameObject.SetActive(isOn);
         }
     }
 
@@ -82,7 +84,7 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
 
     void ReconnectButtonClicked(PointerEventData data)
     {
-        DisableAllButton();
+        SwitchAllButton(false);
         Managers.Photon.Reconnect();
     }
 }

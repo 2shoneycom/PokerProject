@@ -14,8 +14,10 @@ public class ResourceManager
     public GameObject PhotonInstantiate(string path, Transform pos = null)
     {
         path = $"Prefabs/{path}";
-
+        Debug.Log("pi");
         GameObject go = PhotonNetwork.Instantiate(path, pos.position, Quaternion.identity);
+        Debug.Log("pi null");
+
         int index = go.name.IndexOf("(Clone)");         // 프리펩 생성시 붙는 Clone~을 없앰
         if (index > 0)
             go.name = go.name.Substring(0, index);

@@ -48,6 +48,7 @@ public class UI_JackPopup : UI_Popup
     void BeginnerButton(PointerEventData data)
     {
         SetEnterPanel(Buttons.UI_Beginner);
+        Managers.CurrentDifficulty = Define.Difficulty.Beginner;
 
         BindEvent(GetButton((int)Buttons.UI_EnterRoomButton).gameObject, EnterBeginnerRoom);
         BindEvent(GetButton((int)Buttons.UI_CreateRoomButton).gameObject, CreateBeginnerRoom);
@@ -55,7 +56,7 @@ public class UI_JackPopup : UI_Popup
 
     void EnterBeginnerRoom(PointerEventData data)
     {
-
+        Managers.Photon.JoinJack();
     }
 
     void CreateBeginnerRoom(PointerEventData data)

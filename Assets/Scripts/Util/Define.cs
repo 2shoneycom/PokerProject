@@ -13,6 +13,7 @@ public class Define
         Friend,
         PlayerInfo,
         Poker,
+        BlackJack,
     }
 
     public enum UIEvent

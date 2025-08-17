@@ -18,7 +18,7 @@ public class GamePlayer
                 case Define.GameType.Poker:
                     return PokerGameControl.Control.ConvertUItoGame(seatedIndex);
                 case Define.GameType.BlackJack:
-                    //return 0;
+                    return seatedIndex;
                 default:
                     return 0;
             }

@@ -49,6 +49,12 @@ public class User
         Managers.CurrentGameType = Define.GameType.Poker;
     }
 
+    public void SetJackPlay()
+    {
+        gamemPlayer = new GamePlayer();
+        Managers.CurrentGameType = Define.GameType.BlackJack;
+    }
+
     public void DecreaseMoney(string targetUID, int amount)
     {
         if (targetUID != uid)
@@ -91,6 +97,8 @@ public class User
                 PokerSyncSeedMoney();
                 break;
             case Define.GameType.BlackJack:
+                Managers.DB.DBUpdateMoney(uid, amount, "black");
+                JackSyncSeedMoney();
                 break;
         }
     }
@@ -130,4 +138,33 @@ public class User
         if (PokerGameControl.Control.IsPlaying)
             SyncSystem.Sync.SyncPokerPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
     }
+
+    public void JackBettingMoney(string targetUID, int amount)
+    {
+        if (targetUID != uid)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney -= amount;
+        Managers.DB.DBUpdateMoney(uid, -amount, "black");
+        NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
+        JackSyncSeedMoney();
+    }
+
+    public void JackResetBetting()
+    {
+        int betAmount = NowGamePlayer.BetMoney;
+
+        seedMoney += betAmount;
+        Managers.DB.DBUpdateMoney(uid, betAmount, "black");
+        NowGamePlayer.SetBetMoney(0);
+        JackSyncSeedMoney();
+    }
+
+    public void JackSyncSeedMoney()
+    {
+        if (JackGameControl.Control.IsPlaying)
+            SyncSystem.Sync.SyncJackPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
+    }
+
 }

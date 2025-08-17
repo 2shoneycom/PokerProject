@@ -75,6 +75,17 @@ public class SeatManager
 
         // occupiedCount 변수 동기화 위해 옮김
         occupiedCount++;
+        // ui
+        curGameScene.UpdateSeatUI(seatIndex, playerNickName);
+
+
+        if (Managers.CurrentGameType == Define.GameType.BlackJack
+            && PhotonNetwork.IsMasterClient && Managers.IsNowPlayingGame == false)
+        {
+            curGameScene.ReadyForGameStart();
+            return;
+        }
+
         if (occupiedCount >= 2 && PhotonNetwork.IsMasterClient && Managers.IsNowPlayingGame == false)
         {
             /* 
@@ -83,9 +94,6 @@ public class SeatManager
             */
             curGameScene.ReadyForGameStart();
         }
-
-        // ui
-        curGameScene.UpdateSeatUI(seatIndex, playerNickName);
     }
 
     public void LeaveSeat(string player_uid)
@@ -166,6 +174,18 @@ public class SeatManager
         curGameScene.UpdateBetUI(true);
         PokerGameControl.Control.NextStage();
     }
+
+    public void JackConvertToPlayers()
+    {
+        for (int i = 0; i < Managers.GetCurGameMaxPlayer; i++)
+        {
+            JackGameControl.Players.UpdatePlayerUID(i, seats[i * 2]);
+        }
+        User.NowUser.JackSyncSeedMoney();
+        curGameScene.UpdateBetUI(true);
+        JackGameControl.Control.NextStage();
+    }
+
 
     public int GetOccupiedCount()
     {
