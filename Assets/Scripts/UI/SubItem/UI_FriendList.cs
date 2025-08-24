@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class UI_FriendList : UI_FriendBase
 {
+    private string boundUID;
+
     enum Buttons
     {
         UI_FriendList_DeleteButton,
@@ -56,6 +58,11 @@ public class UI_FriendList : UI_FriendBase
         }
     }
 
+    public void SetUID(string uid)
+    {
+        boundUID = uid;
+    }
+
     public void SetFriendName(string name)
     {
         GetText((int)Texts.UI_FriendList_FriendNameText).text = name;
@@ -77,6 +84,7 @@ public class UI_FriendList : UI_FriendBase
 
         // 친구 삭제 처리...
         Debug.Log("Friend Deleted!");
+        Managers.DB.RemoveFriend(boundUID);
         Managers.Resource.Destroy(gameObject);
     }
 }

@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class UI_AcceptFriendList : UI_FriendBase
 {
+    private string boundUID;
+
     enum Buttons
     {
         UI_AcceptFriendList_RejectButton,
@@ -30,7 +32,7 @@ public class UI_AcceptFriendList : UI_FriendBase
         Bind<Image>(typeof(Images));
         Setting();
 
-        BindEvent(GetButton((int)Buttons.UI_AcceptFriendList_RejectButton).gameObject, RejecteFriend);
+        BindEvent(GetButton((int)Buttons.UI_AcceptFriendList_RejectButton).gameObject, RejectFriend);
         BindEvent(GetButton((int)Buttons.UI_AcceptFriendList_AcceptButton).gameObject, AcceptFriend);
     }
 
@@ -40,19 +42,27 @@ public class UI_AcceptFriendList : UI_FriendBase
         //GetImage((int)Images.UI_AcceptFriendList_Icon).sprite = Icon.sprite;
     }
 
-    void AcceptFriend(PointerEventData data)
+    public void SetUID(string uid)
     {
-        // 수락 처리...
-
-        Debug.Log("Friend Accept!");
-        Managers.Resource.Destroy(gameObject);
+        boundUID = uid;
     }
 
-    void RejecteFriend(PointerEventData data)
+    public void SetNickname(string nickname)
     {
-        // 거절 처리...
+        GetText((int)Texts.UI_AcceptFriendList_FriendNameText).text = nickname;
+    }
 
+    void AcceptFriend(PointerEventData data)
+    {
+        Debug.Log("Friend Accept!");
+        Managers.DB.AcceptAndAddFriend(boundUID);   // 친구 수락 처리
+        Managers.Resource.Destroy(gameObject);      // 해당 요소 제거
+    }
+
+    void RejectFriend(PointerEventData data)
+    {
         Debug.Log("Friend Reject!");
+        Managers.DB.RejectRequest(boundUID);
         Managers.Resource.Destroy(gameObject);
     }
 }

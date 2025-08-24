@@ -1,13 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SocialPlatforms;
 using UnityEngine.UI;
 
 public class UI_SearchFriendList : UI_FriendBase
 {
+    private string boundUID;
     enum Buttons
     {
         UI_AddFriendButton,
@@ -37,7 +40,36 @@ public class UI_SearchFriendList : UI_FriendBase
     {
         // 친구 추가 로직...
         Debug.Log("Friend Add!");
-        Managers.Resource.Destroy(gameObject);
+
+        Managers.DB.RequestAddFriend(boundUID);
+    }
+
+    public void SetUID(string uid)
+    {
+        boundUID = uid;
+    }
+
+    public void SetNickname(string name)
+    {
+        GetText((int)Texts.UI_SearchFriendList_FriendNameText).text = name;
+    }
+
+    public string GetNickname()
+    {
+        string nickname = GetText((int)Texts.UI_SearchFriendList_FriendNameText).text;
+
+        return nickname;
+    }
+
+    public async Task CheckIfAlreadyFriend()
+    {
+        string myUID = User.NowUser.GetUid();
+        bool isFriend = await Managers.DB.IsFriendAsync(myUID, boundUID);
+
+        if (isFriend)
+        {
+            GetButton((int)Buttons.UI_AddFriendButton).gameObject.SetActive(false);
+        }
     }
 
     public override void Setting()

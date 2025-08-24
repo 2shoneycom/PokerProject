@@ -43,15 +43,42 @@ public class UI_Friend : UI_Scene
         SwitchToFriendList();
     }
 
+    /*
+        Scene 1(친구 목록 화면) 진입 시 친구 목록 불러오기
+    */
     void LoadAndMakeFriendList()
     {
         GameObject go = GetGameObject((int)GameObjects.UI_FriendList_Contents);
-        // 실제 친구 정보를 참고하여
-        for (int i = 0; i < 10; i++)
+
+        // 친구 리스트 정보 받아오기
+        Managers.DB.GetFriendsData((friends) =>
         {
-            GameObject friendGO = Managers.UI.MakeSubItem<UI_FriendList>(go.transform).gameObject;
-            UI_FriendList friend = friendGO.GetOrAddComponent<UI_FriendList>();
-        }
+            if (friends != null)
+            {
+                foreach (string uid in friends)
+                {
+                    GameObject friendGO = Managers.UI.MakeSubItem<UI_FriendList>(go.transform).gameObject;
+                    UI_FriendList friend = friendGO.GetOrAddComponent<UI_FriendList>();
+
+                    Managers.DB.GetNicknameByUID(uid, (nickname) =>
+                    {
+                        if (nickname != null)
+                        {
+                            friend.SetFriendName(nickname);
+                            friend.SetUID(uid);
+                        }
+                        else
+                        {
+                            Debug.Log(uid + "의 닉네임을 불러오지 못했습니다.");
+                        }
+                    });
+                }
+            }
+            else
+            {
+                Debug.Log("친구 목록을 불러오지 못했습니다.");
+            }
+        });
     }
 
     void ClearFriendList()
@@ -61,15 +88,41 @@ public class UI_Friend : UI_Scene
             Managers.Resource.Destroy(child.gameObject);
     }
 
+    /*
+        Scene 2(친구 요청 화면) 진입 시, 친구 요청 리스트 불러오기
+    */
     void LoadAndMakeAcceptFriendList()
     {
         GameObject go = GetGameObject((int)GameObjects.UI_FriendList_Contents);
-        // 실제 친구 추가 정보를 참고하여
-        for (int i = 0; i < 5; i++)
+
+        Managers.DB.GetRequests((requests) =>
         {
-            GameObject friendGO = Managers.UI.MakeSubItem<UI_AcceptFriendList>(go.transform).gameObject;
-            UI_AcceptFriendList friend = friendGO.GetOrAddComponent<UI_AcceptFriendList>();
-        }
+            if (requests != null)
+            {
+                foreach (string uid in requests)
+                {
+                    GameObject requestGO = Managers.UI.MakeSubItem<UI_AcceptFriendList>(go.transform).gameObject;
+                    UI_AcceptFriendList request = requestGO.GetOrAddComponent<UI_AcceptFriendList>();
+
+                    Managers.DB.GetNicknameByUID(uid, (nickname) =>
+                    {
+                        if (nickname != null)
+                        {
+                            request.SetNickname(nickname);
+                            request.SetUID(uid);
+                        }
+                        else
+                        {
+                            Debug.Log(uid + "의 닉네임을 불러오지 못했습니다.");
+                        }
+                    });
+                }
+            }
+            else
+            {
+                Debug.Log("친구 요청 목록을 불러오지 못했습니다.");
+            }
+        });
     }
 
     void SwitchToAcceptFriend(PointerEventData data)

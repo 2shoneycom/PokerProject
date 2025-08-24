@@ -340,4 +340,267 @@ public class DBManager
             callback(NickNameCheckResult.Available);
         });
     }
+
+    /*
+        친구들 정보 불러오는 함수
+    */
+    public void GetFriendsData(Action<List<string>> onFriendsLoaded)
+    {
+        string currentUID = User.NowUser.GetUid();
+
+        dbRef.Child("Users").Child(currentUID).Child("friends").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("친구 목록 불러오기 실패: " + task.Exception);
+                onFriendsLoaded?.Invoke(null);
+                return;
+            }
+
+            if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+
+                List<string> friendUIDs = new List<string>();
+
+                foreach (var child in snapshot.Children)
+                {
+                    string friendUid = child.Key.ToString();
+                    friendUIDs.Add(friendUid);
+                }
+
+                // 콜백으로 전달
+                onFriendsLoaded?.Invoke(friendUIDs);
+            }
+        });
+    }
+
+    /*
+        친구 요청 목록 불러오는 함수
+    */
+    public void GetRequests(Action<List<string>> onRequestsLoaded)
+    {
+        string currentUID = User.NowUser.GetUid();
+
+        dbRef.Child("Users").Child(currentUID).Child("requests").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("친구 요청 목록 불러오기 실패: " + task.Exception);
+                onRequestsLoaded?.Invoke(null);
+                return;
+            }
+
+            if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+
+                List<string> requestUIDs = new List<string>();
+
+                foreach (var child in snapshot.Children)
+                {
+                    string requestUid = child.Key.ToString();
+                    requestUIDs.Add(requestUid);
+                }
+
+                // 콜백으로 전달
+                onRequestsLoaded?.Invoke(requestUIDs);
+            }
+        });
+    }
+
+    /*
+        uid를 통해, 닉네임을 가져오는 함수
+    */
+    public void GetNicknameByUID(string uid, Action<string> onNicknameLoaded)
+    {
+        dbRef.Child("Users").Child(uid).Child("nickName").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("닉네임 가져오기 실패: " + task.Exception);
+                onNicknameLoaded?.Invoke(null);
+                return;
+            }
+
+            if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                onNicknameLoaded?.Invoke(snapshot.Value.ToString());
+            }
+        });
+    }
+
+    /*
+        닉네임을 통해, 해당 닉네임을 가진 uid 목록을 가져오는 함수
+    */
+    public void GetUIDsByNickname(string nickname, Action<List<string>> onUIDsFound)
+    {
+        var query = dbRef.Child("Users")
+                         .OrderByChild("nickName")
+                         .EqualTo(nickname);
+
+        query.GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("닉네임 검색 실패: " + task.Exception);
+                onUIDsFound?.Invoke(null);
+                return;
+            }
+
+            var uids = new List<string>();
+            var snap = task.Result;
+
+            if (snap.Exists && snap.HasChildren)
+            {
+                foreach (var child in snap.Children)
+                {
+                    // EqualTo 일치한 유저들의 UID
+                    uids.Add(child.Key);
+                }
+            }
+
+            onUIDsFound?.Invoke(uids);
+        });
+    }
+
+
+    /*
+        특정 플레이어에게 친구 요청을 보내놓는 함수
+    */
+    public void RequestAddFriend(string targetUID)
+    {
+        string myUID = User.NowUser.GetUid();
+
+        dbRef.Child("Users").Child(targetUID).Child("requests").Child(myUID).SetValueAsync(true)
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    Debug.Log($"친구 요청 보냄: {myUID} -> {targetUID}");
+                }
+                else if (task.IsFaulted)
+                {
+                    Debug.LogError("친구 요청 실패: " + task.Exception);
+                }
+            });
+    }
+
+    /*
+        친구 수락 함수 (비로소 친구 목록에 서로를 추가) 
+    */
+    public void AcceptAndAddFriend(string targetUID)
+    {
+        string myUID = User.NowUser.GetUid();
+
+        // 1. 내 친구 목록에 상대방 추가
+        dbRef.Child("Users").Child(myUID).Child("friends").Child(targetUID).SetValueAsync(true)
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    Debug.Log($"친구 추가 됨: {myUID} -> {targetUID}");
+                }
+                else if (task.IsFaulted)
+                {
+                    Debug.LogError("친구 추가 실패: " + task.Exception);
+                }
+            });
+
+        // 2. 상대방 목록에 나 추가
+        dbRef.Child("Users").Child(targetUID).Child("friends").Child(myUID).SetValueAsync(true)
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    Debug.Log($"친구 추가 됨: {targetUID} -> {myUID}");
+                }
+                else if (task.IsFaulted)
+                {
+                    Debug.LogError("친구 추가 실패: " + task.Exception);
+                }
+            });
+
+        // 3. 내 요청 목록에서 해당 유저 제거
+        dbRef.Child("Users").Child(myUID).Child("requests").Child(targetUID).RemoveValueAsync()
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    Debug.Log($"요청 제거 완료: {targetUID}");
+                }
+                else if (task.IsFaulted)
+                {
+                    Debug.LogError("요청 제거 실패: " + task.Exception);
+                }
+            });
+    }
+
+    /*
+        친구 요청 거절 함수 
+    */
+    public void RejectRequest(string targetUID)
+    {
+        string myUID = User.NowUser.GetUid();
+
+        // 그냥 내 요청 목록에서 상대방 제거
+        dbRef.Child("Users").Child(myUID).Child("requests").Child(targetUID).RemoveValueAsync()
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    Debug.Log($"요청 제거 완료: {targetUID}");
+                }
+                else if (task.IsFaulted)
+                {
+                    Debug.LogError("요청 제거 실패: " + task.Exception);
+                }
+            });
+    }
+
+    /*
+        친구 제거 함수
+    */
+    public void RemoveFriend(string targetUID)
+    {
+        string myUID = User.NowUser.GetUid();
+
+        // 1. 내 친구 목록에서 상대방 제거
+        dbRef.Child("Users").Child(myUID).Child("friends").Child(targetUID).RemoveValueAsync()
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    Debug.Log($"친구 제거 완료: {targetUID}");
+                }
+                else if (task.IsFaulted)
+                {
+                    Debug.LogError("친구 제거 실패: " + task.Exception);
+                }
+            });
+
+        // 2. 상대방 친구 목록에서 나 제거
+        dbRef.Child("Users").Child(targetUID).Child("friends").Child(myUID).RemoveValueAsync()
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompleted)
+                {
+                    Debug.Log("상대방 친구 목록에서 나 제거 완료");
+                }
+                else if (task.IsFaulted)
+                {
+                    Debug.LogError("상대방 친구 목록에서 나 제거 실패: " + task.Exception);
+                }
+            });
+    }
+
+    /*
+        둘이 친구인지 (친구면 true, 아니면 false)
+    */
+    public async Task<bool> IsFriendAsync(string uid1, string uid2)
+    {
+        var snapshot = await dbRef.Child("Users").Child(uid1).Child("friends").Child(uid2).GetValueAsync();
+        return snapshot.Exists;
+    }
 }

@@ -35,12 +35,57 @@ public class UI_AddFriendPopup : UI_Popup
 
     void SearchFriend(PointerEventData data)
     {
+        // 이전에 검색된 기록 초기화
+        ClearSearchRecords();
+
+        // 현재 입력된 값 (찾고자 하는 닉네임)
+        string inputNickname = GetGameObject((int)GameObjects.UI_Input).GetComponent<TMP_InputField>().text;
+
         GameObject go = GetGameObject((int)GameObjects.UI_SearchFriendList_Contents);
-        // 실제 친구 추가 정보를 참고하여
-        for (int i = 0; i < 3; i++)
+        // 찾아진 유저들 목록 띄우기
+        Managers.DB.GetUIDsByNickname(inputNickname, (searchedUsers) =>
         {
-            GameObject friendGO = Managers.UI.MakeSubItem<UI_SearchFriendList>(go.transform).gameObject;
-            UI_SearchFriendList friend = friendGO.GetOrAddComponent<UI_SearchFriendList>();
+            if (searchedUsers != null)
+            {
+                foreach (string uid in searchedUsers)
+                {
+                    // 검색된 유저가 나라면 패스
+                    if (uid == User.NowUser.GetUid())
+                    {
+                        continue;
+                    }
+
+                    GameObject searchedUserGO = Managers.UI.MakeSubItem<UI_SearchFriendList>(go.transform).gameObject;
+                    UI_SearchFriendList searchedUser = searchedUserGO.GetOrAddComponent<UI_SearchFriendList>();
+
+                    Managers.DB.GetNicknameByUID(uid, async (nickname) =>
+                    {
+                        if (nickname != null)
+                        {
+                            searchedUser.SetNickname(nickname);
+                            searchedUser.SetUID(uid);
+                            await searchedUser.CheckIfAlreadyFriend();
+                        }
+                        else
+                        {
+                            Debug.Log(uid + "의 닉네임을 불러오지 못했습니다.");
+                        }
+                    });
+                }
+            }
+            else
+            {
+                Debug.Log("해당 유저를 찾지 못했습니다.");
+            }
+        });
+    }
+
+    private void ClearSearchRecords()
+    {
+        GameObject go = GetGameObject((int)GameObjects.UI_SearchFriendList_Contents);
+        foreach (Transform child in go.transform)
+        {
+            Managers.Resource.Destroy(child.gameObject);
         }
     }
 }
