@@ -11,17 +11,11 @@ public class JackPlayerManager
     int _nowPlayerNum;
     public int NowPlayerNum { get { return _nowPlayerNum; } }
 
-    int deadPlayerNum = 0;
     int[] playerSeedMoney;
     int[] playerBettingMoney;
     bool[] playerIsBet;
-    bool[] playerIsAlive;
-    bool isOneLeft;
-    public bool IsOneLeft
-    {
-        get { return isOneLeft; }
-        set { isOneLeft = value; }
-    }
+    bool[] playerIsGameEnd;
+    int[] playerIsInsurance;
 
     List<GameObject>[] playerCardGO;        ///////////////////// 스플릿 생각
     List<int>[] playerCardDetails;
@@ -35,7 +29,8 @@ public class JackPlayerManager
         playerSeedMoney = new int[JackGameControl.MAX_PLAYER_NUM];
         playerBettingMoney = new int[JackGameControl.MAX_PLAYER_NUM];
         playerIsBet = new bool[JackGameControl.MAX_PLAYER_NUM];
-        playerIsAlive = new bool[JackGameControl.MAX_PLAYER_NUM];
+        playerIsGameEnd = new bool[JackGameControl.MAX_PLAYER_NUM];
+        playerIsInsurance = new int[JackGameControl.MAX_PLAYER_NUM];
 
         playerCardGO = new List<GameObject>[JackGameControl.MAX_PLAYER_NUM];
         playerCardDetails = new List<int>[JackGameControl.MAX_PLAYER_NUM];
@@ -55,7 +50,8 @@ public class JackPlayerManager
         {
             playerBettingMoney[i] = 0;
             playerIsBet[i] = false;
-            playerIsAlive[i] = true;
+            playerIsInsurance[i] = 0;
+            playerIsGameEnd[i] = false;
             playerSeedMoney[i] = 0;
 
             playerCardGO[i].Clear();
@@ -68,9 +64,32 @@ public class JackPlayerManager
             }
         }
 
-        deadPlayerNum = 0;
         _nowPlayerNum = 0;
-        isOneLeft = false;
+    }
+
+    public void ClearIsBet()
+    {
+        for (int i = 0; i < JackGameControl.MAX_PLAYER_NUM; i++)
+            playerIsBet[i] = false;
+    }
+
+    public void ClearGameSetting()
+    {
+        for (int i = 0; i < JackGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if (GetPlayerUID(i) == "")
+                continue;
+
+            for (int j = 0; j < JackCardManager.PLAYER_CARD_NUM; j++)
+            {
+                if (playerCardGO[i][j] == null) continue;
+
+                GameObject cardGO = playerCardGO[i][j];
+
+                if (cardGO.GetPhotonView().IsMine)
+                    Managers.Resource.PhotonDestroy(cardGO);
+            }
+        }
     }
 
     public void UpdatePlayerUID(int seatIdx, string UID)
@@ -125,6 +144,29 @@ public class JackPlayerManager
     public int GetPlayerBet(int index)
     {
         return playerBettingMoney[index];
+    }
+
+    public void UpdatePlayerIsInsurance(int index, int value)
+    {
+        playerIsInsurance[index] = value;
+    }
+
+    public int GetPlayerIsInsurance(int index)
+    {
+        return playerIsInsurance[index];
+    }
+
+    public void UpdatePlayerIsGameEnd(int index, bool value)
+    {
+        playerIsGameEnd[index] = value;
+
+        if (PhotonNetwork.IsMasterClient)
+            JackGameControl.Control.DetectGameEndAllPass();
+    }
+
+    public bool GetPlayerIsGameEnd(int index)
+    {
+        return playerIsGameEnd[index];
     }
 
     public void UpdatePlayerBetting(int index, int amount)
@@ -249,13 +291,22 @@ public class JackPlayerManager
 
     public void FindPlayerBlackJack()
     {
+        if (!JackGameControl.Control.IsPlaying) return;
+
         for (int i = 0; i < JackGameControl.MAX_PLAYER_NUM; i++)
         {
             if (GetPlayerUID(i) == "")
                 continue;
 
             if (playerCardScore[i].Item1 == 21 || playerCardScore[i].Item2 == 21)
-                SyncSystem.Sync.JackNoticeBlackJack(i);
+                JackGameControl.Control.UpdatePlayerBetStatusUI(i, "BlackJack!!!");
         }
+
+        JackGameControl.Control.NextStage();
+    }
+
+    public Tuple<int, int> GetPlayerCardScore(int playerIndex)
+    {
+        return playerCardScore[playerIndex];
     }
 }

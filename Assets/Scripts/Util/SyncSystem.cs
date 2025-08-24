@@ -785,15 +785,52 @@ class SyncSystem : MonoBehaviourPun
         JackGameControl.Control.NextStage(state);
     }
 
-    public void JackNoticeBlackJack(int playerIndex)
+    public IEnumerator JackNoticeBlackJack()
     {
-        photonView.RPC("RPC_JackNoticeBlackJack", RpcTarget.All, playerIndex);
+        yield return null;
+        photonView.RPC("RPC_JackNoticeBlackJack", RpcTarget.All);
     }
 
     [PunRPC]
-    private void RPC_JackNoticeBlackJack(int playerIndex)
+    private void RPC_JackNoticeBlackJack()
     {
-        JackGameControl.Control.UpdatePlayerBetStatusUI(playerIndex, "BlackJack!!!");
+        JackGameControl.Players.FindPlayerBlackJack();
+    }
+
+    public IEnumerator JackIsDealerIsA()
+    {
+        yield return null;
+        photonView.RPC("RPC_JackIsDealerIsA", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackIsDealerIsA()
+    {
+        JackGameControl.Control.JudgeDealerIsAOrAbove10();
+    }
+
+    public void JackInsuranceAllPass()
+    {
+        photonView.RPC("RPC_JackInsuranceAllPass", RpcTarget.All);
+
+    }
+
+    [PunRPC]
+    private void RPC_JackInsuranceAllPass()
+    {
+        JackGameControl.Control.InsuranceAllPass();
+    }
+
+    public void JackGameEnd()
+    {
+        photonView.RPC("RPC_JackGameEnd", RpcTarget.All);
+
+    }
+
+    [PunRPC]
+    private void RPC_JackGameEnd()
+    {
+        JackGameControl.Control.ClearGame();
     }
 
 
@@ -895,6 +932,17 @@ class SyncSystem : MonoBehaviourPun
         JackGameControl.Players.UpdatePlayerIsBet(index, val);
     }
 
+    public void SyncJackIsGameEnd(int index, bool val)
+    {
+        photonView.RPC("RPC_SyncJackIsGameEnd", RpcTarget.All, index, val);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackIsGameEnd(int index, bool val)
+    {
+        JackGameControl.Players.UpdatePlayerIsGameEnd(index, val);
+    }
+
     public void SyncJackPlayerCard(string pUID, GameObject cardGO, int cardDetail)
     {
         int cardViewID = cardGO.GetComponent<PhotonView>().ViewID;
@@ -905,6 +953,17 @@ class SyncSystem : MonoBehaviourPun
     private void RPC_SyncJackPlayerCard(string pUID, int cardViewID, int cardDetail)
     {
         JackGameControl.Card.SetPlayerCard(pUID, cardViewID, cardDetail);
+    }
+
+    public void SyncJackIsInsurance(int index, int val)
+    {
+        photonView.RPC("RPC_SyncJackIsInsurance", RpcTarget.All, index, val);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackIsInsurance(int index, int val)
+    {
+        JackGameControl.Players.UpdatePlayerIsInsurance(index, val);
     }
 
 
@@ -975,18 +1034,6 @@ class SyncSystem : MonoBehaviourPun
     private void RPC_SyncPokerResultUI()
     {
         PokerGameControl.Control.ShowResult();
-    }
-
-
-    public void T(GameObject go)
-    {
-        photonView.RPC("RPC_T", RpcTarget.All, go.GetComponent<PhotonView>().ViewID);
-    }
-
-    [PunRPC]
-    private void RPC_T(int viewID)
-    {
-        JackGameControl.Card.Test22(viewID);
     }
 
 }

@@ -125,15 +125,6 @@ public class UI_BlackJack : UI_Scene
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);
 
         SetRoomButton(isRoomOpened);
-
-        // 게임 전의 텍스트 조정
-        AdjustTextBeforeGameStart();
-    }
-
-    void AdjustTextBeforeGameStart()
-    {
-        GetText((int)Texts.UI_ButtonLL_Text).text = "리셋";
-        GetText((int)Texts.UI_ButtonRR_Text).text = "게임시작";
     }
 
     IEnumerator LoadingScreenSwitch(bool isOn, float time)
@@ -178,6 +169,9 @@ public class UI_BlackJack : UI_Scene
 
     public void FirstBetSetting()
     {
+        GetGameObject((int)GameObjects.UI_ButtonMM_Block).SetActive(false);
+        GetGameObject((int)GameObjects.UI_ObjectMM).SetActive(true);
+
         ResetButtonSetting();
         ConfirmButtonSetting();
     }
@@ -342,7 +336,11 @@ public class UI_BlackJack : UI_Scene
                 GetGameObject((int)go).SetActive(isOn);
             }
         }
-        GetText((int)Texts.UI_ObjectMM_Text).text = "";
+
+        if (!isOn)
+            GetText((int)Texts.UI_ObjectMM_Text).text = "";
+        else
+            GetText((int)Texts.UI_ObjectMM_Text).text = "관전중";
     }
 
     public void TimerSwitch(bool isOn)
@@ -435,6 +433,10 @@ public class UI_BlackJack : UI_Scene
         GetText((int)Enum.Parse(typeof(Texts), str)).text = status;
     }
 
+    public void UpdateDealerStatusText(string status)
+    {
+        GetText((int)Texts.UI_Dealer_BetStatusText).text = status;
+    }
 
     public GameObject GetPlayerGameObjcet(int index)
     {
@@ -458,8 +460,6 @@ public class UI_BlackJack : UI_Scene
             GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = JackGameControl.Players.GetPlayerSeedMoney(gameIndex).ToString();
         }
     }
-
-
 
     private void LeaveRoomClicked(PointerEventData data)
     {

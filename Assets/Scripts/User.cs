@@ -74,6 +74,8 @@ public class User
                 PokerSyncSeedMoney();
                 break;
             case Define.GameType.BlackJack:
+                Managers.DB.DBUpdateMoney(uid, -amount, "black");
+                JackSyncSeedMoney();
                 break;
         }
     }

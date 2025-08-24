@@ -14,6 +14,7 @@ public class JackCardManager
     const float CARD_ANIMATION_TIME = 0.5f;
 
     public const int PLAYER_CARD_NUM = 10;
+    public const int DEALER_CARD_NUM = 5;
     const float CARD_OFFSET = 50f;
 
     const string MAKE_DEALER_CARD = "MAKEDEALERCARD";
@@ -35,6 +36,7 @@ public class JackCardManager
 
     GameObject[] dealerCardList;
     int[] dealerCardDetail;
+    Tuple<int, int> dealerCardScore;
 
     UI_BlackJack _jackUI;
 
@@ -63,9 +65,10 @@ public class JackCardManager
         _jackUI = (UI_BlackJack)Managers.UI.SceneUI;
 
         cardDeckPos = GameObject.FindGameObjectWithTag("Deck").transform;
-        dealerCardPos = new Vector3[5];
-        dealerCardList = new GameObject[5];
-        dealerCardDetail = new int[5];
+        dealerCardPos = new Vector3[DEALER_CARD_NUM];
+        dealerCardList = new GameObject[DEALER_CARD_NUM];
+        dealerCardDetail = new int[DEALER_CARD_NUM];
+        dealerCardScore = Tuple.Create(-1, -1);
         SetupDealerCardPos();
 
         playerCardPos = new Vector3[JackGameControl.MAX_PLAYER_NUM, PLAYER_CARD_NUM];
@@ -108,7 +111,7 @@ public class JackCardManager
 
     private void SetupDealerCardPos()
     {
-        for(int i = 0; i < 5; i++)
+        for(int i = 0; i < DEALER_CARD_NUM; i++)
         {
             dealerCardList[i] = null;
             if (i == 0)
@@ -166,6 +169,13 @@ public class JackCardManager
     {
         int nowCard = cardBuffer[0];
         cardBuffer.RemoveAt(0);
+
+        if(cardBuffer.Count == 0)
+        {
+            ShuffleCard();
+            JackGameControl.Control.RequestDeckShuffle();
+        }
+
         return nowCard;
     }
 
@@ -253,9 +263,81 @@ public class JackCardManager
         dealerCardList[index] = cardGO;
         dealerCardDetail[index] = cardDetail;
         card.SetCardImage(cardDetail);
-
+        CalculateDealerCardScore();
 
         JackGameControl.Control.NextStage();
+    }
+
+    void CalculateDealerCardScore()
+    {
+        int[] score = new int[22];
+        if (dealerCardScore.Item1 == -1)
+        {
+            score[0] = 1;
+        }
+        else
+        {
+            score[dealerCardScore.Item1] = 1;
+
+            if (dealerCardScore.Item2 != -1)
+                score[dealerCardScore.Item2] = 1;
+        }
+
+        int i = -1;
+
+        for (int ii = 0; ii < dealerCardList.Length; ii++)
+        {
+            if (dealerCardList[ii] == null)
+                break;
+
+            i = ii;
+        }
+
+        int cardscore = GetCardNum(dealerCardDetail[i]);
+        if (cardscore >= 10)
+            cardscore = 10;
+
+        int[] tmp = new int[22];
+        for (int j = 0; j < 22; j++)
+        {
+            if (score[j] == 1)
+            {
+                int s = j + cardscore;
+
+                if (s <= 21 && tmp[s] == 0)
+                    tmp[s] = 1;
+
+                if (cardscore == 1)
+                {
+                    s = j + 11;
+
+                    if (s <= 21 && tmp[s] == 0)
+                        tmp[s] = 1;
+                }
+            }
+        }
+        score = tmp;
+
+        int a = -1;
+        int b = -1;
+
+        for (int j = 0; j < 22; j++)
+        {
+            if (score[j] == 1)
+            {
+                if (a == -1)
+                    a = j;
+                else
+                    b = j;
+            }
+        }
+
+        dealerCardScore = Tuple.Create(a, b);
+    }
+
+    public Tuple<int,int> GetDealerCardScore()
+    {
+        return dealerCardScore;
     }
 
     void CardMoveToPosDealer(GameObject cardGO, int index)
@@ -316,29 +398,6 @@ public class JackCardManager
         //cardGO.transform.DOScale(Vector3.one * 3.5f, CARD_ANIMATION_TIME);
     }
 
-    public void Test2()
-    {
-        Debug.Log("3");
-        GameObject go = Managers.Resource.PhotonInstantiate(CARD_PREFAB_PATH, cardDeckPos);
-
-        SyncSystem.Sync.T(go);
-    }
-
-    public void Test22(int viewID)
-    {
-        GameObject go = PhotonView.Find(viewID).gameObject;
-        go.transform.SetParent(cardDeckPos);
-
-        if (go.GetComponent<PhotonView>().IsMine)
-        {
-            UI_Card card = go.GetOrAddComponent<UI_Card>();
-
-            card.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
-            Debug.Log("4");
-            card.gameObject.transform.DOMove(playerCardPos[1, 0], CARD_ANIMATION_TIME);
-        }
-    }
-
     public Sprite GetRightCardImage(int cardIndex)
     {
         return cardSprites[cardIndex];
@@ -347,6 +406,11 @@ public class JackCardManager
     public int GetCardNum(int cardIndex)
     {
         return cardNum[cardIndex];
+    }
+
+    public int GetDealerCardDetail(int cardIndex)
+    {
+        return dealerCardDetail[cardIndex];
     }
 
     public int GetDealerCardLen()
@@ -359,4 +423,15 @@ public class JackCardManager
         return -1;
     }
 
+    public void ClearDealerCard()
+    {
+        for (int i = 0; i < DEALER_CARD_NUM; i++)
+        {
+            if (PhotonNetwork.IsMasterClient)
+                Managers.Resource.PhotonDestroy(dealerCardList[i]);
+
+            dealerCardList[i] = null;
+        }
+        leavePlayerCard.Clear();
+    }
 }
