@@ -430,7 +430,15 @@ public class UI_BlackJack : UI_Scene
     public void UpdatePlayerBetScoreText(int index, string status)
     {
         string str = $"UI_Player{index}_BetScoreText";
-        GetText((int)Enum.Parse(typeof(Texts), str)).text = status;
+        TextMeshProUGUI text = GetText((int)Enum.Parse(typeof(Texts), str));
+
+        if(text == null)
+        {
+            Bind<TextMeshProUGUI>(typeof(Texts));
+            text = GetText((int)Enum.Parse(typeof(Texts), str));
+        }
+
+        text.text = status;
     }
 
     public void UpdateDealerStatusText(string status)

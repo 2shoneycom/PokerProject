@@ -812,7 +812,6 @@ class SyncSystem : MonoBehaviourPun
     public void JackInsuranceAllPass()
     {
         photonView.RPC("RPC_JackInsuranceAllPass", RpcTarget.All);
-
     }
 
     [PunRPC]
@@ -824,7 +823,6 @@ class SyncSystem : MonoBehaviourPun
     public void JackGameEnd()
     {
         photonView.RPC("RPC_JackGameEnd", RpcTarget.All);
-
     }
 
     [PunRPC]

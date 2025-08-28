@@ -16,28 +16,29 @@ public class UI_Card : UI_Base
         UI_Card,
     }
 
+    bool isInit = false;
+
     public override void Init()
     {
-        Bind<Image>(typeof(Images));
-        Bind<GameObject>(typeof(GameObjects));
+        if (!isInit)
+        {
+            Bind<Image>(typeof(Images));
+            Bind<GameObject>(typeof(GameObjects));
+            isInit = true;
+        }
     }
 
     public void SetCardImage(int cardDetail)
     {
         Debug.Log("a");
-        Image target = GetImage((int)Images.UI_Card_Image);
-        if(target == null)
+
+        if (!isInit)
         {
-            Debug.Log("null");
-
-            Bind<Image>(typeof(Images));
-            target = GetImage((int)Images.UI_Card_Image);
+            Init();
         }
-
+        Image target = GetImage((int)Images.UI_Card_Image);
         Debug.Log(cardDetail);
         target.sprite = JackGameControl.Card.GetRightCardImage(cardDetail);
         Debug.Log("b");
-
     }
-
 }

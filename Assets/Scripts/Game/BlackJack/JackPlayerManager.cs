@@ -159,7 +159,7 @@ public class JackPlayerManager
     public void UpdatePlayerIsGameEnd(int index, bool value)
     {
         playerIsGameEnd[index] = value;
-
+        Debug.Log("UpdatePlayerIsGameEnd multi call?");
         if (PhotonNetwork.IsMasterClient)
             JackGameControl.Control.DetectGameEndAllPass();
     }
@@ -216,7 +216,7 @@ public class JackPlayerManager
         Debug.Log("c");
 
         JackGameControl.Control.UpdatePlayerBetScoreUI(playerIndex);
-
+        Debug.Log("d");
         JackGameControl.Control.NextStage(1);
     }
 

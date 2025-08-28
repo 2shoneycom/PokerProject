@@ -294,8 +294,10 @@ public class JackGameControl : MonoBehaviour
 
     public void UpdatePlayerBetScoreUI(int playerIndex)
     {
+        Debug.Log("UpdatePlayerBetScoreUI");
         string text = "";
         Tuple<int, int> score = Players.CalculatePlayerBetScore(playerIndex);
+        Debug.Log("UpdatePlayerBetScoreUI Y");
 
         text += score.Item1;
         if(score.Item2 != -1)
@@ -303,8 +305,11 @@ public class JackGameControl : MonoBehaviour
             text += "/";
             text += score.Item2;
         }
+        Debug.Log("UpdatePlayerBetScoreText");
 
         _jackUI.UpdatePlayerBetScoreText(playerIndex + 1, text);
+        Debug.Log("UpdatePlayerBetScoreText Y");
+
     }
 
     public void UpdatePlayerBetStatusUI(int playerIndex, string text)
@@ -388,9 +393,9 @@ public class JackGameControl : MonoBehaviour
 
     public void InsuranceAllPass()
     {
-        if (betTimer != null)
+        if (insuranceTimer != null)
         {
-            StopCoroutine(betTimer);
+            StopCoroutine(insuranceTimer);
         }
         _jackUI.SetTimerText(0f);
         _jackUI.TimerSwitch(false);
@@ -400,9 +405,11 @@ public class JackGameControl : MonoBehaviour
 
     void DealerSecondCardCheck()
     {
+        if (!IsPlaying) return;
+
         //////////////////////////////// 딜러가 카드를 확인 애니메이션
         ///
-
+        Debug.Log("DealerSecondCardCheck multi call?");
         var score = Card.GetDealerCardScore();
         if(score.Item1 == 21 || score.Item2 == 21)
         {
@@ -421,7 +428,7 @@ public class JackGameControl : MonoBehaviour
     void DealerBlackJack()
     {
         if (!IsPlaying) return;
-
+        Debug.Log("DealerBlackJack multi call?");
         var score = Players.GetPlayerCardScore(User.NowGamePlayer.GameIndex);
         if (score.Item1 == 21 || score.Item2 == 21)
         {
@@ -480,6 +487,7 @@ public class JackGameControl : MonoBehaviour
 
     void MoneySetting(int amount)
     {
+        Debug.Log("MoneySetting multi call?");
         User.NowUser.IncreaseMoney(User.NowUser.GetUid(), amount);
         SyncSystem.Sync.SyncJackMyBettingReset(User.NowGamePlayer.GameIndex);
 
@@ -494,7 +502,7 @@ public class JackGameControl : MonoBehaviour
     {
         if (!IsPlaying) return;
 
-        bool isPass = false;
+        bool isPass = true;
         for(int i = 0; i < MAX_PLAYER_NUM; i++)
         {
             if (Players.GetPlayerUID(i) == "") continue;
@@ -502,6 +510,10 @@ public class JackGameControl : MonoBehaviour
             if (Players.GetPlayerIsGameEnd(i) == false)
                 isPass = false;
         }
+
+        if (isPass) Debug.Log("DetectGameEndAllPass true");
+        else Debug.Log("DetectGameEndAllPass false");
+
         if (!isPass) return;
 
         SyncSystem.Sync.JackGameEnd();
