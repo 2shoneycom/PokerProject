@@ -43,15 +43,20 @@ public class UI_FriendList : UI_FriendBase
         //GetImage((int)Images.UI_FriendList_Icon).sprite = Icon.sprite;
     }
 
-    public void SetStatusInfo(bool isOnline)
+    public void SetStatusInfo(Define.Status value)
     {
         TextMeshProUGUI txt = GetText((int)Texts.UI_FriendList_FriendStatusText);
-        if (isOnline)
+        if (value == Define.Status.Online)
         {
             txt.text = "온라인";
             txt.color = Color.green;
         }
-        else
+        else if (value == Define.Status.Playing)
+        {
+            txt.text = "게임 중";
+            txt.color = Color.green;
+        }
+        else if (value == Define.Status.Offline)
         {
             txt.text = "오프라인";
             txt.color = Color.red;

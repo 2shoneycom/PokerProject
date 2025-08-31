@@ -33,6 +33,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         _loginUI.SetConnectionInfoText("연결 성공!");
         PhotonNetwork.JoinLobby();
         Managers.Scene.LoadScene(Define.Scene.Lobby);
+        Managers.DB.SetUserStatus(Define.Status.Online);    // 로그인씬 -> 로비씬 (status: online)
     }
 
     public override void OnDisconnected(DisconnectCause cause)
@@ -187,6 +188,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         _loadingUI.SetConnectionInfoText("Success to Enter Room");
         // 모든 룸 참가자가 GameRoom 씬을 로드하게함
         Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
+        Managers.DB.SetUserStatus(Define.Status.Playing);   // 로비씬 -> 홀덤씬 (status: playing)
         // 씬메니저로 로드하면 연결 정보가 사라짐.
 
         // 방에 들어왔으면 내 포톤 플레이어 정보 설정

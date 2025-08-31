@@ -55,6 +55,11 @@ public class UI_AddFriendPopup : UI_Popup
                         continue;
                     }
 
+                    /* (차후에 할 것) 
+                    CheckIfAlreadyFriend 검사를 여기서 미리 해놓는 것이 보기 좋아보임
+                    저기 뒤에서 뒤늦게 하니까 친구 추가 버튼이 한 번 보였다가 사라짐
+                    */
+
                     GameObject searchedUserGO = Managers.UI.MakeSubItem<UI_SearchFriendList>(go.transform).gameObject;
                     UI_SearchFriendList searchedUser = searchedUserGO.GetOrAddComponent<UI_SearchFriendList>();
 

@@ -432,6 +432,28 @@ public class DBManager
     }
 
     /*
+        uid를 통해, 접속 상태를 가져오는 함수
+    */
+    public void GetStatusByUID(string uid, Action<string> onStatusLoaded)
+    {
+        dbRef.Child("Users").Child(uid).Child("status").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("닉네임 가져오기 실패: " + task.Exception);
+                onStatusLoaded?.Invoke(null);
+                return;
+            }
+
+            if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                onStatusLoaded?.Invoke(snapshot.Value.ToString());
+            }
+        });
+    }
+
+    /*
         닉네임을 통해, 해당 닉네임을 가진 uid 목록을 가져오는 함수
     */
     public void GetUIDsByNickname(string nickname, Action<List<string>> onUIDsFound)
@@ -602,5 +624,34 @@ public class DBManager
     {
         var snapshot = await dbRef.Child("Users").Child(uid1).Child("friends").Child(uid2).GetValueAsync();
         return snapshot.Exists;
+    }
+
+    /*
+        유저의 상태를 설정
+    */
+    public void SetUserStatus(Define.Status value)
+    {
+        string myUID = User.NowUser.GetUid();
+
+        DatabaseReference statusRef = dbRef.Child("Users").Child(myUID).Child("status");
+
+        // 현재 상태 기록
+        statusRef.SetValueAsync(value.ToString()).ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted)
+            {
+                Debug.Log("상태 변경 완료: " + value);
+            }
+            else if (task.IsFaulted)
+            {
+                Debug.LogError("상태 변경 실패: " + value);
+            }
+        });
+
+        // 연결 끊기면 offline으로 자동 변경
+        if (value != Define.Status.Offline)
+        {
+            statusRef.OnDisconnect().SetValue(Define.Status.Offline.ToString());
+        }
     }
 }

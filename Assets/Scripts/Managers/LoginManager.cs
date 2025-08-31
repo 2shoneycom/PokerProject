@@ -74,6 +74,7 @@ public class LoginManager
             Debug.Log("Logout success.");
             Managers.Photon.DisconnectPhoton();
             Managers.Scene.LoadScene(Define.Scene.Login);
+            Managers.DB.SetUserStatus(Define.Status.Offline);   // 유저정보씬 -> 로그인씬 (status: offline)
         }
         catch (System.Exception e)
         {
@@ -107,6 +108,7 @@ public class LoginManager
 
                     Managers.Photon.DisconnectPhoton();
                     Managers.Scene.LoadScene(Define.Scene.Login);
+                    // Managers.DB.SetUserStatus(Define.Status.Offline); 할 필요 없고 하면 안되기도 함 (이미 DB에서 해당 유저는 없어짐)
                 }
                 else
                 {

@@ -69,5 +69,6 @@ public class HoldemScene : BaseScene
         // 방을 나가고 로비씬으로 이동
         Managers.Photon.LeaveRoom();
         Managers.Scene.LoadScene(Define.Scene.Lobby);
+        Managers.DB.SetUserStatus(Define.Status.Online);    // 홀덤씬 -> 로비씬 (status: online)
     }
 }

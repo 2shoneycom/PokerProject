@@ -60,16 +60,29 @@ public class UI_Friend : UI_Scene
                     GameObject friendGO = Managers.UI.MakeSubItem<UI_FriendList>(go.transform).gameObject;
                     UI_FriendList friend = friendGO.GetOrAddComponent<UI_FriendList>();
 
+                    friend.SetUID(uid);
+
                     Managers.DB.GetNicknameByUID(uid, (nickname) =>
                     {
                         if (nickname != null)
                         {
                             friend.SetFriendName(nickname);
-                            friend.SetUID(uid);
                         }
                         else
                         {
                             Debug.Log(uid + "의 닉네임을 불러오지 못했습니다.");
+                        }
+                    });
+
+                    Managers.DB.GetStatusByUID(uid, (status) =>
+                    {
+                        if (status != null)
+                        {
+                            friend.SetStatusInfo(Enum.Parse<Define.Status>(status));
+                        }
+                        else
+                        {
+                            Debug.Log(uid + "의 상태를 불러오지 못했습니다.");
                         }
                     });
                 }
