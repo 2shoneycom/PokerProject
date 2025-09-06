@@ -9,6 +9,7 @@ using Firebase.Auth;
 using Firebase.Database;
 using System.Net;
 using System;
+using System.Runtime.Serialization;
 
 public class DataToSave
 {
@@ -16,6 +17,7 @@ public class DataToSave
     public long seedMoney;
     public bool reward;
     public string nickNameUpdatedDate;
+    public Dictionary<string, object> invitation;
 
     public DataToSave() { }
     public DataToSave(string nickName, long seedMoney, bool reward, string nickNameUpdatedDate = "20000101")
@@ -24,12 +26,14 @@ public class DataToSave
         this.seedMoney = seedMoney;
         this.reward = reward;
         this.nickNameUpdatedDate = nickNameUpdatedDate;
+        this.invitation = new Dictionary<string, object>();
     }
 }
 
 public class DBManager
 {
     public DatabaseReference dbRef;
+    private DatabaseReference inviteRef;
     public DataToSave dts;
 
     public void Init()
@@ -89,6 +93,10 @@ public class DBManager
                     User.NowUser.SetSeedMoney(dts.seedMoney);
                     Debug.Log("new user data create success");
                 }
+
+                // 게임 초대 관련 DB에 콜백함수 연결
+                inviteRef = dbRef.Child("Users").Child(User.NowUser.GetUid()).Child("invitations");
+                inviteRef.ChildAdded += HandleInviteAdded;  // 해결해야될 점...
             });
     }
 
@@ -346,9 +354,9 @@ public class DBManager
     */
     public void GetFriendsData(Action<List<string>> onFriendsLoaded)
     {
-        string currentUID = User.NowUser.GetUid();
+        string myUID = User.NowUser.GetUid();
 
-        dbRef.Child("Users").Child(currentUID).Child("friends").GetValueAsync().ContinueWithOnMainThread(task =>
+        dbRef.Child("Users").Child(myUID).Child("friends").GetValueAsync().ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
             {
@@ -434,21 +442,21 @@ public class DBManager
     /*
         uid를 통해, 접속 상태를 가져오는 함수
     */
-    public void GetStatusByUID(string uid, Action<string> onStatusLoaded)
+    public void GetStatusByUID(string uid, Action<Define.Status> onStatusLoaded)
     {
         dbRef.Child("Users").Child(uid).Child("status").GetValueAsync().ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
             {
                 Debug.LogError("닉네임 가져오기 실패: " + task.Exception);
-                onStatusLoaded?.Invoke(null);
+                onStatusLoaded?.Invoke(Enum.Parse<Define.Status>(null));
                 return;
             }
 
             if (task.IsCompleted)
             {
                 DataSnapshot snapshot = task.Result;
-                onStatusLoaded?.Invoke(snapshot.Value.ToString());
+                onStatusLoaded?.Invoke(Enum.Parse<Define.Status>(snapshot.Value.ToString()));
             }
         });
     }
@@ -653,5 +661,130 @@ public class DBManager
         {
             statusRef.OnDisconnect().SetValue(Define.Status.Offline.ToString());
         }
+    }
+
+    /*
+        상대방에게 게임 초대 보내놓는 함수
+    */
+    public void SendInvitation(string targetUID)
+    {
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        long ttl = 30 * 1000; // 30초
+        long expiresAt = now + ttl;
+
+        string myNickName = User.NowUser.GetNickName();
+
+
+        // 초대 신청 데이터 포맷
+        var inviteData = new Dictionary<string, object>
+        {
+            {"from", myNickName},
+            {"roomID", Managers.Photon.currentRoomName},
+            {"gameType", Define.GameType.Texas.ToString()},    // 임시 게임 종류
+            { "createdAt", now},
+            {"expiresAt", expiresAt}
+        };
+
+        // 상대가 온라인인지부터 확인 (온라인일 때만 초대 보내기)
+        GetStatusByUID(targetUID, (status) =>
+        {
+            if (status == Define.Status.Online)
+            {
+                DatabaseReference targetInvRef = dbRef.Child("Users").Child(targetUID).Child("invitations").Child("invitation");
+                var snapshotTask = targetInvRef.GetValueAsync();
+
+                snapshotTask.ContinueWithOnMainThread(snapshotTaskResult =>
+                {
+                    if (snapshotTaskResult.IsCompleted)
+                    {
+                        DataSnapshot snapshot = snapshotTaskResult.Result;
+
+                        bool canSend = true;
+
+                        if (snapshot.Exists)
+                        {
+                            // 기존 초대 데이터가 있다면 만료 여부 확인
+                            var data = snapshot.Value as Dictionary<string, object>;
+                            if (data != null && data.ContainsKey("expiresAt"))
+                            {
+                                long existingExpiresAt = Convert.ToInt64(data["expiresAt"]);
+                                if (now < existingExpiresAt)
+                                {
+                                    // 아직 만료 안 된 초대가 있음
+                                    canSend = false;
+                                }
+                            }
+                        }
+
+                        if (canSend)
+                        {
+                            targetInvRef.SetValueAsync(inviteData).ContinueWithOnMainThread(task =>
+                            {
+                                if (task.IsCompleted)
+                                {
+                                    Debug.Log($"{targetUID}에게 초대 보내기 성공");
+                                }
+                                else if (task.IsFaulted)
+                                {
+                                    Debug.LogError($"{targetUID}에게 초대 보내기 실패");
+                                }
+                            });
+                        }
+                        else
+                        {
+                            Debug.Log("이미 유효한 초대가 존재합니다.");
+                        }
+                    }
+                });
+            }
+            else
+            {
+                Debug.Log("상대가 온라인 상태가 아닙니다.");
+            }
+        });
+    }
+
+    private void HandleInviteAdded(object sender, ChildChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError("DB Error: " + args.DatabaseError.Message);
+            return;
+        }
+
+        var data = args.Snapshot.Value as Dictionary<string, object>;
+        if (data == null) return;
+
+        long expiresAt = Convert.ToInt64(data["expiresAt"]);
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        string myUID = User.NowUser.GetUid();
+
+        if (now > expiresAt)
+        {
+            Debug.Log("만료된 초대, 무시");
+            // DB에서 삭제 처리
+            args.Snapshot.Reference.RemoveValueAsync();
+            return;
+        }
+
+        string roomID = Convert.ToString(data["roomID"]);
+        string senderName = Convert.ToString(data["from"]);
+        string gameType = Convert.ToString(data["gameType"]);
+
+        // 내가 온라인일 때만
+        GetStatusByUID(myUID, (status) =>
+        {
+            if (status == Define.Status.Online)
+            {
+                Debug.Log("새로운 초대 도착!");
+                // 게임 초대 팝업 띄우기
+                UI_GameInvitePopup invitePopup = Managers.UI.ShowPopupUI<UI_GameInvitePopup>();
+                invitePopup.SetRoomID(roomID);
+                invitePopup.SetSenderNickName(senderName);
+                invitePopup.SetGameType(gameType);
+                // 해결해야될 점...
+            }
+        });
     }
 }

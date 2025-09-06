@@ -34,4 +34,11 @@ public class Define
         Amateur,
         Pro,
     }
+
+    public enum GameType
+    {
+        Texas,
+        Seven,
+        Blackjack,
+    }
 }

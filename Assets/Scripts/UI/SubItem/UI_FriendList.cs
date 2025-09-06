@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class UI_FriendList : UI_FriendBase
 {
     private string boundUID;
+    private bool isInited = false;
 
     enum Buttons
     {
@@ -28,12 +29,19 @@ public class UI_FriendList : UI_FriendBase
 
     public override void Init()
     {
+        if (isInited)
+        {
+            return;
+        }
+
         Bind<Button>(typeof(Buttons));
         Bind<TextMeshProUGUI>(typeof(Texts));
         Bind<Image>(typeof(Images));
         Setting();
 
         BindEvent(GetButton((int)Buttons.UI_FriendList_DeleteButton).gameObject, DeleteFriend);
+
+        isInited = true;
     }
 
     public override void Setting()

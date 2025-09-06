@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
+using Photon.Pun.Demo.Cockpit;
 using Photon.Realtime;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
@@ -11,6 +12,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private Dictionary<string, RoomInfo> availableRooms = new Dictionary<string, RoomInfo>();
     UI_Loading _loadingUI;
     UI_Login _loginUI;
+    public string currentRoomName;
 
     void Start()
     {
@@ -82,7 +84,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void CreateHoldem(int betMoney) 
+    public void CreateHoldem(int betMoney)
     {
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
         StartCoroutine(LoadingCreateHoldem(0.5f, betMoney));
@@ -106,8 +108,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 IsVisible = true, // 방이 리스트에 나타나게 설정
                 IsOpen = true,    // 새로운 플레이어가 들어올 수 있도록 설정
                 CleanupCacheOnLeave = false,
-                CustomRoomProperties = new ExitGames.Client.Photon.Hashtable { { "betMoney", betMoney} },
-                CustomRoomPropertiesForLobby = new string[] {"betMoney"}
+                CustomRoomProperties = new ExitGames.Client.Photon.Hashtable { { "betMoney", betMoney } },
+                CustomRoomPropertiesForLobby = new string[] { "betMoney" }
             };
             PhotonNetwork.CreateRoom(roomName, roomOptions);
         }
@@ -127,6 +129,19 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         yield return new WaitForSeconds(sec);
         JoinRoom(betMoney);
+    }
+
+    // roomID로 해당 방 들어가는 함수
+    public void JoinRoomByName(string roomName)
+    {
+        if (PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.JoinRoom(roomName);
+        }
+        else
+        {
+            Reconnect();
+        }
     }
 
     void JoinRoom(int betMoney)
@@ -189,7 +204,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         // 모든 룸 참가자가 GameRoom 씬을 로드하게함
         Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
         Managers.DB.SetUserStatus(Define.Status.Playing);   // 로비씬 -> 홀덤씬 (status: playing)
-        // 씬메니저로 로드하면 연결 정보가 사라짐.
+                                                            // 씬메니저로 로드하면 연결 정보가 사라짐.
+
+
+        currentRoomName = PhotonNetwork.CurrentRoom.Name;
 
         // 방에 들어왔으면 내 포톤 플레이어 정보 설정
         SetMyPhotonPlayerInfo(PhotonNetwork.LocalPlayer);
@@ -312,7 +330,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log($"나간 사람 ActorNumber: {otherPlayer.ActorNumber}");
         Debug.Log($"나간 사람 CustomProperties: {otherPlayer.CustomProperties["uid"]}");
-        
+
         if (otherPlayer.CustomProperties.ContainsKey("uid"))
         {
             string uid = otherPlayer.CustomProperties["uid"].ToString();

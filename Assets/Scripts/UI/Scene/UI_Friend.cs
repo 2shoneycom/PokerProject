@@ -60,6 +60,7 @@ public class UI_Friend : UI_Scene
                     GameObject friendGO = Managers.UI.MakeSubItem<UI_FriendList>(go.transform).gameObject;
                     UI_FriendList friend = friendGO.GetOrAddComponent<UI_FriendList>();
 
+                    friend.Init();
                     friend.SetUID(uid);
 
                     Managers.DB.GetNicknameByUID(uid, (nickname) =>
@@ -76,9 +77,9 @@ public class UI_Friend : UI_Scene
 
                     Managers.DB.GetStatusByUID(uid, (status) =>
                     {
-                        if (status != null)
+                        if (Enum.IsDefined(typeof(Define.Status), status))
                         {
-                            friend.SetStatusInfo(Enum.Parse<Define.Status>(status));
+                            friend.SetStatusInfo(status);
                         }
                         else
                         {
