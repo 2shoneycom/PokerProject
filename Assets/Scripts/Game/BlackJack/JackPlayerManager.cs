@@ -12,13 +12,13 @@ public class JackPlayerManager
     public int NowPlayerNum { get { return _nowPlayerNum; } }
 
     int[] playerSeedMoney;
-    int[] playerBettingMoney;
+    int[,] playerBettingMoney;
     bool[] playerIsBet;
-    bool[] playerIsGameEnd;
+    bool[,] playerIsGameEnd;
     int[] playerIsInsurance;
 
-    List<GameObject>[] playerCardGO;        ///////////////////// 스플릿 생각
-    List<int>[] playerCardDetails;
+    List<GameObject>[,] playerCardGO;        ///////////////////// 스플릿 생각
+    List<int>[,] playerCardDetails;
 
     Tuple<int, int>[,] playerCardScore;
 
@@ -27,23 +27,22 @@ public class JackPlayerManager
         playerNickName = new Dictionary<string, string>();
         jackPlayerUID = new string[JackGameControl.MAX_PLAYER_NUM];
         playerSeedMoney = new int[JackGameControl.MAX_PLAYER_NUM];
-        playerBettingMoney = new int[JackGameControl.MAX_PLAYER_NUM];
+        playerBettingMoney = new int[JackGameControl.MAX_PLAYER_NUM, JackGameControl.MAX_SPLIT_NUM];
         playerIsBet = new bool[JackGameControl.MAX_PLAYER_NUM];
-        playerIsGameEnd = new bool[JackGameControl.MAX_PLAYER_NUM];
+        playerIsGameEnd = new bool[JackGameControl.MAX_PLAYER_NUM, JackGameControl.MAX_SPLIT_NUM];
         playerIsInsurance = new int[JackGameControl.MAX_PLAYER_NUM];
 
-        playerCardGO = new List<GameObject>[JackGameControl.MAX_PLAYER_NUM];
-        playerCardDetails = new List<int>[JackGameControl.MAX_PLAYER_NUM];
-        playerCardScore = new Tuple<int, int>[JackGameControl.MAX_PLAYER_NUM, 4];
+        playerCardGO = new List<GameObject>[JackGameControl.MAX_PLAYER_NUM, JackGameControl.MAX_SPLIT_NUM];
+        playerCardDetails = new List<int>[JackGameControl.MAX_PLAYER_NUM, JackGameControl.MAX_SPLIT_NUM];
+        playerCardScore = new Tuple<int, int>[JackGameControl.MAX_PLAYER_NUM, JackGameControl.MAX_SPLIT_NUM];
         for (int i = 0; i < JackGameControl.MAX_PLAYER_NUM; i++)
         {
-            playerCardGO[i] = new List<GameObject>();
-            playerCardDetails[i] = new List<int>();
-
-            playerCardScore[i, 0] = Tuple.Create(-1, -1);
-            playerCardScore[i, 1] = Tuple.Create(-1, -1);
-            playerCardScore[i, 2] = Tuple.Create(-1, -1);
-            playerCardScore[i, 3] = Tuple.Create(-1, -1);
+            for (int j = 0; j < JackGameControl.MAX_SPLIT_NUM; j++) 
+            {
+                playerCardGO[i, j] = new List<GameObject>();
+                playerCardDetails[i, j] = new List<int>();
+                playerCardScore[i, j] = Tuple.Create(-1, -1);
+            }
         }
     }
 
@@ -52,24 +51,22 @@ public class JackPlayerManager
         playerNickName.Clear();
         for (int i = 0; i < JackGameControl.MAX_PLAYER_NUM; i++)
         {
-            playerBettingMoney[i] = 0;
             playerIsBet[i] = false;
             playerIsInsurance[i] = 0;
-            playerIsGameEnd[i] = false;
             playerSeedMoney[i] = 0;
 
-            playerCardGO[i].Clear();
-            playerCardDetails[i].Clear();
-
-            playerCardScore[i, 0] = Tuple.Create(-1, -1);
-            playerCardScore[i, 1] = Tuple.Create(-1, -1);
-            playerCardScore[i, 2] = Tuple.Create(-1, -1);
-            playerCardScore[i, 3] = Tuple.Create(-1, -1);
-
-            for (int j = 0; j < JackCardManager.PLAYER_CARD_NUM; j++)
+            for(int j = 0; j < JackGameControl.MAX_SPLIT_NUM; j++)
             {
-                playerCardGO[i].Add(null);
-                playerCardDetails[i].Add(-1);
+                playerBettingMoney[i, j] = 0;
+
+                if (j == 0)
+                    playerIsGameEnd[i, j] = false;
+                else
+                    playerIsGameEnd[i, j] = true;
+
+                playerCardGO[i, j].Clear();
+                playerCardDetails[i, j].Clear();
+                playerCardScore[i, j] = Tuple.Create(-1, -1);
             }
         }
 
@@ -89,14 +86,15 @@ public class JackPlayerManager
             if (GetPlayerUID(i) == "")
                 continue;
 
-            for (int j = 0; j < JackCardManager.PLAYER_CARD_NUM; j++)
+            for (int j = 0; j < JackGameControl.MAX_SPLIT_NUM; j++)
             {
-                if (playerCardGO[i][j] == null) continue;
+                for (int k = 0; k < playerCardGO[i,j].Count; k++)
+                {
+                    GameObject cardGO = playerCardGO[i, j][k];
 
-                GameObject cardGO = playerCardGO[i][j];
-
-                if (cardGO.GetPhotonView().IsMine)
-                    Managers.Resource.PhotonDestroy(cardGO);
+                    if (cardGO.GetPhotonView().IsMine)
+                        Managers.Resource.PhotonDestroy(cardGO);
+                }
             }
         }
     }
@@ -150,9 +148,9 @@ public class JackPlayerManager
         JackGameControl.Control.UpdatePlayerSeedMoneyUI();
     }
 
-    public int GetPlayerBet(int index)
+    public int GetPlayerBet(int playerIndex, int splitNum)
     {
-        return playerBettingMoney[index];
+        return playerBettingMoney[playerIndex, splitNum];
     }
 
     public void UpdatePlayerIsInsurance(int index, int value)
@@ -165,32 +163,32 @@ public class JackPlayerManager
         return playerIsInsurance[index];
     }
 
-    public void UpdatePlayerIsGameEnd(int index, bool value)
+    public void UpdatePlayerIsGameEnd(int playerIndex, int splitNum, bool value)
     {
-        playerIsGameEnd[index] = value;
+        playerIsGameEnd[playerIndex, splitNum] = value;
 
         if (value == true)
-            PlayerGameEndSetting(index);
+            PlayerGameEndSetting(playerIndex, splitNum);
 
         Debug.Log("UpdatePlayerIsGameEnd multi call?");
         if (PhotonNetwork.IsMasterClient)
             JackGameControl.Control.DetectGameEndAllPass();
     }
 
-    public bool GetPlayerIsGameEnd(int index)
+    public bool GetPlayerIsGameEnd(int playerIndex, int splitNum)
     {
-        return playerIsGameEnd[index];
+        return playerIsGameEnd[playerIndex, splitNum];
     }
 
-    public void UpdatePlayerBetting(int index, int amount)
+    public void UpdatePlayerBetting(int playerIndex, int splitNum, int amount)
     {
-        playerBettingMoney[index] += amount;
+        playerBettingMoney[playerIndex, splitNum] += amount;
         JackGameControl.Control.UpdatePlayerBetMoneyUI();
     }
 
-    public void UpdatePlayerBetReset(int index)
+    public void UpdatePlayerBetReset(int playerIndex, int splitNum)
     {
-        playerBettingMoney[index] = 0;
+        playerBettingMoney[playerIndex, splitNum] = 0;
         JackGameControl.Control.UpdatePlayerBetMoneyUI();
     }
 
@@ -204,61 +202,50 @@ public class JackPlayerManager
         return playerIsBet[index];
     }
 
-    public int GetPlayerCardLen(int index)
+    public int GetPlayerCardLen(int playerIndex, int splitNum)
     {
-        for (int i = 0; i < playerCardGO.Length; i++)
-        {
-            if (playerCardGO[index][i] == null)
-                return i;
-        }
-        return -1;
+        return playerCardGO[playerIndex, splitNum].Count;
     }
 
-    public void SetPlayerCard(string pUID, int cardViewID, int cardDetail)
+    public void SetPlayerCard(string pUID, int splitNum, int cardViewID, int cardDetail)
     {
         int playerIndex = GetPlayerGameIndexByUID(pUID);
-        int cardIndex = GetPlayerCardLen(playerIndex);
+        int cardIndex = GetPlayerCardLen(playerIndex, splitNum);
         GameObject cardGO = PhotonView.Find(cardViewID).gameObject;
 
-        playerCardGO[playerIndex][cardIndex] = cardGO;
-        playerCardDetails[playerIndex][cardIndex] = cardDetail;
+        playerCardGO[playerIndex, splitNum].Add(cardGO);
+        playerCardDetails[playerIndex, splitNum].Add(cardDetail);
         Debug.Log($"PlayerIndex : {playerIndex}, Player CardIndex : {cardIndex}");
 
         UI_Card cardUI = cardGO.GetOrAddComponent<UI_Card>();
         cardUI.SetCardImage(cardDetail);
         Debug.Log("c");
 
-        JackGameControl.Control.UpdatePlayerBetScoreUI(playerIndex);
+        JackGameControl.Control.UpdatePlayerBetScoreUI(playerIndex, splitNum);
         Debug.Log("d");
-        JackGameControl.Control.NextStage(1);
+
+        if (JackGameControl.Control.StageCount <= 10)
+            JackGameControl.Control.NextStage(1);
     }
 
-    public Tuple<int, int> CalculatePlayerBetScore(int playerIndex)
+    public Tuple<int, int> CalculatePlayerBetScore(int playerIndex, int splitNum)
     {
         int[] score = new int[22];
-        if (playerCardScore[playerIndex].Item1 == -1)
+        if (playerCardScore[playerIndex, splitNum].Item1 == -1)
         {
             score[0] = 1;
         }
         else
         {
-            score[playerCardScore[playerIndex].Item1] = 1;
+            score[playerCardScore[playerIndex, splitNum].Item1] = 1;
 
-            if (playerCardScore[playerIndex].Item2 != -1)
-                score[playerCardScore[playerIndex].Item2] = 1;
+            if (playerCardScore[playerIndex, splitNum].Item2 != -1)
+                score[playerCardScore[playerIndex, splitNum].Item2] = 1;
         }
 
-        int i = -1;
+        int i = GetPlayerCardLen(playerIndex, splitNum) - 1;
 
-        for (int ii = 0; ii < playerCardGO[playerIndex].Count; ii++)
-        {
-            if (playerCardGO[playerIndex][ii] == null)
-                break;
-
-            i = ii;
-        }
-
-        int cardscore = JackGameControl.Card.GetCardNum(playerCardDetails[playerIndex][i]);
+        int cardscore = JackGameControl.Card.GetCardNum(playerCardDetails[playerIndex, splitNum][i]);
         if (cardscore >= 10)
             cardscore = 10;
 
@@ -297,9 +284,9 @@ public class JackPlayerManager
             }
         }
 
-        playerCardScore[playerIndex] = Tuple.Create(a, b);
+        playerCardScore[playerIndex, splitNum] = Tuple.Create(a, b);
 
-        return playerCardScore[playerIndex];
+        return playerCardScore[playerIndex, splitNum];
     }
 
     public void FindPlayerBlackJack()
@@ -311,24 +298,27 @@ public class JackPlayerManager
             if (GetPlayerUID(i) == "")
                 continue;
 
-            if (playerCardScore[i].Item1 == 21 || playerCardScore[i].Item2 == 21)
+            if (playerCardScore[i, 0].Item1 == 21 || playerCardScore[i, 0].Item2 == 21)
                 JackGameControl.Control.UpdatePlayerBetStatusUI(i, "BlackJack!!!");
         }
 
         JackGameControl.Control.NextStage();
     }
 
-    public Tuple<int, int> GetPlayerCardScore(int playerIndex)
+    public Tuple<int, int> GetPlayerCardScore(int playerIndex, int splitNum)
     {
-        return playerCardScore[playerIndex];
+        return playerCardScore[playerIndex, splitNum];
     }
 
-    public void PlayerGameEndSetting(int index)
+    public void PlayerGameEndSetting(int playerIndex, int splitNum)
     {
-        var score = GetPlayerCardScore(index);
+        var score = GetPlayerCardScore(playerIndex, splitNum);
         bool isBlackJack = score.Item1 == 21 || score.Item2 == 21;
 
-        foreach (GameObject cardGO in playerCardGO[index]) 
+        int cardLen = GetPlayerCardLen(playerIndex, splitNum);
+        if (cardLen > 2) isBlackJack = false;
+
+        foreach (GameObject cardGO in playerCardGO[playerIndex, splitNum]) 
         {
             if (cardGO != null)
             {
@@ -349,8 +339,8 @@ public class JackPlayerManager
 
     public bool IsPlayerCanSplit(int playerIndex)
     {
-        int card1 = playerCardDetails[playerIndex][JackGameControl.Control.PlayerSplit * 10];
-        int card2 = playerCardDetails[playerIndex][JackGameControl.Control.PlayerSplit * 10 + 1];
+        int card1 = playerCardDetails[playerIndex, JackGameControl.Control.PlayerSplit][0];
+        int card2 = playerCardDetails[playerIndex, JackGameControl.Control.PlayerSplit][1];
 
         if (card1 >= 10)
             card1 = 10;
@@ -360,13 +350,10 @@ public class JackPlayerManager
         return card1 == card2;
     }
 
-    public bool IsPlayerSplit(int playerIndex)
+    public bool IsPlayerSplit(int playerIndex, int splitNum)
     {
-        GameObject go = playerCardGO[playerIndex][JackGameControl.Control.PlayerSplit * 10];
+        int len = playerCardGO[playerIndex, splitNum].Count;
 
-        if (go == null)
-            return false;
-        else
-            return true;
+        return len != 0;
     }
 }

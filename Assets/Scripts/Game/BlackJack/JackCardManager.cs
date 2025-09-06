@@ -13,9 +13,9 @@ public class JackCardManager
 
     const float CARD_ANIMATION_TIME = 0.5f;
 
-    public const int PLAYER_CARD_NUM = 40;
     public const int DEALER_CARD_NUM = 5;
-    const float CARD_OFFSET = 50f;
+    const float CARD_X_OFFSET = 50f;
+    const float CARD_Y_OFFSET = 200f;
 
     const string MAKE_DEALER_CARD = "MAKEDEALERCARD";
     const string CARD_PREFAB_PATH = "UI/SubItem/UI_Card";
@@ -32,8 +32,6 @@ public class JackCardManager
     Transform cardDeckPos;
 
     Vector3[] dealerCardPos;
-    Vector3[,] playerCardPos;
-
     GameObject[] dealerCardList;
     int[] dealerCardDetail;
     Tuple<int, int> dealerCardScore;
@@ -44,6 +42,8 @@ public class JackCardManager
     public static Action OnAddCardToDealer;
 
     bool isInited = false;
+    bool isShuffled = false;
+    int curPlayerSplitNum = -1;
 
     public void Init()
     {
@@ -70,9 +70,6 @@ public class JackCardManager
         dealerCardDetail = new int[DEALER_CARD_NUM];
         dealerCardScore = Tuple.Create(-1, -1);
         SetupDealerCardPos();
-
-        playerCardPos = new Vector3[JackGameControl.MAX_PLAYER_NUM, PLAYER_CARD_NUM];
-        SetupPlayerCardPos();
 
         cardBuffer = new List<int>(FULL_CARD_DECK_LEN);
         cardSprites = new List<Sprite>(FULL_CARD_LEN);
@@ -122,32 +119,28 @@ public class JackCardManager
             else
             {
                 dealerCardPos[i] = dealerCardPos[i - 1];
-                dealerCardPos[i].x += CARD_OFFSET;
+                dealerCardPos[i].x += CARD_X_OFFSET;
             }
         }
     }
 
-    private void SetupPlayerCardPos()
+    public Vector3 GetPlayerCardPos(int playerIndex, int splitNum, int cardIndex)
     {
-        for (int i = 0; i < JackGameControl.MAX_PLAYER_NUM; i++)
-        {
-            int seatedIndex = i;
-            GameObject destGO = _jackUI.GetPlayerGameObjcet(seatedIndex);
-            RectTransform reference = destGO.GetComponent<RectTransform>();
+        GameObject destGO = _jackUI.GetPlayerGameObjcet(playerIndex);
+        RectTransform reference = destGO.GetComponent<RectTransform>();
 
-            Vector3 worldPos = reference.position;
-            playerCardPos[i, 0] = worldPos;
+        Vector3 worldPos = reference.position;
+        worldPos.x += CARD_X_OFFSET * cardIndex;
+        worldPos.y += CARD_Y_OFFSET * splitNum;
 
-            for (int j = 1; j < PLAYER_CARD_NUM; j++)
-            {
-                worldPos.x += CARD_OFFSET;
-                playerCardPos[i, j] = worldPos;
-            }
-        }
+        return worldPos;
     }
 
     public void ShuffleCard()
     {
+        if (isShuffled) return;
+        isShuffled = true;
+
         cardBuffer.Clear();
 
         for (int i = 0; i < FULL_CARD_DECK_LEN; i++)
@@ -196,7 +189,7 @@ public class JackCardManager
         JackGameControl.Control.NextStage();
     }
 
-    public IEnumerator DealingCard(int toPlayer = -1)
+    public IEnumerator DealingCard(int toPlayer = -1, int splitNum = -1)
     {
         yield return cardMoveDelay;
         Debug.Log("1");
@@ -210,14 +203,15 @@ public class JackCardManager
             Debug.Log("2");
 
             string pUID = JackGameControl.Players.GetPlayerUID(toPlayer);
-            SyncSystem.Sync.JackAddCard(pUID);
+            SyncSystem.Sync.JackAddCard(pUID, splitNum);
         }
     }
 
-    public void AddCardToPlayerStarter(string playerUID = "")
+    public void AddCardToPlayerStarter(string playerUID, int splitNum)
     {
         Debug.Log("3");
 
+        curPlayerSplitNum = splitNum;
         OnAddCard?.Invoke(playerUID);
     }
 
@@ -379,14 +373,14 @@ public class JackCardManager
             CardMoveToPosPlayer(cardGO, pUID);
         }
 
-        JackGameControl.Players.SetPlayerCard(pUID, cardViewID, cardDetail);
+        JackGameControl.Players.SetPlayerCard(pUID, curPlayerSplitNum, cardViewID, cardDetail);
     }
 
     void CardMoveToPosPlayer(GameObject cardGO, string pUID)
     {
         int playerIndex = JackGameControl.Players.GetPlayerGameIndexByUID(pUID);
-        int cardIndex = JackGameControl.Players.GetPlayerCardLen(playerIndex);
-        Vector3 destPos = playerCardPos[playerIndex, cardIndex];
+        int cardIndex = JackGameControl.Players.GetPlayerCardLen(playerIndex, curPlayerSplitNum);
+        Vector3 destPos = GetPlayerCardPos(playerIndex, curPlayerSplitNum, cardIndex);
 
         cardGO.transform.DOMove(destPos, CARD_ANIMATION_TIME);
         cardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);

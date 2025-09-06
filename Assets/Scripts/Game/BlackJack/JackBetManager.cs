@@ -34,12 +34,12 @@ public class JackBetManager
         _jackUI = ui;
     }
 
-    public void JackBetting(int playerIndex, int amount)
+    public void JackBetting(int playerIndex, int splitNum, int amount)
     {
         string pUID = JackGameControl.Players.GetPlayerUID(playerIndex);
         SyncSystem.Sync.JackBetMoneyToTarget(pUID, amount);
 
-        SyncSystem.Sync.SyncJackMyBetting(playerIndex, amount);
+        SyncSystem.Sync.SyncJackMyBetting(playerIndex, splitNum, amount);
     }
 
     public void JackBettingReset(int playerIndex)
@@ -48,7 +48,7 @@ public class JackBetManager
             return;
 
         User.NowUser.JackResetBetting();
-        SyncSystem.Sync.SyncJackMyBettingReset(playerIndex);
+        SyncSystem.Sync.SyncJackMyBettingReset(playerIndex, 0);
     }
 
     public void JackBettingConfirm(int playerIndex)

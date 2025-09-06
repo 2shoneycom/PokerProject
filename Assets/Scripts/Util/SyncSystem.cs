@@ -894,15 +894,15 @@ class SyncSystem : MonoBehaviourPun
         JackGameControl.Card.SetCardDeck(cardDeck);
     }
 
-    public void JackAddCard(string toPlayer)
+    public void JackAddCard(string toPlayer, int splitNum)
     {
-        photonView.RPC("RPC_JackAddCard", RpcTarget.All, toPlayer);
+        photonView.RPC("RPC_JackAddCard", RpcTarget.All, toPlayer, splitNum);
     }
 
     [PunRPC]
-    private void RPC_JackAddCard(string toPlayer)
+    private void RPC_JackAddCard(string toPlayer, int splitNum)
     {
-        JackGameControl.Card.AddCardToPlayerStarter(toPlayer);
+        JackGameControl.Card.AddCardToPlayerStarter(toPlayer, splitNum);
     }
 
     public void JackDealerCard()
@@ -943,26 +943,26 @@ class SyncSystem : MonoBehaviourPun
         JackGameControl.Players.UpdatePlayerSeedMoney(index, amount);
     }
 
-    public void SyncJackMyBetting(int index, int amount)
+    public void SyncJackMyBetting(int playerIndex, int splitNum, int amount)
     {
-        photonView.RPC("RPC_SyncJackMyBetting", RpcTarget.All, index, amount);
+        photonView.RPC("RPC_SyncJackMyBetting", RpcTarget.All, playerIndex, splitNum, amount);
     }
 
     [PunRPC]
-    private void RPC_SyncJackMyBetting(int index, int amount)
+    private void RPC_SyncJackMyBetting(int playerIndex, int splitNum, int amount)
     {
-        JackGameControl.Players.UpdatePlayerBetting(index, amount);
+        JackGameControl.Players.UpdatePlayerBetting(playerIndex, splitNum, amount);
     }
 
-    public void SyncJackMyBettingReset(int index)
+    public void SyncJackMyBettingReset(int playerIndex, int splitNum)
     {
-        photonView.RPC("RPC_SyncJackMyBettingReset", RpcTarget.All, index);
+        photonView.RPC("RPC_SyncJackMyBettingReset", RpcTarget.All, playerIndex, splitNum);
     }
 
     [PunRPC]
-    private void RPC_SyncJackMyBettingReset(int index)
+    private void RPC_SyncJackMyBettingReset(int playerIndex, int splitNum)
     {
-        JackGameControl.Players.UpdatePlayerBetReset(index);
+        JackGameControl.Players.UpdatePlayerBetReset(playerIndex, splitNum);
     }
 
     public void SyncJackIsBet(int index, bool val)
@@ -976,15 +976,15 @@ class SyncSystem : MonoBehaviourPun
         JackGameControl.Players.UpdatePlayerIsBet(index, val);
     }
 
-    public void SyncJackIsGameEnd(int index, bool val)
+    public void SyncJackIsGameEnd(int playerIndex, int splitNum, bool val)
     {
-        photonView.RPC("RPC_SyncJackIsGameEnd", RpcTarget.All, index, val);
+        photonView.RPC("RPC_SyncJackIsGameEnd", RpcTarget.All, playerIndex, splitNum, val);
     }
 
     [PunRPC]
-    private void RPC_SyncJackIsGameEnd(int index, bool val)
+    private void RPC_SyncJackIsGameEnd(int playerIndex, int splitNum, bool val)
     {
-        JackGameControl.Players.UpdatePlayerIsGameEnd(index, val);
+        JackGameControl.Players.UpdatePlayerIsGameEnd(playerIndex, splitNum, val);
     }
 
     public void SyncJackPlayerCard(string pUID, GameObject cardGO, int cardDetail)
