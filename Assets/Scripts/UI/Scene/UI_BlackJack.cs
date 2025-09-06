@@ -227,6 +227,25 @@ public class UI_BlackJack : UI_Scene
         HitButtonSetting();
     }
 
+    public void NowPlayerBetSettingSwitch(bool isOn)
+    {
+        GetButton((int)Buttons.UI_ButtonLL).interactable = isOn;
+        GetButton((int)Buttons.UI_ButtonRM).interactable = isOn;
+        GetButton((int)Buttons.UI_ButtonRR).interactable = isOn;
+
+        if(isOn == false)
+        {
+            GetButton((int)Buttons.UI_ButtonLM).interactable = isOn;
+        }
+        else
+        {
+            if (JackGameControl.Players.IsPlayerCanSplit(User.NowGamePlayer.GameIndex))
+                GetButton((int)Buttons.UI_ButtonLM).interactable = isOn;
+            else
+                GetButton((int)Buttons.UI_ButtonLM).interactable = isOn;
+        }
+    }
+
     void DoubleDownButtonSetting()
     {
         Button bt = GetButton((int)Buttons.UI_ButtonLL);
@@ -242,7 +261,13 @@ public class UI_BlackJack : UI_Scene
 
     void DoubleDownClicked()
     {
-
+        // 1장만 더 받는 조건으로 돈을 2배로 검
+        // 돈 2배로 베팅
+        JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, User.NowGamePlayer.BetMoney);
+        // 1장 받기
+        StartCoroutine(JackGameControl.Card.DealingCard(User.NowGamePlayer.GameIndex));
+        // 베팅 종료
+        SyncSystem.Sync.JackNormalBetEnd();
     }
 
     void SplitButtonSetting()
@@ -260,7 +285,7 @@ public class UI_BlackJack : UI_Scene
 
     void SplitClicked()
     {
-
+        // 엄....
     }
 
     void StandButtonSetting()
@@ -276,9 +301,10 @@ public class UI_BlackJack : UI_Scene
         bt.gameObject.GetComponent<Image>().color = targetColor;
     }
 
-    void StandClicked()
+    public void StandClicked()
     {
-
+        // 카드 그만 받기
+        SyncSystem.Sync.JackNormalBetEnd();
     }
 
     void HitButtonSetting()
@@ -296,7 +322,12 @@ public class UI_BlackJack : UI_Scene
 
     void HitClicked()
     {
+        GetButton((int)Buttons.UI_ButtonLM).interactable = false;
 
+        // 카드 1장 더 받기
+        StartCoroutine(JackGameControl.Card.DealingCard(User.NowGamePlayer.GameIndex));
+        // 타이머 초기화
+        SyncSystem.Sync.JackRestartBetTimer();
     }
 
     public void ChipUISwitch(bool isOn)

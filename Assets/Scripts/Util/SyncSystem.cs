@@ -831,6 +831,52 @@ class SyncSystem : MonoBehaviourPun
         JackGameControl.Control.ClearGame();
     }
 
+    public IEnumerator JackNormalBetting(int playerIndex)
+    {
+        yield return new WaitForSeconds(1f);
+        photonView.RPC("RPC_JackNormalBetting", RpcTarget.All, playerIndex);
+    }
+
+    [PunRPC]
+    private void RPC_JackNormalBetting(int playerIndex)
+    {
+        JackGameControl.Control.PlayerNormalBetSetting(playerIndex);
+    }
+
+    public IEnumerator JackBlackJackPlayerWin(int playerIndex)
+    {
+        yield return null;
+        photonView.RPC("RPC_JackBlackJackPlayerWin", RpcTarget.All, playerIndex);
+    }
+
+    [PunRPC]
+    private void RPC_JackBlackJackPlayerWin(int playerIndex)
+    {
+        JackGameControl.Control.BlackJackPlayerWin(playerIndex);
+    }
+
+    public void JackNormalBetEnd()
+    {
+        photonView.RPC("RPC_JackNormalBetEnd", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackNormalBetEnd()
+    {
+        JackGameControl.Control.PlayerNormalBetEnd();
+    }
+
+    public void JackRestartBetTimer()
+    {
+        photonView.RPC("RPC_JackRestartBetTimer", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackRestartBetTimer()
+    {
+        JackGameControl.Control.RestartBetTimer();
+    }
+
 
     #endregion
 

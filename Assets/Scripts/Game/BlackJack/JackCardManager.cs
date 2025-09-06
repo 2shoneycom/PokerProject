@@ -13,7 +13,7 @@ public class JackCardManager
 
     const float CARD_ANIMATION_TIME = 0.5f;
 
-    public const int PLAYER_CARD_NUM = 10;
+    public const int PLAYER_CARD_NUM = 40;
     public const int DEALER_CARD_NUM = 5;
     const float CARD_OFFSET = 50f;
 
@@ -234,7 +234,6 @@ public class JackCardManager
             return;
 
         AddCardToPlayer(popedCard, playerUID);
-        //SyncSystem.Sync.JackNextStage_V2(1);
     }
 
     private void AddCardToDealer()
@@ -245,7 +244,6 @@ public class JackCardManager
             return;
 
         AddCardToPlayer(popedCard);
-        //SyncSystem.Sync.JackNextStage_V2(1);
     }
 
     public void SetDealerCard(int cardViewID, int index, int cardDetail)    // 딜러 카드 오브젝트 저장 및 앞면 보이게 설정
@@ -343,12 +341,9 @@ public class JackCardManager
     void CardMoveToPosDealer(GameObject cardGO, int index)
     {
         Vector3 targetPos = dealerCardPos[index];
-        //if (targetPos == null)
-        //    targetPos = GameObject.Find($"Dealer Card Pos {index + 1}").GetOrAddComponent<Transform>();
 
         cardGO.transform.DOMove(targetPos, CARD_ANIMATION_TIME);
         cardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);
-        //cardGO.transform.DOScale(Vector3.one * 5f, CARD_ANIMATION_TIME);
     }
 
     private void AddCardToPlayer(int popedCard, string pUID = MAKE_DEALER_CARD)
@@ -395,7 +390,11 @@ public class JackCardManager
 
         cardGO.transform.DOMove(destPos, CARD_ANIMATION_TIME);
         cardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);
-        //cardGO.transform.DOScale(Vector3.one * 3.5f, CARD_ANIMATION_TIME);
+    }
+
+    public void CardScaleBigger(GameObject cardGO)
+    {
+        cardGO.transform.DOScale(Vector3.one * 1.7f, CARD_ANIMATION_TIME);
     }
 
     public Sprite GetRightCardImage(int cardIndex)

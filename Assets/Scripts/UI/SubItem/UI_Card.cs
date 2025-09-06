@@ -14,6 +14,7 @@ public class UI_Card : UI_Base
     enum GameObjects
     {
         UI_Card,
+        UI_Block,
     }
 
     bool isInit = false;
@@ -24,6 +25,8 @@ public class UI_Card : UI_Base
         {
             Bind<Image>(typeof(Images));
             Bind<GameObject>(typeof(GameObjects));
+
+            UIBlockSwitch(false);
             isInit = true;
         }
     }
@@ -40,5 +43,10 @@ public class UI_Card : UI_Base
         Debug.Log(cardDetail);
         target.sprite = JackGameControl.Card.GetRightCardImage(cardDetail);
         Debug.Log("b");
+    }
+
+    public void UIBlockSwitch(bool isOn)
+    {
+        GetGameObject((int)GameObjects.UI_Block).SetActive(isOn);
     }
 }

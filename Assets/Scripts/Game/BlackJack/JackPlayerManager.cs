@@ -19,8 +19,8 @@ public class JackPlayerManager
 
     List<GameObject>[] playerCardGO;        ///////////////////// 스플릿 생각
     List<int>[] playerCardDetails;
-    Tuple<int, int>[] playerCardScore;
-    List<int>[] PlayerCards { get { return playerCardDetails; } }
+
+    Tuple<int, int>[,] playerCardScore;
 
     public JackPlayerManager()
     {
@@ -34,12 +34,16 @@ public class JackPlayerManager
 
         playerCardGO = new List<GameObject>[JackGameControl.MAX_PLAYER_NUM];
         playerCardDetails = new List<int>[JackGameControl.MAX_PLAYER_NUM];
-        playerCardScore = new Tuple<int, int>[JackGameControl.MAX_PLAYER_NUM];
+        playerCardScore = new Tuple<int, int>[JackGameControl.MAX_PLAYER_NUM, 4];
         for (int i = 0; i < JackGameControl.MAX_PLAYER_NUM; i++)
         {
             playerCardGO[i] = new List<GameObject>();
             playerCardDetails[i] = new List<int>();
-            playerCardScore[i] = Tuple.Create(-1, -1);
+
+            playerCardScore[i, 0] = Tuple.Create(-1, -1);
+            playerCardScore[i, 1] = Tuple.Create(-1, -1);
+            playerCardScore[i, 2] = Tuple.Create(-1, -1);
+            playerCardScore[i, 3] = Tuple.Create(-1, -1);
         }
     }
 
@@ -56,11 +60,16 @@ public class JackPlayerManager
 
             playerCardGO[i].Clear();
             playerCardDetails[i].Clear();
+
+            playerCardScore[i, 0] = Tuple.Create(-1, -1);
+            playerCardScore[i, 1] = Tuple.Create(-1, -1);
+            playerCardScore[i, 2] = Tuple.Create(-1, -1);
+            playerCardScore[i, 3] = Tuple.Create(-1, -1);
+
             for (int j = 0; j < JackCardManager.PLAYER_CARD_NUM; j++)
             {
                 playerCardGO[i].Add(null);
                 playerCardDetails[i].Add(-1);
-                playerCardScore[i] = Tuple.Create(-1, -1);
             }
         }
 
@@ -159,6 +168,10 @@ public class JackPlayerManager
     public void UpdatePlayerIsGameEnd(int index, bool value)
     {
         playerIsGameEnd[index] = value;
+
+        if (value == true)
+            PlayerGameEndSetting(index);
+
         Debug.Log("UpdatePlayerIsGameEnd multi call?");
         if (PhotonNetwork.IsMasterClient)
             JackGameControl.Control.DetectGameEndAllPass();
@@ -308,5 +321,52 @@ public class JackPlayerManager
     public Tuple<int, int> GetPlayerCardScore(int playerIndex)
     {
         return playerCardScore[playerIndex];
+    }
+
+    public void PlayerGameEndSetting(int index)
+    {
+        var score = GetPlayerCardScore(index);
+        bool isBlackJack = score.Item1 == 21 || score.Item2 == 21;
+
+        foreach (GameObject cardGO in playerCardGO[index]) 
+        {
+            if (cardGO != null)
+            {
+                UI_Card card = cardGO.GetOrAddComponent<UI_Card>();
+
+                if(isBlackJack)
+                {
+                    if (card.GetComponent<PhotonView>().IsMine)
+                        JackGameControl.Card.CardScaleBigger(cardGO);
+                }
+                else
+                {
+                    card.UIBlockSwitch(true);
+                }
+            }
+        }
+    }
+
+    public bool IsPlayerCanSplit(int playerIndex)
+    {
+        int card1 = playerCardDetails[playerIndex][JackGameControl.Control.PlayerSplit * 10];
+        int card2 = playerCardDetails[playerIndex][JackGameControl.Control.PlayerSplit * 10 + 1];
+
+        if (card1 >= 10)
+            card1 = 10;
+        if (card2 >= 10)
+            card2 = 10;
+
+        return card1 == card2;
+    }
+
+    public bool IsPlayerSplit(int playerIndex)
+    {
+        GameObject go = playerCardGO[playerIndex][JackGameControl.Control.PlayerSplit * 10];
+
+        if (go == null)
+            return false;
+        else
+            return true;
     }
 }

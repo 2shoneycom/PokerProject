@@ -20,6 +20,9 @@ public class JackBetManager
 
     public const float AUTO_DIE_TIMER = 10.0f;
 
+    int curBetPlayer = -1;
+    public int CurBetPlayer {  get { return curBetPlayer; } }
+
     public JackBetManager()
     {
         _isBetting = false;
@@ -30,7 +33,6 @@ public class JackBetManager
         _isBetting = false;
         _jackUI = ui;
     }
-
 
     public void JackBetting(int playerIndex, int amount)
     {
@@ -58,4 +60,8 @@ public class JackBetManager
         SyncSystem.Sync.SyncJackIsBet(playerIndex, true);
     }
 
+    public void UpdateCurBetPlayer(int playerIndex)
+    {
+        curBetPlayer = playerIndex;
+    }
 }
