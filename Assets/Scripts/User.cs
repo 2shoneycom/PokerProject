@@ -148,7 +148,7 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
-        Managers.DB.DBUpdateMoney(uid, -amount, "black");
+        Managers.DB.DBUpdateMoney(uid, -amount, "blackjack");
         NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
         JackSyncSeedMoney();
     }
@@ -158,7 +158,7 @@ public class User
         int betAmount = NowGamePlayer.BetMoney;
 
         seedMoney += betAmount;
-        Managers.DB.DBUpdateMoney(uid, betAmount, "black");
+        Managers.DB.DBUpdateMoney(uid, betAmount, "blackjack");
         NowGamePlayer.SetBetMoney(0);
         JackSyncSeedMoney();
     }

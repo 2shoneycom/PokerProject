@@ -5,6 +5,7 @@ using System.Reflection;
 using Google.MiniJSON;
 using Photon.Pun;
 using Photon.Realtime;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -877,6 +878,28 @@ class SyncSystem : MonoBehaviourPun
         JackGameControl.Control.RestartBetTimer();
     }
 
+    public void JackStopBetTimer()
+    {
+        photonView.RPC("RPC_JackStopBetTimer", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackStopBetTimer()
+    {
+        JackGameControl.Control.BetTimerStop();
+    }
+
+    public IEnumerator SyncJacksplitAnd21()
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncJacksplitAnd21", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJacksplitAnd21()
+    {
+        JackGameControl.Control.ResetSplitAnd21();
+    }
 
     #endregion
 
@@ -1008,6 +1031,17 @@ class SyncSystem : MonoBehaviourPun
     private void RPC_SyncJackIsInsurance(int index, int val)
     {
         JackGameControl.Players.UpdatePlayerIsInsurance(index, val);
+    }
+
+    public void JackPlayerSplitSetting(int playerIndex, int nowSplitNum)
+    {
+        photonView.RPC("RPC_JackPlayerSplitSetting", RpcTarget.All, playerIndex, nowSplitNum);
+    }
+
+    [PunRPC]
+    private void RPC_JackPlayerSplitSetting(int playerIndex, int nowSplitNum)
+    {
+        JackGameControl.Control.PlayerSplitSetting(playerIndex, nowSplitNum);
     }
 
 

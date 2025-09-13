@@ -263,7 +263,8 @@ public class UI_BlackJack : UI_Scene
     {
         // 1장만 더 받는 조건으로 돈을 2배로 검
         // 돈 2배로 베팅
-        JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, JackGameControl.Control.PlayerSplit, User.NowGamePlayer.BetMoney);
+        int baseBet = User.NowGamePlayer.GetBlackJackBaseBet();
+        JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, JackGameControl.Control.PlayerSplit, baseBet);
         // 1장 받기
         StartCoroutine(JackGameControl.Card.DealingCard(User.NowGamePlayer.GameIndex, JackGameControl.Control.PlayerSplit));
         // 베팅 종료
@@ -285,7 +286,15 @@ public class UI_BlackJack : UI_Scene
 
     void SplitClicked()
     {
-        // 엄....
+        // 1. 카드 나눠짐
+        // 2. 새로운 카드 1장 받음
+        // 3. 새롭게 배팅 시작
+
+        // 돈도 초기 배팅 금액만큼 검
+        int baseBet = User.NowGamePlayer.GetBlackJackBaseBet();
+        JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, JackGameControl.Control.PlayerSplit, baseBet);
+
+        SyncSystem.Sync.JackPlayerSplitSetting(User.NowGamePlayer.GameIndex, JackGameControl.Control.PlayerSplit);
     }
 
     void StandButtonSetting()
@@ -320,14 +329,31 @@ public class UI_BlackJack : UI_Scene
         bt.gameObject.GetComponent<Image>().color = targetColor;
     }
 
+    int curPlayerIndex = -1;
+    int curPlayerSplit = -1;
     void HitClicked()
     {
-        GetButton((int)Buttons.UI_ButtonLM).interactable = false;
+        curPlayerIndex = User.NowGamePlayer.GameIndex;
+        curPlayerSplit = JackGameControl.Control.PlayerSplit;
 
+        SyncSystem.Sync.JackStopBetTimer();
+
+        StartCoroutine(GiveCardWaitRestart());
+    }
+
+    IEnumerator GiveCardWaitRestart()
+    {
         // 카드 1장 더 받기
-        StartCoroutine(JackGameControl.Card.DealingCard(User.NowGamePlayer.GameIndex, JackGameControl.Control.PlayerSplit));
-        // 타이머 초기화
-        SyncSystem.Sync.JackRestartBetTimer();
+        StartCoroutine(JackGameControl.Card.DealingCard(curPlayerIndex, curPlayerSplit));
+        yield return new WaitForSeconds(1f);
+
+        if(JackGameControl.Players.GetPlayerIsGameEnd(curPlayerIndex, curPlayerSplit) == false)
+        {
+            NowPlayerBetSettingSwitch(true);
+
+            // 타이머 초기화
+            SyncSystem.Sync.JackRestartBetTimer();
+        }
     }
 
     public void ChipUISwitch(bool isOn)
@@ -384,7 +410,6 @@ public class UI_BlackJack : UI_Scene
         GetText((int)Texts.UI_TimerText).text = time.ToString("F1");    //time.Tostring("F1")는 소숫점 첫째자리까지만 표기
     }
 
-
     public void GameStartButtonSetting()
     {
         GameObject go = GetGameObject((int)GameObjects.UI_ButtonRR_Block);
@@ -406,7 +431,6 @@ public class UI_BlackJack : UI_Scene
         SyncSystem.Sync.JackStartSync();
         Debug.Log("1");
     }
-
 
     void IconFriendClicked(PointerEventData data)
     {
@@ -461,26 +485,7 @@ public class UI_BlackJack : UI_Scene
     public void UpdatePlayerBetScoreText(int index, string status)
     {
         string str = $"UI_Player{index}_BetScoreText";
-        Debug.Log(str);
-        TextMeshProUGUI text = GetText((int)Enum.Parse(typeof(Texts), str));
-
-        while(text == null)
-        {
-            Debug.Log("Text가 NULL입니다 ㅅㅂ");
-
-            text = GetText((int)Enum.Parse(typeof(Texts), str));
-        }
-        Debug.Log("Text가 NULL이 아닙니다 오예");
-
-        if (text == null)
-        {
-            Debug.Log("여기로 들어가면 미친 새끼");
-
-            Bind<TextMeshProUGUI>(typeof(Texts));
-            text = GetText((int)Enum.Parse(typeof(Texts), str));
-        }
-
-        text.text = status;
+        GetText((int)Enum.Parse(typeof(Texts), str)).text = status;
     }
 
     public void UpdateDealerStatusText(string status)

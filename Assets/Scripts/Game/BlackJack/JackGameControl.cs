@@ -234,7 +234,7 @@ public class JackGameControl : MonoBehaviour
                         break;
                     }
 
-                    if(PlayerSplit >= MAX_SPLIT_NUM)
+                    if (PlayerSplit >= MAX_SPLIT_NUM)
                     {
                         StartCoroutine(SyncSystem.Sync.JackNextStage(1));
                         break;
@@ -254,10 +254,12 @@ public class JackGameControl : MonoBehaviour
                         break;
                     }
 
+                    StartCoroutine(SyncSystem.Sync.SyncJacksplitAnd21());
+
                     if (PlayerSplit == 0)
                         StartCoroutine(SyncSystem.Sync.JackNormalBetting(nowPlayer));
                     else
-                        SplitedPlayerSet();
+                        SplitedPlayerSet(nowPlayer);
 
                     break;
                 }
@@ -354,7 +356,7 @@ public class JackGameControl : MonoBehaviour
         Debug.Log("Timer End");
 
         _jackUI.FirstBetEnd();
-
+        User.NowGamePlayer.SetBlackJackBaseBet();
         yield return new WaitForSeconds(time);
 
         NextStage();
@@ -384,10 +386,8 @@ public class JackGameControl : MonoBehaviour
 
     public void UpdatePlayerBetScoreUI(int playerIndex, int splitNum)
     {
-        Debug.Log("UpdatePlayerBetScoreUI");
         string text = "";
         Tuple<int, int> score = Players.CalculatePlayerBetScore(playerIndex, splitNum);
-        Debug.Log("UpdatePlayerBetScoreUI Y");
 
         if (score.Item1 == -1 && score.Item2 == -1)
         {
@@ -398,35 +398,26 @@ public class JackGameControl : MonoBehaviour
             return;
         }
 
-        if(score.Item1 == 21 || score.Item2 == 21)
-        {
-            if(Players.GetPlayerCardLen(playerIndex, splitNum) == 2)
-            {
-                if(splitNum == 0 && StageCount >= 10)   // 스플릿을 통해 새로받은 카드 1장으로 21이 된 경우
-                {
-
-                }
-                else if(splitNum > 0)   // 스플릿을 통해 새로받은 카드 1장으로 21이 된 경우
-                {
-
-                }
-            }
-            else    // 히트나 더블 다운 등을 통해 21이 된 경우
-            {
-               
-            }
-        }
-
         text += score.Item1;
         if (score.Item2 != -1)
         {
             text += "/";
             text += score.Item2;
         }
-        Debug.Log("UpdatePlayerBetScoreText");
 
         _jackUI.UpdatePlayerBetScoreText(playerIndex + 1, text);
-        Debug.Log("UpdatePlayerBetScoreText Y");
+
+        if ((score.Item1 == 21 || score.Item2 == 21) && StageCount >= 10)    // 블랙잭이 아닌 21이 된 경우
+        {
+            /////////
+            /// UI 처리
+            /////////
+
+            if (Players.GetPlayerCardLen(playerIndex, splitNum) == 2)
+                splitAnd21 = true;
+            else
+                PlayerNormalBetEnd();
+        }
     }
 
     public void UpdatePlayerBetStatusUI(int playerIndex, string text)
@@ -591,7 +582,11 @@ public class JackGameControl : MonoBehaviour
     void PlayerEvenMoney()
     {
         MoneySetting(User.NowGamePlayer.BetMoney * 2);
+    }
 
+    void PlayerWin()
+    {
+        MoneySetting(User.NowGamePlayer.BetMoney * 2);
     }
 
     void PlayerInsurance()
@@ -656,16 +651,12 @@ public class JackGameControl : MonoBehaviour
         SyncSystem.Sync.JackGameEnd();
     }
 
-    void SplitedPlayerSet()
-    {
-
-    }
-
     public void PlayerNormalBetSetting(int playerIndex)
     {
         if (!IsPlaying) return;
 
         Bet.UpdateCurBetPlayer(playerIndex);
+        Card.CurTurnPlayerCardBigger(playerIndex, PlayerSplit);
 
         isNormalBetEnd = false;
         _jackUI.TimerSwitch(true);
@@ -683,6 +674,10 @@ public class JackGameControl : MonoBehaviour
             StopCoroutine(betTimer);
         }
         betTimer = StartCoroutine(NormalBetTimer(NORMAL_BETTING_TIME));
+
+        if (Bet.CurBetPlayer != User.NowGamePlayer.GameIndex) return;
+
+        _jackUI.NowPlayerBetSettingSwitch(true);
     }
 
     IEnumerator NormalBetTimer(float time)
@@ -716,15 +711,72 @@ public class JackGameControl : MonoBehaviour
         {
             isNormalBetEnd = true;
 
-            if (betTimer != null)
-            {
-                StopCoroutine(betTimer);
-            }
-            _jackUI.TimerSwitch(false);
-            _jackUI.NowPlayerBetSettingSwitch(false);
+            BetTimerStop();
+            Card.CurTurnPlayerCardOrigin(Bet.CurBetPlayer, PlayerSplit);
 
             NextStage(2);
         }
+    }
+
+    public void BetTimerStop()
+    {
+        if (betTimer != null)
+        {
+            StopCoroutine(betTimer);
+        }
+        _jackUI.TimerSwitch(false);
+        _jackUI.NowPlayerBetSettingSwitch(false);
+    }
+
+    void SplitedPlayerSet(int nowPlayer)
+    {
+        if (Players.GetPlayerCardLen(nowPlayer, PlayerSplit) >= 2)
+        {
+            StartCoroutine(SyncSystem.Sync.JackNormalBetting(nowPlayer));
+        }
+        else
+        {
+            StartCoroutine(GiveCardToSplit(nowPlayer, PlayerSplit));
+        }
+    }
+
+    public void PlayerSplitSetting(int playerIndex, int nowSplitNum)
+    {
+        StartCoroutine(SplitSetting(playerIndex, nowSplitNum));
+    }
+
+    IEnumerator SplitSetting(int playerIndex, int nowSplitNum)
+    {
+        BetTimerStop();
+
+        Players.PlayerSplitSetting(playerIndex, nowSplitNum);
+        yield return new WaitForSeconds(0.7f);
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            StartCoroutine(GiveCardToSplit(playerIndex, nowSplitNum));
+        }
+    }
+
+    IEnumerator GiveCardToSplit(int nowPlayer, int nowSplitNum)
+    {
+        StartCoroutine(Card.DealingCard(nowPlayer, nowSplitNum));
+        yield return new WaitForSeconds(0.7f);
+        SplitNormalProcess();
+    }
+
+    bool splitAnd21 = false;
+    void SplitNormalProcess()
+    {
+        if (splitAnd21 == false && PhotonNetwork.IsMasterClient == true)
+            ProcessStage();
+        else if (splitAnd21 == true)
+            NextStage(2);
+    }
+
+    public void ResetSplitAnd21()
+    {
+        splitAnd21 = false;
     }
 
     public void ClearGame()
@@ -740,6 +792,7 @@ public class JackGameControl : MonoBehaviour
 
         // 자신 게임 관련 초기화 (사실 베팅금만 초기화)
         User.NowGamePlayer.ClearSetting();
+        Bet.UpdateCurBetPlayer(-1);
 
         // 플레이어 카드 삭제
         Players.ClearGameSetting();

@@ -215,14 +215,13 @@ public class JackPlayerManager
 
         playerCardGO[playerIndex, splitNum].Add(cardGO);
         playerCardDetails[playerIndex, splitNum].Add(cardDetail);
-        Debug.Log($"PlayerIndex : {playerIndex}, Player CardIndex : {cardIndex}");
+        if (playerIndex == JackGameControl.Bet.CurBetPlayer)
+            JackGameControl.Card.CurTurnPlayerCardBigger(cardGO);
 
         UI_Card cardUI = cardGO.GetOrAddComponent<UI_Card>();
         cardUI.SetCardImage(cardDetail);
-        Debug.Log("c");
 
         JackGameControl.Control.UpdatePlayerBetScoreUI(playerIndex, splitNum);
-        Debug.Log("d");
 
         if (JackGameControl.Control.StageCount <= 10)
             JackGameControl.Control.NextStage(1);
@@ -310,6 +309,11 @@ public class JackPlayerManager
         return playerCardScore[playerIndex, splitNum];
     }
 
+    public GameObject GetPlayerCardGO(int playerIndex, int splitNum, int cardIndex)
+    {
+        return playerCardGO[playerIndex, splitNum][cardIndex];
+    }
+
     public void PlayerGameEndSetting(int playerIndex, int splitNum)
     {
         var score = GetPlayerCardScore(playerIndex, splitNum);
@@ -339,15 +343,25 @@ public class JackPlayerManager
 
     public bool IsPlayerCanSplit(int playerIndex)
     {
+        if (GetPlayerCardLen(playerIndex, JackGameControl.Control.PlayerSplit) != 2) 
+            return false;
+
+        int lastSplitCardSpaceLen = playerCardGO[playerIndex, JackGameControl.MAX_SPLIT_NUM - 1].Count;
+        if (lastSplitCardSpaceLen > 0)
+            return false;
+
         int card1 = playerCardDetails[playerIndex, JackGameControl.Control.PlayerSplit][0];
         int card2 = playerCardDetails[playerIndex, JackGameControl.Control.PlayerSplit][1];
 
-        if (card1 >= 10)
-            card1 = 10;
-        if (card2 >= 10)
-            card2 = 10;
+        int cardNum1 = JackGameControl.Card.GetCardNum(card1);
+        int cardNum2 = JackGameControl.Card.GetCardNum(card2);
 
-        return card1 == card2;
+        if (cardNum1 >= 10)
+            cardNum1 = 10;
+        if (cardNum2 >= 10)
+            cardNum2 = 10;
+
+        return cardNum1 == cardNum2;
     }
 
     public bool IsPlayerSplit(int playerIndex, int splitNum)
@@ -355,5 +369,41 @@ public class JackPlayerManager
         int len = playerCardGO[playerIndex, splitNum].Count;
 
         return len != 0;
+    }
+
+    public void PlayerSplitSetting(int playerIndex, int nowSplitNum)
+    {
+        int gotoSplitNum = nowSplitNum;
+        while (GetPlayerCardLen(playerIndex, gotoSplitNum) != 0)
+            gotoSplitNum++;
+
+        GameObject cardGO = playerCardGO[playerIndex, nowSplitNum][1];
+        playerCardGO[playerIndex, nowSplitNum].RemoveAt(1);
+        playerCardGO[playerIndex, gotoSplitNum].Add(cardGO);
+        JackGameControl.Card.CurTurnPlayerCardOrigin(cardGO);
+
+        int cardDetail = playerCardDetails[playerIndex, nowSplitNum][1];
+        playerCardDetails[playerIndex, nowSplitNum].RemoveAt(1);
+        playerCardDetails[playerIndex, gotoSplitNum].Add(cardDetail);
+
+        int cardNum = JackGameControl.Card.GetCardNum(cardDetail);
+        if (cardNum >= 10) 
+            cardNum = 10;
+
+        if(cardNum == 1)
+        {
+            playerCardScore[playerIndex, nowSplitNum] = Tuple.Create(1, 11);
+        }
+        else
+        {
+            playerCardScore[playerIndex, nowSplitNum] = Tuple.Create(cardNum, -1);
+        }
+
+        if (cardGO.GetComponent<PhotonView>().IsMine)
+        {
+            JackGameControl.Card.SplittedCardMove(playerIndex, gotoSplitNum, cardGO);
+        }
+
+        playerIsGameEnd[playerIndex, gotoSplitNum] = false;
     }
 }

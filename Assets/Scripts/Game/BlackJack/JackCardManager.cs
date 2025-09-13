@@ -181,7 +181,7 @@ public class JackCardManager
     {
         cardBuffer.Clear();
 
-        for (int i = 0; i < FULL_CARD_DECK_LEN; i++)
+        for (int i = 0; i < cardDeck.Length; i++)
         {
             cardBuffer.Add(cardDeck[i]);
         }
@@ -349,7 +349,7 @@ public class JackCardManager
         cardGO.GetOrAddComponent<UI_Card>();
         cardGO.GetComponent<PhotonView>().OwnershipTransfer = OwnershipOption.Takeover;
 
-        if(pUID == MAKE_DEALER_CARD)
+        if (pUID == MAKE_DEALER_CARD)
         {
             int cardIndex = GetDealerCardLen();
             SyncSystem.Sync.SyncJackDealerCard(cardGO, cardIndex, popedCard);
@@ -384,6 +384,56 @@ public class JackCardManager
 
         cardGO.transform.DOMove(destPos, CARD_ANIMATION_TIME);
         cardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);
+    }
+
+    public void SplittedCardMove(int playerIndex, int splitNum, GameObject cardGO)
+    {
+        Vector3 destPos = GetPlayerCardPos(playerIndex, splitNum, 0);
+        cardGO.transform.DOMove(destPos, CARD_ANIMATION_TIME);
+        cardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);
+    }
+
+    public void CurTurnPlayerCardBigger(int playerIndex, int splitNum, int cardIndex = -1)
+    {
+        if(cardIndex != -1)
+        {
+            GameObject cardGO = JackGameControl.Players.GetPlayerCardGO(playerIndex, splitNum, cardIndex);
+            cardGO.transform.DOScale(Vector3.one * 1.3f, CARD_ANIMATION_TIME);
+            return;
+        }
+
+        for (int i = 0; i < JackGameControl.Players.GetPlayerCardLen(playerIndex, splitNum); i++)
+        {
+            GameObject cardGO = JackGameControl.Players.GetPlayerCardGO(playerIndex, splitNum, i);
+            cardGO.transform.DOScale(Vector3.one * 1.3f, CARD_ANIMATION_TIME);
+        }
+    }
+
+    public void CurTurnPlayerCardBigger(GameObject cardGO)
+    {
+        cardGO.transform.DOScale(Vector3.one * 1.3f, CARD_ANIMATION_TIME);
+    }
+
+
+    public void CurTurnPlayerCardOrigin(int playerIndex, int splitNum, int cardIndex = -1)
+    {
+        if (cardIndex != -1)
+        {
+            GameObject cardGO = JackGameControl.Players.GetPlayerCardGO(playerIndex, splitNum, cardIndex);
+            cardGO.transform.DOScale(Vector3.one, CARD_ANIMATION_TIME);
+            return;
+        }
+
+        for (int i = 0; i < JackGameControl.Players.GetPlayerCardLen(playerIndex, splitNum); i++)
+        {
+            GameObject cardGO = JackGameControl.Players.GetPlayerCardGO(playerIndex, splitNum, i);
+            cardGO.transform.DOScale(Vector3.one, CARD_ANIMATION_TIME);
+        }
+    }
+
+    public void CurTurnPlayerCardOrigin(GameObject cardGO)
+    {
+        cardGO.transform.DOScale(Vector3.one, CARD_ANIMATION_TIME);
     }
 
     public void CardScaleBigger(GameObject cardGO)
