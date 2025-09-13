@@ -95,8 +95,8 @@ public class DBManager
                 }
 
                 // 게임 초대 관련 DB에 콜백함수 연결
-                inviteRef = dbRef.Child("Users").Child(User.NowUser.GetUid()).Child("invitations");
-                inviteRef.ChildAdded += HandleInviteAdded;  // 해결해야될 점...
+                inviteRef = dbRef.Child("Users").Child(User.NowUser.GetUid()).Child("invitation");
+                inviteRef.ValueChanged += HandleInviteAdded;
             });
     }
 
@@ -674,14 +674,13 @@ public class DBManager
 
         string myNickName = User.NowUser.GetNickName();
 
-
         // 초대 신청 데이터 포맷
         var inviteData = new Dictionary<string, object>
         {
             {"from", myNickName},
             {"roomID", Managers.Photon.currentRoomName},
             {"gameType", Define.GameType.Texas.ToString()},    // 임시 게임 종류
-            { "createdAt", now},
+            {"createdAt", now},
             {"expiresAt", expiresAt}
         };
 
@@ -690,7 +689,7 @@ public class DBManager
         {
             if (status == Define.Status.Online)
             {
-                DatabaseReference targetInvRef = dbRef.Child("Users").Child(targetUID).Child("invitations").Child("invitation");
+                DatabaseReference targetInvRef = dbRef.Child("Users").Child(targetUID).Child("invitation");
                 var snapshotTask = targetInvRef.GetValueAsync();
 
                 snapshotTask.ContinueWithOnMainThread(snapshotTaskResult =>
@@ -744,7 +743,7 @@ public class DBManager
         });
     }
 
-    private void HandleInviteAdded(object sender, ChildChangedEventArgs args)
+    private void HandleInviteAdded(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
         {
@@ -779,11 +778,33 @@ public class DBManager
             {
                 Debug.Log("새로운 초대 도착!");
                 // 게임 초대 팝업 띄우기
-                UI_GameInvitePopup invitePopup = Managers.UI.ShowPopupUI<UI_GameInvitePopup>();
+                GameObject inviteGO = Managers.UI.ShowPopupUI<UI_GameInvitePopup>().gameObject;
+                UI_GameInvitePopup invitePopup = inviteGO.GetOrAddComponent<UI_GameInvitePopup>();
+                invitePopup.Init();
                 invitePopup.SetRoomID(roomID);
                 invitePopup.SetSenderNickName(senderName);
                 invitePopup.SetGameType(gameType);
-                // 해결해야될 점...
+            }
+        });
+    }
+
+    /* 
+        받은 초대 삭제하는 함수
+    */
+    public void RemoveInvitation()
+    {
+        string myUID = User.NowUser.GetUid();
+
+        // invitation 밑의 모든 자식 삭제
+        dbRef.Child("Users").Child(myUID).Child("invitation").SetValueAsync(null).ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted)
+            {
+                Debug.Log("invitation 전체 삭제 성공");
+            }
+            else if (task.IsFaulted)
+            {
+                Debug.LogError("invitation 전체 삭제 실패");
             }
         });
     }

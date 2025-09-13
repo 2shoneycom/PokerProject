@@ -1,13 +1,14 @@
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using WebSocketSharp.Server;
 
 public class Managers : MonoBehaviour
 {
     static Managers m_instance;
-    static Managers Instance { get { Init(); return m_instance; } }
+    static public Managers Instance { get { Init(); return m_instance; } }
 
     ResourceManager _resource = new ResourceManager();
     SceneManagerEx _scene = new SceneManagerEx();
@@ -30,7 +31,7 @@ public class Managers : MonoBehaviour
     public static AuthManager Auth { get { return Instance._auth; } }
     public static RewardManager Reward { get { return Instance._reward; } }
     public static PhotonManager Photon { get { return Instance._photon; } }
-    public static WebManager Web { get { return Instance._web;  }}
+    public static WebManager Web { get { return Instance._web; } }
     public static NickNameManager NickName { get { return Instance._nickname; } }
 
 
@@ -52,7 +53,12 @@ public class Managers : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
+    }
+
+    void OnDestroy()
+    {
+        Scene.OnDestroy();
     }
 
     static void Init()
@@ -70,6 +76,7 @@ public class Managers : MonoBehaviour
             m_instance = go.GetComponent<Managers>();
 
             DB.Init();
+            Scene.Init();
         }
     }
 

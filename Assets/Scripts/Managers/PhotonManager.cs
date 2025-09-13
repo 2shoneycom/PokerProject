@@ -136,6 +136,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsConnected)
         {
+            Debug.Log("초대받은 방의 아이디: " + roomName);
+            _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
             PhotonNetwork.JoinRoom(roomName);
         }
         else
@@ -199,13 +201,15 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
 
     public override void OnJoinedRoom()
-    {   // 룸 참가에 성공한 경우
-        _loadingUI.SetConnectionInfoText("Success to Enter Room");
+    {
+        // 룸 참가에 성공한 경우
+        PhotonNetwork.IsMessageQueueRunning = false;
+        _loadingUI.SetConnectionInfoText("Success to Enter Room"); // 이거 초대 받은 사람은 에러 뜸 loading UI가 없어서
+
         // 모든 룸 참가자가 GameRoom 씬을 로드하게함
         Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
         Managers.DB.SetUserStatus(Define.Status.Playing);   // 로비씬 -> 홀덤씬 (status: playing)
                                                             // 씬메니저로 로드하면 연결 정보가 사라짐.
-
 
         currentRoomName = PhotonNetwork.CurrentRoom.Name;
 
