@@ -37,8 +37,9 @@ public class Define
 
     public enum GameType
     {
-        Texas,
+        None,
+        Holdem,
         Seven,
-        Blackjack,
+        Black,
     }
 }

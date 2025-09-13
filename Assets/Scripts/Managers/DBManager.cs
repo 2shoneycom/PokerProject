@@ -679,7 +679,7 @@ public class DBManager
         {
             {"from", myNickName},
             {"roomID", Managers.Photon.currentRoomName},
-            {"gameType", Define.GameType.Texas.ToString()},    // 임시 게임 종류
+            {"gameType", Managers.Photon.GetGameType().ToString()},
             {"createdAt", now},
             {"expiresAt", expiresAt}
         };
