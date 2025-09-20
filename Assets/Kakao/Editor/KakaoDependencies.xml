@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dependencies>
+	<androidPackages>
+		<androidPackage spec="com.kakao.sdk:v2-user:2.21.4"/>
+	</androidPackages>
+</dependencies>
