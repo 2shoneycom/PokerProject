@@ -901,6 +901,31 @@ class SyncSystem : MonoBehaviourPun
         JackGameControl.Control.ResetSplitAnd21();
     }
 
+    public IEnumerator SyncJackDecideWinner(int playerIndex, int splitNum)
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncJackDecideWinner", RpcTarget.All, playerIndex, splitNum);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackDecideWinner(int playerIndex, int splitNum)
+    {
+        JackGameControl.Control.PlayerWinOrLose(playerIndex, splitNum);
+    }
+
+    public IEnumerator JackBeforeProcess()
+    {
+        yield return null;
+        photonView.RPC("RPC_JackBeforeProcess", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackBeforeProcess()
+    {
+        JackGameControl.Control.BeforeProcess();
+    }
+
+
     #endregion
 
     #region JackCardManager
@@ -950,6 +975,18 @@ class SyncSystem : MonoBehaviourPun
     {
         JackGameControl.Card.SetDealerCard(viewID, index, cardDetail);
     }
+
+    public void JackPlayerCardOrigin(int playerIndex, int splitNum)
+    {
+        photonView.RPC("RPC_JackPlayerCardOrigin", RpcTarget.All, playerIndex, splitNum);
+    }
+
+    [PunRPC]
+    private void RPC_JackPlayerCardOrigin(int playerIndex, int splitNum)
+    {
+        JackGameControl.Card.CurTurnPlayerCardOrigin(playerIndex, splitNum);
+    }
+
 
     #endregion
 

@@ -172,7 +172,10 @@ public class JackPlayerManager
 
         Debug.Log("UpdatePlayerIsGameEnd multi call?");
         if (PhotonNetwork.IsMasterClient)
-            JackGameControl.Control.DetectGameEndAllPass();
+        {
+            if (JackGameControl.Control.DetectGameEndAllPass())
+                SyncSystem.Sync.JackGameEnd();
+        }
     }
 
     public bool GetPlayerIsGameEnd(int playerIndex, int splitNum)
@@ -330,11 +333,11 @@ public class JackPlayerManager
 
                 if(isBlackJack)
                 {
-                    if (card.GetComponent<PhotonView>().IsMine)
-                        JackGameControl.Card.CardScaleBigger(cardGO);
+                    JackGameControl.Card.CardScaleBigger(cardGO);
                 }
                 else
                 {
+                    JackGameControl.Card.CurTurnPlayerCardOrigin(cardGO);
                     card.UIBlockSwitch(true);
                 }
             }
@@ -386,6 +389,13 @@ public class JackPlayerManager
         playerCardDetails[playerIndex, nowSplitNum].RemoveAt(1);
         playerCardDetails[playerIndex, gotoSplitNum].Add(cardDetail);
 
+        if(playerIndex == User.NowGamePlayer.GameIndex)
+        {
+            // 돈도 초기 배팅 금액만큼 검
+            int baseBet = User.NowGamePlayer.GetBlackJackBaseBet();
+            JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, gotoSplitNum, baseBet);
+        }
+
         int cardNum = JackGameControl.Card.GetCardNum(cardDetail);
         if (cardNum >= 10) 
             cardNum = 10;
@@ -393,10 +403,12 @@ public class JackPlayerManager
         if(cardNum == 1)
         {
             playerCardScore[playerIndex, nowSplitNum] = Tuple.Create(1, 11);
+            playerCardScore[playerIndex, gotoSplitNum] = Tuple.Create(1, 11);
         }
         else
         {
             playerCardScore[playerIndex, nowSplitNum] = Tuple.Create(cardNum, -1);
+            playerCardScore[playerIndex, gotoSplitNum] = Tuple.Create(cardNum, -1);
         }
 
         if (cardGO.GetComponent<PhotonView>().IsMine)

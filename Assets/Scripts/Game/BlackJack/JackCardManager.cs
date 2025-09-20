@@ -43,10 +43,13 @@ public class JackCardManager
 
     bool isInited = false;
     bool isShuffled = false;
+    bool isBurst = false;
     int curPlayerSplitNum = -1;
 
     public void Init()
     {
+        isBurst = false;
+
         if (isInited)
             return;
 
@@ -108,7 +111,7 @@ public class JackCardManager
 
     private void SetupDealerCardPos()
     {
-        for(int i = 0; i < DEALER_CARD_NUM; i++)
+        for (int i = 0; i < DEALER_CARD_NUM; i++)
         {
             dealerCardList[i] = null;
             if (i == 0)
@@ -163,7 +166,7 @@ public class JackCardManager
         int nowCard = cardBuffer[0];
         cardBuffer.RemoveAt(0);
 
-        if(cardBuffer.Count == 0)
+        if (cardBuffer.Count == 0)
         {
             ShuffleCard();
             JackGameControl.Control.RequestDeckShuffle();
@@ -254,13 +257,25 @@ public class JackCardManager
 
         dealerCardList[index] = cardGO;
         dealerCardDetail[index] = cardDetail;
-        card.SetCardImage(cardDetail);
-        CalculateDealerCardScore();
 
-        JackGameControl.Control.NextStage();
+        if(index != 1)
+            card.SetCardImage(cardDetail);
+        CalculateDealerCardScore(cardDetail);
+
+        if (JackGameControl.Control.StageCount < 10)
+            JackGameControl.Control.NextStage();
+        else
+            JackGameControl.Control.NextStage(1);
     }
 
-    void CalculateDealerCardScore()
+    public void SetDealerCardOpen()
+    {
+        UI_Card card = dealerCardList[1].GetOrAddComponent<UI_Card>();
+        int cardDetail = dealerCardDetail[1];
+        card.SetCardImage(cardDetail);
+    }
+
+    void CalculateDealerCardScore(int cardDetail)
     {
         int[] score = new int[22];
         if (dealerCardScore.Item1 == -1)
@@ -275,17 +290,7 @@ public class JackCardManager
                 score[dealerCardScore.Item2] = 1;
         }
 
-        int i = -1;
-
-        for (int ii = 0; ii < dealerCardList.Length; ii++)
-        {
-            if (dealerCardList[ii] == null)
-                break;
-
-            i = ii;
-        }
-
-        int cardscore = GetCardNum(dealerCardDetail[i]);
+        int cardscore = GetCardNum(cardDetail);
         if (cardscore >= 10)
             cardscore = 10;
 
@@ -325,9 +330,43 @@ public class JackCardManager
         }
 
         dealerCardScore = Tuple.Create(a, b);
+        Debug.Log($"딜러의 카드 점수 : {dealerCardScore.Item1} / {dealerCardScore.Item2}");
+        if(JackGameControl.Control.StageCount > 10)
+        {
+            if (dealerCardScore.Item1 == -1 && dealerCardScore.Item2 == -1)
+            {
+                isBurst = true;
+                _jackUI.UpdateDealerStatusText("Bust...");
+
+                foreach (GameObject cardGO in dealerCardList)
+                {
+                    if (cardGO != null)
+                    {
+                        UI_Card card = cardGO.GetOrAddComponent<UI_Card>();
+                        card.UIBlockSwitch(true);
+                    }
+                }
+                return;
+            }
+
+            string text = "";
+
+            text += dealerCardScore.Item1.ToString();
+            if (dealerCardScore.Item2 != -1)
+            {
+                text += "/";
+                text += dealerCardScore.Item2.ToString();
+            }
+            _jackUI.UpdateDealerStatusText(text);
+        }
     }
 
-    public Tuple<int,int> GetDealerCardScore()
+    public bool GetDealerIsBurst()
+    {
+        return isBurst;
+    }
+
+    public Tuple<int, int> GetDealerCardScore()
     {
         return dealerCardScore;
     }
@@ -395,7 +434,7 @@ public class JackCardManager
 
     public void CurTurnPlayerCardBigger(int playerIndex, int splitNum, int cardIndex = -1)
     {
-        if(cardIndex != -1)
+        if (cardIndex != -1)
         {
             GameObject cardGO = JackGameControl.Players.GetPlayerCardGO(playerIndex, splitNum, cardIndex);
             cardGO.transform.DOScale(Vector3.one * 1.3f, CARD_ANIMATION_TIME);
@@ -458,7 +497,7 @@ public class JackCardManager
 
     public int GetDealerCardLen()
     {
-        for(int i = 0; i < dealerCardList.Length; i++)
+        for (int i = 0; i < dealerCardList.Length; i++)
         {
             if (dealerCardList[i] == null)
                 return i;
