@@ -6,11 +6,11 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-
 public class LoginScene : BaseScene
 {
     private static LoginScene instance;
-    public static LoginScene Instance {  get { return instance; } }
+    public static LoginScene Instance { get { return instance; } }
+
     protected override void Init()
     {
         base.Init();
@@ -24,15 +24,21 @@ public class LoginScene : BaseScene
         Debug.Log("Login Scene Clear");
     }
 
+    // 구글 로그인 요청 (기존)
     public void RequestLogin()
     {
         if (Managers.Login != null)
-        {
             Managers.Login.LogIn();
-        }
         else
-        {
             Debug.LogError("LoginManager가 초기화되지 않았습니다.");
-        }
+    }
+
+    // 카카오 로그인 요청 (신규)
+    public void RequestKakaoLogin()
+    {
+        if (Managers.Login != null)
+            Managers.Login.LogInWithKakao();
+        else
+            Debug.LogError("LoginManager가 초기화되지 않았습니다.");
     }
 }

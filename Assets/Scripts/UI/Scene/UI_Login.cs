@@ -25,7 +25,7 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
     }
 
     Button _lobbyButton = null;
-    public Button LobbyButton {  get { return _lobbyButton; } }
+    public Button LobbyButton { get { return _lobbyButton; } }
 
     public override void Init()
     {
@@ -33,16 +33,22 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
         Bind<Button>(typeof(Buttons));
         Bind<TextMeshProUGUI>(typeof(Texts));
 
-        TextMeshProUGUI tmp = GetText((int)Texts.UI_GoogleLoginButton_Text);
-        tmp.text = "구글 로그인";
+        GetText((int)Texts.UI_GoogleLoginButton_Text).text = "구글 로그인";
+        GetText((int)Texts.UI_KakaoLoginButton_Text).text = "카카오 로그인";
 
         SetConnectionInfoText("로그인 해주세요!");
 
+        // 구글 버튼
         _lobbyButton = GetButton((int)Buttons.UI_GoogleLoginButton);
-        BindEvent(_lobbyButton.gameObject, OnButtonClicked);
+        BindEvent(_lobbyButton.gameObject, OnGoogleButtonClicked);
 
+        // 카카오 버튼
+        BindEvent(GetButton((int)Buttons.UI_KakaoLoginButton).gameObject, OnKakaoButtonClicked);
+
+        // 재접속 버튼
         GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(false);
         BindEvent(GetButton((int)Buttons.UI_ReconnectButton).gameObject, ReconnectButtonClicked);
+
         Managers.Login.LoginSceneLoaded(this);
         Managers.Auth.LoginSceneLoaded(this);
     }
@@ -55,24 +61,34 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
     public void ButtonInteractive(bool on)
     {
         _lobbyButton.interactable = on;
+        GetButton((int)Buttons.UI_KakaoLoginButton).interactable = on;
     }
 
-    public void OnButtonClicked(PointerEventData data)
+    private void OnGoogleButtonClicked(PointerEventData data)
     {
         if (!_lobbyButton.interactable)
             return;
 
         DisableAllButton();
-        //Managers.Photon.ConnectToPhoton(this);
-        LoginScene.Instance.RequestLogin();
+        LoginScene.Instance.RequestLogin();       // 기존 구글 플로우
+    }
+
+    private void OnKakaoButtonClicked(PointerEventData data)
+    {
+        DisableAllButton();
+        LoginScene.Instance.RequestKakaoLogin();  // 새 카카오 플로우
+    }
+
+    public void ShowLoginButtons()
+    {
+        GetButton((int)Buttons.UI_GoogleLoginButton).gameObject.SetActive(true);
+        GetButton((int)Buttons.UI_KakaoLoginButton).gameObject.SetActive(true);
     }
 
     void DisableAllButton()
     {
         for (int i = 0; i < Enum.GetValues(typeof(Buttons)).Length; i++)
-        {
             GetButton(i).gameObject.SetActive(false);
-        }
     }
 
     public void ShowReconnectButton()

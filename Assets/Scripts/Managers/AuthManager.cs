@@ -70,6 +70,24 @@ public class AuthManager
         });
     }
 
+    public void SignInWithFirebaseCustomToken(string customToken, UI_Login uiLogin)
+    {
+        auth.SignInWithCustomTokenAsync(customToken).ContinueWithOnMainThread(authTask =>
+        {
+            if (authTask.IsCanceled || authTask.IsFaulted)
+            {
+                Debug.LogError($"Firebase CustomToken Auth failed: {authTask.Exception}");
+                uiLogin?.SetConnectionInfoText("Firebase 커스텀 인증 실패");
+                return;
+            }
+
+            Debug.Log("Firebase custom auth success (Kakao)");
+            uiLogin?.SetConnectionInfoText("카카오 로그인 성공!");
+
+            // 이후 흐름은 AuthStateChanged에서 동일하게 처리됨
+        });
+    }
+
     public void SignOutFirebase()
     {
         auth?.SignOut();
