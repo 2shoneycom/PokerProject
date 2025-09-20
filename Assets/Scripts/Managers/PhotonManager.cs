@@ -95,7 +95,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void CreateGame(int betMoney, Define.GameType gameType) 
+    public void CreateGame(int betMoney, Define.GameType gameType)
     {
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
         StartCoroutine(LoadingCreateGame(0.5f, betMoney, gameType));
@@ -151,7 +151,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                     { "betMoney", betMoney },
                     { "gameType", gameType.ToString() }
                 },
-                CustomRoomPropertiesForLobby = new string[] {"betMoney", "gameType"}
+                CustomRoomPropertiesForLobby = new string[] { "betMoney", "gameType" }
             };
             PhotonNetwork.CreateRoom(roomName, roomOptions);
         }
@@ -177,7 +177,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         StartCoroutine(LoadingJoinGame(0.5f, betMoney, gameType));
     }
 
-        // roomID로 해당 방 들어가는 함수
+    // roomID로 해당 방 들어가는 함수
     public void JoinRoomByName(string roomName)
     {
         if (PhotonNetwork.IsConnected)
@@ -268,8 +268,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        Debug.LogError($"OnJoinRoomFailed: {returnCode}, {message}");
+        _loadingUI.SetConnectionInfoText($"JoinRoom Failed: {message}");
+    }
+
     public override void OnJoinedRoom()
-    {   
+    {
         // 룸 참가에 성공한 경우
         PhotonNetwork.IsMessageQueueRunning = false;
         Debug.Log("Success to Enter Room");
@@ -277,6 +283,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         // 방의 gameType 가져오기
         Define.GameType gameType = Define.GameType.Holdem; // 기본값
+        currentGameType = gameType;
 
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("gameType"))
         {
