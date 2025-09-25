@@ -15,7 +15,7 @@ public class JackCardManager
 
     public const int DEALER_CARD_NUM = 5;
     const float CARD_X_OFFSET = 50f;
-    const float CARD_Y_OFFSET = 200f;
+    const float CARD_Y_OFFSET = 150f;
 
     const string MAKE_DEALER_CARD = "MAKEDEALERCARD";
     const string CARD_PREFAB_PATH = "UI/SubItem/UI_Card";
@@ -49,6 +49,7 @@ public class JackCardManager
     public void Init()
     {
         isBurst = false;
+        dealerCardScore = Tuple.Create(-1, -1);
 
         if (isInited)
             return;
@@ -71,7 +72,6 @@ public class JackCardManager
         dealerCardPos = new Vector3[DEALER_CARD_NUM];
         dealerCardList = new GameObject[DEALER_CARD_NUM];
         dealerCardDetail = new int[DEALER_CARD_NUM];
-        dealerCardScore = Tuple.Create(-1, -1);
         SetupDealerCardPos();
 
         cardBuffer = new List<int>(FULL_CARD_DECK_LEN);
@@ -330,7 +330,7 @@ public class JackCardManager
         }
 
         dealerCardScore = Tuple.Create(a, b);
-        Debug.Log($"딜러의 카드 점수 : {dealerCardScore.Item1} / {dealerCardScore.Item2}");
+
         if(JackGameControl.Control.StageCount > 10)
         {
             if (dealerCardScore.Item1 == -1 && dealerCardScore.Item2 == -1)
@@ -343,22 +343,26 @@ public class JackCardManager
                     if (cardGO != null)
                     {
                         UI_Card card = cardGO.GetOrAddComponent<UI_Card>();
-                        card.UIBlockSwitch(true);
+                        card.UILoseBlockSwitch(true);
                     }
                 }
                 return;
             }
-
-            string text = "";
-
-            text += dealerCardScore.Item1.ToString();
-            if (dealerCardScore.Item2 != -1)
-            {
-                text += "/";
-                text += dealerCardScore.Item2.ToString();
-            }
-            _jackUI.UpdateDealerStatusText(text);
+            UpdateDealerScoreText();
         }
+    }
+
+    public void UpdateDealerScoreText()
+    {
+        string text = "";
+
+        text += dealerCardScore.Item1.ToString();
+        if (dealerCardScore.Item2 != -1)
+        {
+            text += "/";
+            text += dealerCardScore.Item2.ToString();
+        }
+        _jackUI.UpdateDealerStatusText(text);
     }
 
     public bool GetDealerIsBurst()
@@ -452,7 +456,6 @@ public class JackCardManager
     {
         cardGO.transform.DOScale(Vector3.one * 1.3f, CARD_ANIMATION_TIME);
     }
-
 
     public void CurTurnPlayerCardOrigin(int playerIndex, int splitNum, int cardIndex = -1)
     {

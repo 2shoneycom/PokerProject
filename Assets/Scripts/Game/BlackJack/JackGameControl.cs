@@ -248,7 +248,7 @@ public class JackGameControl : MonoBehaviour
                         break;
                     }
 
-                    if (Players.GetPlayerIsGameEnd(nowPlayer, PlayerSplit))
+                    if (Players.GetPlayerIsGameEnd(nowPlayer, PlayerSplit) != -1)
                     {
                         StartCoroutine(SyncSystem.Sync.JackNextStage(2));
                         break;
@@ -302,7 +302,7 @@ public class JackGameControl : MonoBehaviour
                         break;
                     }
 
-                    if (Players.GetPlayerIsGameEnd(nowPlayer, PlayerSplit))
+                    if (Players.GetPlayerIsGameEnd(nowPlayer, PlayerSplit) != -1)
                     {
                         StartCoroutine(SyncSystem.Sync.JackNextStage(2));
                         break;
@@ -586,6 +586,7 @@ public class JackGameControl : MonoBehaviour
             return;
 
         Card.SetDealerCardOpen();
+        Card.UpdateDealerScoreText();
 
         NextStage();
     }
@@ -736,7 +737,12 @@ public class JackGameControl : MonoBehaviour
         /// UI 처리
         /////////
 
-        SyncSystem.Sync.SyncJackIsGameEnd(playerIndex, splitNum, true);
+        int isWinOrLose = 0;
+        if (amount == 0) isWinOrLose = 0;
+        else if (amount == User.NowGamePlayer.GetBlackJackBaseBet()) isWinOrLose = 1;
+        else isWinOrLose = 2;
+
+        SyncSystem.Sync.SyncJackIsGameEnd(playerIndex, splitNum, isWinOrLose);
     }
 
     public bool DetectGameEndAllPass()
@@ -747,7 +753,7 @@ public class JackGameControl : MonoBehaviour
 
             for (int j = 0; j < MAX_SPLIT_NUM; j++)
             {
-                if (Players.GetPlayerIsGameEnd(i, j) == false)
+                if (Players.GetPlayerIsGameEnd(i, j) == -1)
                     return false;
             }
         }

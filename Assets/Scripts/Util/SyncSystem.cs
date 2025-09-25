@@ -1036,13 +1036,13 @@ class SyncSystem : MonoBehaviourPun
         JackGameControl.Players.UpdatePlayerIsBet(index, val);
     }
 
-    public void SyncJackIsGameEnd(int playerIndex, int splitNum, bool val)
+    public void SyncJackIsGameEnd(int playerIndex, int splitNum, int val)
     {
         photonView.RPC("RPC_SyncJackIsGameEnd", RpcTarget.All, playerIndex, splitNum, val);
     }
 
     [PunRPC]
-    private void RPC_SyncJackIsGameEnd(int playerIndex, int splitNum, bool val)
+    private void RPC_SyncJackIsGameEnd(int playerIndex, int splitNum, int val)
     {
         JackGameControl.Players.UpdatePlayerIsGameEnd(playerIndex, splitNum, val);
     }

@@ -355,7 +355,7 @@ public class UI_BlackJack : UI_Scene
         StartCoroutine(JackGameControl.Card.DealingCard(curPlayerIndex, curPlayerSplit));
         yield return new WaitForSeconds(1f);
 
-        if (JackGameControl.Players.GetPlayerIsGameEnd(curPlayerIndex, curPlayerSplit) == false)
+        if (JackGameControl.Players.GetPlayerIsGameEnd(curPlayerIndex, curPlayerSplit) == -1)
         {
             var score = JackGameControl.Players.GetPlayerCardScore(curPlayerIndex, curPlayerSplit);
             if (score.Item1 == 21 || score.Item2 == 21)

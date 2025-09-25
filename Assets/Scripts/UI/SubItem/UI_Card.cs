@@ -14,7 +14,8 @@ public class UI_Card : UI_Base
     enum GameObjects
     {
         UI_Card,
-        UI_Block,
+        UI_LoseBlock,
+        UI_PushBlock,
     }
 
     bool isInit = false;
@@ -26,7 +27,8 @@ public class UI_Card : UI_Base
             Bind<Image>(typeof(Images));
             Bind<GameObject>(typeof(GameObjects));
 
-            UIBlockSwitch(false);
+            UILoseBlockSwitch(false);
+            UIPushBlockSwitch(false);
             isInit = true;
         }
     }
@@ -45,8 +47,13 @@ public class UI_Card : UI_Base
         Debug.Log("b");
     }
 
-    public void UIBlockSwitch(bool isOn)
+    public void UILoseBlockSwitch(bool isOn)
     {
-        GetGameObject((int)GameObjects.UI_Block).SetActive(isOn);
+        GetGameObject((int)GameObjects.UI_LoseBlock).SetActive(isOn);
+    }
+
+    public void UIPushBlockSwitch(bool isOn)
+    {
+        GetGameObject((int)GameObjects.UI_PushBlock).SetActive(isOn);
     }
 }

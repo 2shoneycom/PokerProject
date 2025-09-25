@@ -14,7 +14,7 @@ public class JackPlayerManager
     int[] playerSeedMoney;
     int[,] playerBettingMoney;
     bool[] playerIsBet;
-    bool[,] playerIsGameEnd;
+    int[,] playerIsGameEnd;
     int[] playerIsInsurance;
 
     List<GameObject>[,] playerCardGO;        ///////////////////// 스플릿 생각
@@ -29,7 +29,7 @@ public class JackPlayerManager
         playerSeedMoney = new int[JackGameControl.MAX_PLAYER_NUM];
         playerBettingMoney = new int[JackGameControl.MAX_PLAYER_NUM, JackGameControl.MAX_SPLIT_NUM];
         playerIsBet = new bool[JackGameControl.MAX_PLAYER_NUM];
-        playerIsGameEnd = new bool[JackGameControl.MAX_PLAYER_NUM, JackGameControl.MAX_SPLIT_NUM];
+        playerIsGameEnd = new int[JackGameControl.MAX_PLAYER_NUM, JackGameControl.MAX_SPLIT_NUM];
         playerIsInsurance = new int[JackGameControl.MAX_PLAYER_NUM];
 
         playerCardGO = new List<GameObject>[JackGameControl.MAX_PLAYER_NUM, JackGameControl.MAX_SPLIT_NUM];
@@ -60,9 +60,9 @@ public class JackPlayerManager
                 playerBettingMoney[i, j] = 0;
 
                 if (j == 0)
-                    playerIsGameEnd[i, j] = false;
+                    playerIsGameEnd[i, j] = -1;
                 else
-                    playerIsGameEnd[i, j] = true;
+                    playerIsGameEnd[i, j] = 0;
 
                 playerCardGO[i, j].Clear();
                 playerCardDetails[i, j].Clear();
@@ -163,11 +163,11 @@ public class JackPlayerManager
         return playerIsInsurance[index];
     }
 
-    public void UpdatePlayerIsGameEnd(int playerIndex, int splitNum, bool value)
+    public void UpdatePlayerIsGameEnd(int playerIndex, int splitNum, int value)
     {
         playerIsGameEnd[playerIndex, splitNum] = value;
 
-        if (value == true)
+        if (value != -1)
             PlayerGameEndSetting(playerIndex, splitNum);
 
         Debug.Log("UpdatePlayerIsGameEnd multi call?");
@@ -178,7 +178,7 @@ public class JackPlayerManager
         }
     }
 
-    public bool GetPlayerIsGameEnd(int playerIndex, int splitNum)
+    public int GetPlayerIsGameEnd(int playerIndex, int splitNum)
     {
         return playerIsGameEnd[playerIndex, splitNum];
     }
@@ -219,7 +219,10 @@ public class JackPlayerManager
         playerCardGO[playerIndex, splitNum].Add(cardGO);
         playerCardDetails[playerIndex, splitNum].Add(cardDetail);
         if (playerIndex == JackGameControl.Bet.CurBetPlayer)
-            JackGameControl.Card.CurTurnPlayerCardBigger(cardGO);
+        {
+            if (splitNum == 0 || playerCardGO[playerIndex, splitNum].Count != 2)
+                JackGameControl.Card.CurTurnPlayerCardBigger(cardGO);
+        }
 
         UI_Card cardUI = cardGO.GetOrAddComponent<UI_Card>();
         cardUI.SetCardImage(cardDetail);
@@ -250,6 +253,9 @@ public class JackPlayerManager
         int cardscore = JackGameControl.Card.GetCardNum(playerCardDetails[playerIndex, splitNum][i]);
         if (cardscore >= 10)
             cardscore = 10;
+
+        Debug.Log($"PlayerIndex : {playerIndex} , SplitNum : {splitNum} / Now Card Len : {i + 1} / Now Card Num {cardscore}");
+        Debug.Log($"Before {playerCardScore[playerIndex, splitNum].Item1} / {playerCardScore[playerIndex, splitNum].Item2}");
 
         int[] tmp = new int[22];
         for (int j = 0; j < 22; j++)
@@ -287,6 +293,7 @@ public class JackPlayerManager
         }
 
         playerCardScore[playerIndex, splitNum] = Tuple.Create(a, b);
+        Debug.Log($"After {playerCardScore[playerIndex, splitNum].Item1} / {playerCardScore[playerIndex, splitNum].Item2}");
 
         return playerCardScore[playerIndex, splitNum];
     }
@@ -325,20 +332,34 @@ public class JackPlayerManager
         int cardLen = GetPlayerCardLen(playerIndex, splitNum);
         if (cardLen > 2) isBlackJack = false;
 
+        if (playerCardGO[playerIndex, 1].Count > 0) isBlackJack = false;
+
         foreach (GameObject cardGO in playerCardGO[playerIndex, splitNum]) 
         {
             if (cardGO != null)
             {
                 UI_Card card = cardGO.GetOrAddComponent<UI_Card>();
+                int isWinOrLose = playerIsGameEnd[playerIndex, splitNum];
+                JackGameControl.Card.CurTurnPlayerCardOrigin(cardGO);
 
-                if(isBlackJack)
+                if (isBlackJack)
                 {
+                    // 블랙잭이라면 일반 색에 커짐
                     JackGameControl.Card.CardScaleBigger(cardGO);
+                }
+                else if(isWinOrLose == 2)
+                {
+                    // 돈을 기본 베팅보다 땃다면 일반 색에 일반 크기
+                }
+                else if (isWinOrLose == 1)
+                {
+                    // 본전만 찾았다면 약간 회색
+                    card.UIPushBlockSwitch(true);
                 }
                 else
                 {
-                    JackGameControl.Card.CurTurnPlayerCardOrigin(cardGO);
-                    card.UIBlockSwitch(true);
+                    // 본전도 잃었으면 회색
+                    card.UILoseBlockSwitch(true);
                 }
             }
         }
@@ -416,6 +437,6 @@ public class JackPlayerManager
             JackGameControl.Card.SplittedCardMove(playerIndex, gotoSplitNum, cardGO);
         }
 
-        playerIsGameEnd[playerIndex, gotoSplitNum] = false;
+        playerIsGameEnd[playerIndex, gotoSplitNum] = -1;
     }
 }

@@ -36,9 +36,6 @@ public class User
 
     public void SetHoldemPlay()
     {
-        //SetUid(Random.Range(100000, 1000000).ToString());
-        //SetNickName(Random.Range(10000, 100000).ToString());
-        //SetSeedMoney(100000);
         gamemPlayer = new GamePlayer();
         Managers.CurrentGameType = Define.GameType.Holdem;
     }
@@ -74,7 +71,7 @@ public class User
                 PokerSyncSeedMoney();
                 break;
             case Define.GameType.BlackJack:
-                Managers.DB.DBUpdateMoney(uid, -amount, "black");
+                Managers.DB.DBUpdateMoney(uid, -amount, "blackjack");
                 JackSyncSeedMoney();
                 break;
         }
@@ -99,7 +96,7 @@ public class User
                 PokerSyncSeedMoney();
                 break;
             case Define.GameType.BlackJack:
-                Managers.DB.DBUpdateMoney(uid, amount, "black");
+                Managers.DB.DBUpdateMoney(uid, amount, "blackjack");
                 JackSyncSeedMoney();
                 break;
         }
@@ -130,7 +127,7 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
-        Managers.DB.DBUpdateMoney(uid, -amount, "seven");
+        Managers.DB.DBUpdateMoney(uid, -amount, "poker");
         NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
         PokerSyncSeedMoney();
     }
