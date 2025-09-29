@@ -18,7 +18,7 @@ public class GamePlayer
                 case Define.GameType.Poker:
                     return PokerGameControl.Control.ConvertUItoGame(seatedIndex);
                 case Define.GameType.BlackJack:
-                    //return 0;
+                    return seatedIndex;
                 default:
                     return 0;
             }
@@ -26,6 +26,7 @@ public class GamePlayer
     }
 
     int betMoney;
+    int blackJackBaseBetAmount = 0;
     public int BetMoney { get { return betMoney; } }
 
     public GamePlayer()
@@ -51,5 +52,16 @@ public class GamePlayer
     public void ClearSetting()
     {
         betMoney = 0;
+        blackJackBaseBetAmount = 0;
+    }
+
+    public void SetBlackJackBaseBet()
+    {
+        blackJackBaseBetAmount = betMoney;
+    }
+
+    public int GetBlackJackBaseBet()
+    {
+        return blackJackBaseBetAmount;
     }
 }

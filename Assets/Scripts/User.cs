@@ -36,9 +36,6 @@ public class User
 
     public void SetHoldemPlay()
     {
-        //SetUid(Random.Range(100000, 1000000).ToString());
-        //SetNickName(Random.Range(10000, 100000).ToString());
-        //SetSeedMoney(100000);
         gamemPlayer = new GamePlayer();
         Managers.CurrentGameType = Define.GameType.Holdem;
     }
@@ -47,6 +44,12 @@ public class User
     {
         gamemPlayer = new GamePlayer();
         Managers.CurrentGameType = Define.GameType.Poker;
+    }
+
+    public void SetJackPlay()
+    {
+        gamemPlayer = new GamePlayer();
+        Managers.CurrentGameType = Define.GameType.BlackJack;
     }
 
     public void DecreaseMoney(string targetUID, int amount)
@@ -68,6 +71,8 @@ public class User
                 PokerSyncSeedMoney();
                 break;
             case Define.GameType.BlackJack:
+                Managers.DB.DBUpdateMoney(uid, -amount, "blackjack");
+                JackSyncSeedMoney();
                 break;
         }
     }
@@ -91,6 +96,8 @@ public class User
                 PokerSyncSeedMoney();
                 break;
             case Define.GameType.BlackJack:
+                Managers.DB.DBUpdateMoney(uid, amount, "blackjack");
+                JackSyncSeedMoney();
                 break;
         }
     }
@@ -120,7 +127,7 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
-        Managers.DB.DBUpdateMoney(uid, -amount, "seven");
+        Managers.DB.DBUpdateMoney(uid, -amount, "poker");
         NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
         PokerSyncSeedMoney();
     }
@@ -130,4 +137,33 @@ public class User
         if (PokerGameControl.Control.IsPlaying)
             SyncSystem.Sync.SyncPokerPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
     }
+
+    public void JackBettingMoney(string targetUID, int amount)
+    {
+        if (targetUID != uid)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney -= amount;
+        Managers.DB.DBUpdateMoney(uid, -amount, "blackjack");
+        NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
+        JackSyncSeedMoney();
+    }
+
+    public void JackResetBetting()
+    {
+        int betAmount = NowGamePlayer.BetMoney;
+
+        seedMoney += betAmount;
+        Managers.DB.DBUpdateMoney(uid, betAmount, "blackjack");
+        NowGamePlayer.SetBetMoney(0);
+        JackSyncSeedMoney();
+    }
+
+    public void JackSyncSeedMoney()
+    {
+        if (JackGameControl.Control.IsPlaying)
+            SyncSystem.Sync.SyncJackPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
+    }
+
 }

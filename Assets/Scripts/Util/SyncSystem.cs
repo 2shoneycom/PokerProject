@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Google.MiniJSON;
 using Photon.Pun;
 using Photon.Realtime;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -77,6 +79,17 @@ class SyncSystem : MonoBehaviourPun
     private void RPC_PokerBetMoneyToTarget(string uid, int amount)
     {
         User.NowUser.PokerBettingMoney(uid, amount);
+    }
+
+    public void JackBetMoneyToTarget(string uid, int amount)
+    {
+        photonView.RPC("RPC_JackBetMoneyToTarget", RpcTarget.All, uid, amount);
+    }
+
+    [PunRPC]
+    private void RPC_JackBetMoneyToTarget(string uid, int amount)
+    {
+        User.NowUser.JackBettingMoney(uid, amount);
     }
 
 
@@ -692,6 +705,390 @@ class SyncSystem : MonoBehaviourPun
 
 
     #endregion
+
+    //////////////////////////////////////////////////////
+
+    #region JackGameControl
+
+    public void JackStartSync()
+    {
+        photonView.RPC("RPC_JackStartSync", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackStartSync()
+    {
+        JackGameControl.Control.StartGame();
+    }
+
+    public IEnumerator SyncJackPlayerUID()
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncJackPlayerUID", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackPlayerUID()
+    {
+        Managers.Seat.JackConvertToPlayers();
+    }
+
+    public IEnumerator SyncJackFirstPlayerIndex(int index)
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncJackFirstPlayerIndex", RpcTarget.All, index);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackFirstPlayerIndex(int index)
+    {
+        JackGameControl.Control.SetFirstPlayer(index);
+    }
+
+    public IEnumerator StartFirstBetting()
+    {
+        yield return null;
+        photonView.RPC("RPC_StartFirstBetting", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_StartFirstBetting()
+    {
+        JackGameControl.Control.StartFirstBet();
+    }
+
+    public void FirstBettingAllPass()
+    {
+        photonView.RPC("RPC_FirstBettingAllPass", RpcTarget.All);
+
+    }
+
+    [PunRPC]
+    private void RPC_FirstBettingAllPass()
+    {
+        JackGameControl.Control.FirstBetAllPass();
+    }
+
+    public IEnumerator JackNextStage(int state = 0)      // 1은 스테이지 세부 사항 카운트 증가
+    {
+        yield return null;
+        photonView.RPC("RPC_JackNextStage", RpcTarget.All, state);
+    }
+
+    public void JackNextStage_V2(int state = 0)
+    {
+        photonView.RPC("RPC_JackNextStage", RpcTarget.All, state);
+    }
+
+    [PunRPC]
+    private void RPC_JackNextStage(int state = 0)
+    {
+        JackGameControl.Control.NextStage(state);
+    }
+
+    public IEnumerator JackNoticeBlackJack()
+    {
+        yield return null;
+        photonView.RPC("RPC_JackNoticeBlackJack", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackNoticeBlackJack()
+    {
+        JackGameControl.Players.FindPlayerBlackJack();
+    }
+
+    public IEnumerator JackIsDealerIsA()
+    {
+        yield return null;
+        photonView.RPC("RPC_JackIsDealerIsA", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackIsDealerIsA()
+    {
+        JackGameControl.Control.JudgeDealerIsAOrAbove10();
+    }
+
+    public void JackInsuranceAllPass()
+    {
+        photonView.RPC("RPC_JackInsuranceAllPass", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackInsuranceAllPass()
+    {
+        JackGameControl.Control.InsuranceAllPass();
+    }
+
+    public void JackGameEnd()
+    {
+        photonView.RPC("RPC_JackGameEnd", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackGameEnd()
+    {
+        JackGameControl.Control.ClearGame();
+    }
+
+    public IEnumerator JackNormalBetting(int playerIndex)
+    {
+        yield return new WaitForSeconds(1f);
+        photonView.RPC("RPC_JackNormalBetting", RpcTarget.All, playerIndex);
+    }
+
+    [PunRPC]
+    private void RPC_JackNormalBetting(int playerIndex)
+    {
+        JackGameControl.Control.PlayerNormalBetSetting(playerIndex);
+    }
+
+    public IEnumerator JackBlackJackPlayerWin(int playerIndex)
+    {
+        yield return null;
+        photonView.RPC("RPC_JackBlackJackPlayerWin", RpcTarget.All, playerIndex);
+    }
+
+    [PunRPC]
+    private void RPC_JackBlackJackPlayerWin(int playerIndex)
+    {
+        JackGameControl.Control.BlackJackPlayerWin(playerIndex);
+    }
+
+    public void JackNormalBetEnd()
+    {
+        photonView.RPC("RPC_JackNormalBetEnd", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackNormalBetEnd()
+    {
+        JackGameControl.Control.PlayerNormalBetEnd();
+    }
+
+    public void JackRestartBetTimer()
+    {
+        photonView.RPC("RPC_JackRestartBetTimer", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackRestartBetTimer()
+    {
+        JackGameControl.Control.RestartBetTimer();
+    }
+
+    public void JackStopBetTimer()
+    {
+        photonView.RPC("RPC_JackStopBetTimer", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackStopBetTimer()
+    {
+        JackGameControl.Control.BetTimerStop();
+    }
+
+    public IEnumerator SyncJacksplitAnd21()
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncJacksplitAnd21", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJacksplitAnd21()
+    {
+        JackGameControl.Control.ResetSplitAnd21();
+    }
+
+    public IEnumerator SyncJackDecideWinner(int playerIndex, int splitNum)
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncJackDecideWinner", RpcTarget.All, playerIndex, splitNum);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackDecideWinner(int playerIndex, int splitNum)
+    {
+        JackGameControl.Control.PlayerWinOrLose(playerIndex, splitNum);
+    }
+
+    public IEnumerator JackBeforeProcess()
+    {
+        yield return null;
+        photonView.RPC("RPC_JackBeforeProcess", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackBeforeProcess()
+    {
+        JackGameControl.Control.BeforeProcess();
+    }
+
+
+    #endregion
+
+    #region JackCardManager
+
+    public IEnumerator SyncJackDeck()
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncJackDeck", RpcTarget.All, JackGameControl.Card.GetCardDeck());
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackDeck(int[] cardDeck)
+    {
+        JackGameControl.Card.SetCardDeck(cardDeck);
+    }
+
+    public void JackAddCard(string toPlayer, int splitNum)
+    {
+        photonView.RPC("RPC_JackAddCard", RpcTarget.All, toPlayer, splitNum);
+    }
+
+    [PunRPC]
+    private void RPC_JackAddCard(string toPlayer, int splitNum)
+    {
+        JackGameControl.Card.AddCardToPlayerStarter(toPlayer, splitNum);
+    }
+
+    public void JackDealerCard()
+    {
+        photonView.RPC("RPC_JackDealerCard", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_JackDealerCard()
+    {
+        JackGameControl.Card.AddCardToDealerStarter();
+    }
+
+    public void SyncJackDealerCard(GameObject cardGO, int index, int cardDetail)
+    {
+        int cardViewID = cardGO.GetComponent<PhotonView>().ViewID;
+        photonView.RPC("RPC_SyncJackDealerCard", RpcTarget.All, cardViewID, index, cardDetail);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackDealerCard(int viewID, int index, int cardDetail)
+    {
+        JackGameControl.Card.SetDealerCard(viewID, index, cardDetail);
+    }
+
+    public void JackPlayerCardOrigin(int playerIndex, int splitNum)
+    {
+        photonView.RPC("RPC_JackPlayerCardOrigin", RpcTarget.All, playerIndex, splitNum);
+    }
+
+    [PunRPC]
+    private void RPC_JackPlayerCardOrigin(int playerIndex, int splitNum)
+    {
+        JackGameControl.Card.CurTurnPlayerCardOrigin(playerIndex, splitNum);
+    }
+
+
+    #endregion
+
+    #region JackPlayerManager
+
+    public void SyncJackPlayerSeedMoney(int index, int amount)
+    {
+        photonView.RPC("RPC_SyncJackPlayerSeedMoney", RpcTarget.All, index, amount);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackPlayerSeedMoney(int index, int amount)
+    {
+        JackGameControl.Players.UpdatePlayerSeedMoney(index, amount);
+    }
+
+    public void SyncJackMyBetting(int playerIndex, int splitNum, int amount)
+    {
+        photonView.RPC("RPC_SyncJackMyBetting", RpcTarget.All, playerIndex, splitNum, amount);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackMyBetting(int playerIndex, int splitNum, int amount)
+    {
+        JackGameControl.Players.UpdatePlayerBetting(playerIndex, splitNum, amount);
+    }
+
+    public void SyncJackMyBettingReset(int playerIndex, int splitNum)
+    {
+        photonView.RPC("RPC_SyncJackMyBettingReset", RpcTarget.All, playerIndex, splitNum);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackMyBettingReset(int playerIndex, int splitNum)
+    {
+        JackGameControl.Players.UpdatePlayerBetReset(playerIndex, splitNum);
+    }
+
+    public void SyncJackIsBet(int index, bool val)
+    {
+        photonView.RPC("RPC_SyncJackIsBet", RpcTarget.All, index, val);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackIsBet(int index, bool val)
+    {
+        JackGameControl.Players.UpdatePlayerIsBet(index, val);
+    }
+
+    public void SyncJackIsGameEnd(int playerIndex, int splitNum, int val)
+    {
+        photonView.RPC("RPC_SyncJackIsGameEnd", RpcTarget.All, playerIndex, splitNum, val);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackIsGameEnd(int playerIndex, int splitNum, int val)
+    {
+        JackGameControl.Players.UpdatePlayerIsGameEnd(playerIndex, splitNum, val);
+    }
+
+    public void SyncJackPlayerCard(string pUID, GameObject cardGO, int cardDetail)
+    {
+        int cardViewID = cardGO.GetComponent<PhotonView>().ViewID;
+        photonView.RPC("RPC_SyncJackPlayerCard", RpcTarget.All, pUID, cardViewID, cardDetail);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackPlayerCard(string pUID, int cardViewID, int cardDetail)
+    {
+        JackGameControl.Card.SetPlayerCard(pUID, cardViewID, cardDetail);
+    }
+
+    public void SyncJackIsInsurance(int index, int val)
+    {
+        photonView.RPC("RPC_SyncJackIsInsurance", RpcTarget.All, index, val);
+    }
+
+    [PunRPC]
+    private void RPC_SyncJackIsInsurance(int index, int val)
+    {
+        JackGameControl.Players.UpdatePlayerIsInsurance(index, val);
+    }
+
+    public void JackPlayerSplitSetting(int playerIndex, int nowSplitNum)
+    {
+        photonView.RPC("RPC_JackPlayerSplitSetting", RpcTarget.All, playerIndex, nowSplitNum);
+    }
+
+    [PunRPC]
+    private void RPC_JackPlayerSplitSetting(int playerIndex, int nowSplitNum)
+    {
+        JackGameControl.Control.PlayerSplitSetting(playerIndex, nowSplitNum);
+    }
+
+
+    #endregion
+
+    #region JackBetManager
+
+
+    #endregion
+
 
     //////////////////////////////////////////////////////
 

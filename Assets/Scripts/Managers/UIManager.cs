@@ -73,7 +73,7 @@ public class UIManager      // Canvas의 sort order을 관리하기위해
         GameObject go = Managers.Resource.Instantiate($"UI/Scene/{name}");
         T sceneUI = go.GetOrAddComponent<T>();
         _sceneUI = sceneUI;
-
+        if (_sceneUI == null) Debug.Log("NULL");
         go.transform.SetParent(Root.transform);
 
         return sceneUI;

@@ -14,7 +14,6 @@ public class LoginScene : BaseScene
     protected override void Init()
     {
         base.Init();
-        instance = this;
         SceneType = Define.Scene.Login;
         Managers.UI.ShowSceneUI<UI_Login>();
     }

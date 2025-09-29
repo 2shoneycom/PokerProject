@@ -48,7 +48,6 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
         // 재접속 버튼
         GetButton((int)Buttons.UI_ReconnectButton).gameObject.SetActive(false);
         BindEvent(GetButton((int)Buttons.UI_ReconnectButton).gameObject, ReconnectButtonClicked);
-
         Managers.Login.LoginSceneLoaded(this);
         Managers.Auth.LoginSceneLoaded(this);
     }
@@ -69,20 +68,29 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
         if (!_lobbyButton.interactable)
             return;
 
-        DisableAllButton();
+        SwitchAllButton(false);
         LoginScene.Instance.RequestLogin();       // 기존 구글 플로우
     }
 
     private void OnKakaoButtonClicked(PointerEventData data)
     {
         DisableAllButton();
-        LoginScene.Instance.RequestKakaoLogin();  // 새 카카오 플로우
+        LoginScene loginScene = (LoginScene)Managers.Scene.CurrentScene;
+        loginScene.RequestKakaoLogin();  // 새 카카오 플로우
     }
 
     public void ShowLoginButtons()
     {
         GetButton((int)Buttons.UI_GoogleLoginButton).gameObject.SetActive(true);
         GetButton((int)Buttons.UI_KakaoLoginButton).gameObject.SetActive(true);
+    }
+
+    public void SwitchAllButton(bool isOn)
+    {
+        for (int i = 0; i < Enum.GetValues(typeof(Buttons)).Length; i++)
+        {
+            GetButton(i).gameObject.SetActive(false);
+        }
     }
 
     void DisableAllButton()
@@ -98,7 +106,7 @@ public class UI_Login : UI_Scene        // Lobby씬의 SceneUI
 
     void ReconnectButtonClicked(PointerEventData data)
     {
-        DisableAllButton();
+        SwitchAllButton(false);
         Managers.Photon.Reconnect();
     }
 }

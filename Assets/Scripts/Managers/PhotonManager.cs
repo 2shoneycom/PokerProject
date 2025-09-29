@@ -183,6 +183,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         StartCoroutine(Loading(0.5f));
     }
 
+    public void JoinJack()
+    {
+        _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
+        StartCoroutine(Loading(0.5f));
+    }
+
     IEnumerator Loading(float sec)
     {
         yield return new WaitForSeconds(sec);
@@ -314,10 +320,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
                 break;
             case Define.GameType.Seven:
-                //Managers.Scene.PhotonLoadScene(Define.Scene.Seven);
+                Managers.Scene.PhotonLoadScene(Define.Scene.Seven);
                 break;
-            case Define.GameType.Black:
-                //Managers.Scene.PhotonLoadScene(Define.Scene.Black);
+            case Define.GameType.BlackJack:
+                Managers.Scene.PhotonLoadScene(Define.Scene.BlackJack);
                 break;
             default:
                 Debug.LogError($"Unknown gameType: {gameType}");

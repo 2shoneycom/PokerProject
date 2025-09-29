@@ -105,6 +105,8 @@ public class PokerGameControl : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("Start2");
+
         _pokerUI = (UI_Poker)Managers.UI.SceneUI;
     }
 
