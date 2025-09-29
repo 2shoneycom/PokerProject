@@ -38,6 +38,7 @@ public class UI_Lobby : UI_Scene
     }
 
     UI_Popup _popup = null;
+    LobbyScene _scene = null;
 
     public override void Init()
     {
@@ -63,12 +64,14 @@ public class UI_Lobby : UI_Scene
         BindEvent(GetImage((int)Images.UI_IconGift).gameObject, GiftClicked);
         //BindEvent(GetButton((int)Buttons.UI_ButtonBlackJack).gameObject, LoginManager.Instance.LogOut);
         BindEvent(GetImage((int)Images.UI_IconWeb).gameObject, WebClicked);
+
+        _scene = (LobbyScene)Managers.Scene.CurrentScene;
     }
 
     void HoldemClicked(PointerEventData data)
     {
         PopupSetting(true);
-
+        Managers.CurrentGameType = Define.GameType.Holdem;
         _popup = Managers.UI.ShowPopupUI<UI_HoldemPopup>();
 
         GetText((int)Texts.UI_LobbyTitleText).text = "텍사스 홀덤";
@@ -77,7 +80,7 @@ public class UI_Lobby : UI_Scene
     void PokerClicked(PointerEventData data)
     {
         PopupSetting(true);
-
+        Managers.CurrentGameType = Define.GameType.Poker;
         _popup = Managers.UI.ShowPopupUI<UI_PokerPopup>();
 
         GetText((int)Texts.UI_LobbyTitleText).text = "세븐 포커";
@@ -86,7 +89,7 @@ public class UI_Lobby : UI_Scene
     void JackClicked(PointerEventData data)
     {
         PopupSetting(true);
-
+        Managers.CurrentGameType = Define.GameType.BlackJack;
         _popup = Managers.UI.ShowPopupUI<UI_JackPopup>();
 
         GetText((int)Texts.UI_LobbyTitleText).text = "블랙잭";

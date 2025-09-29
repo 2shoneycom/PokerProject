@@ -34,6 +34,12 @@ public class Managers : MonoBehaviour
     public static WebManager Web { get { return Instance._web; } }
     public static NickNameManager NickName { get { return Instance._nickname; } }
 
+    Define.GameType gameType = Define.GameType.None;
+    public static Define.GameType CurrentGameType
+    {
+        get { return m_instance.gameType; }
+        set { m_instance.gameType = value; }
+    }
 
     Define.Difficulty difficulty = Define.Difficulty.None;
     public static Define.Difficulty CurrentDifficulty
@@ -42,6 +48,40 @@ public class Managers : MonoBehaviour
         set { m_instance.difficulty = value; }
     }
 
+    public static bool IsNowPlayingGame
+    {
+        get {
+            switch (CurrentGameType)
+            {
+                case Define.GameType.Holdem:
+                    return HoldemGameControl.Control.IsPlaying;
+                case Define.GameType.Poker:
+                    return PokerGameControl.Control.IsPlaying;
+                case Define.GameType.BlackJack:
+                    //return BlackJackGameControl.Control.IsPlaying;
+                default:
+                    return false;
+            }
+        }
+    }
+
+    public static int GetCurGameMaxPlayer
+    {
+        get
+        {
+            switch (CurrentGameType)
+            {
+                case Define.GameType.Holdem:
+                    return HoldemGameControl.MAX_PLAYER_NUM;
+                case Define.GameType.Poker:
+                    return PokerGameControl.MAX_PLAYER_NUM;
+                case Define.GameType.BlackJack:
+                //return BlackJackGameControl.Control.IsPlaying;
+                default:
+                    return 0;
+            }
+        }
+    }
 
     // Start is called before the first frame update
     void Start()

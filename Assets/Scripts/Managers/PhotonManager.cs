@@ -174,6 +174,22 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public void JoinGame(int betMoney, Define.GameType gameType)
     {
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
+        StartCoroutine(Loading(0.5f));
+    }
+
+    public void JoinPoker()
+    {
+        _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
+        StartCoroutine(Loading(0.5f));
+    }
+
+    IEnumerator Loading(float sec)
+    {
+        yield return new WaitForSeconds(sec);
+        JoinRoom();
+    }
+
+    void JoinRoom()
         StartCoroutine(LoadingJoinGame(0.5f, betMoney, gameType));
     }
 
@@ -525,4 +541,56 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             Debug.LogWarning("나간 사람의 CustomProperties에 uid가 없습니다.");
         }
     }
+    
+    
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        if(PhotonNetwork.IsMasterClient)                            // Room 입장과 Scene 입장은 별개이므로 N초의 로딩 시간 적용
+            HoldemGameControl.Control.PlayerEnterHoldemRoom(1f, newPlayer);
+    }
+
+    /*
+    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)       // 일반 클라이언트 나간 경우
+    {
+        foreach (var view in PhotonNetwork.PhotonViewCollection)
+        {
+            // if(view.Owner == otherPlayer) 라고 하는 경우 소유권이 나가자마자 이전되서 항상 false가 됨.
+            if (view.CreatorActorNr == otherPlayer.ActorNumber)     // 현재 오브젝트의 창조자가 나간 클라이언트인 경우
+            {
+                view.TransferOwnership(PhotonNetwork.MasterClient);     // 굳이 할 필요가 있을까???
+
+                Player leavePlayer = view.gameObject.GetComponent<Player>();
+                if (leavePlayer != null)
+                {
+                    PlayerManager.Inst.leavePlayerList.Add(leavePlayer.pIdx);
+
+                    if (TurnManager.Inst.isNowGameStarted)  // 현재 게임중일때
+                    {
+                        if (leavePlayer.isActive)           // 살아있다면
+                        {
+                            if (leavePlayer.myTurn) PlayerManager.Inst.BetProcess("Die");       // 현재 나간 플레이어 턴인 경우
+                            else leavePlayer.getOutReserve = true;                             // 다른 플레이어 턴인 경우
+                        }
+                    }
+                    else
+                    {                                       // 게임 시작 안했을땐 바로 나가는 처리
+                        PlayerManager.Inst.LeavePlayerProcess();
+                    }
+                }
+            }
+        }
+    }
+
+
+    public override void OnMasterClientSwitched(Photon.Realtime.Player newMaster)   // 마스터 클라이언트 나간 경우
+    {
+        foreach (PhotonView view in PhotonNetwork.PhotonViewCollection)
+        {
+            if (view.IsMine)  // 이전 마스터가 소유한 오브젝트라면
+            {
+                view.TransferOwnership(newMaster);
+            }
+        }
+    }
+     */
 }

@@ -40,6 +40,14 @@ public class UI_Holdem : UI_Scene
         UI_Player5_BetText,
         UI_Player6_BetText,
         UI_Player7_BetText,
+        UI_Player1_SeedMoneyText,
+        UI_Player2_SeedMoneyText,
+        UI_Player3_SeedMoneyText,
+        UI_Player4_SeedMoneyText,
+        UI_Player5_SeedMoneyText,
+        UI_Player6_SeedMoneyText,
+        UI_Player7_SeedMoneyText,
+        UI_TimerText,
     }
 
     enum Images
@@ -59,6 +67,7 @@ public class UI_Holdem : UI_Scene
         UI_Backspace,
         UI_IconFriend,
         UI_TmpWinnerShow,
+        UI_Timer,
         UI_Player1_Panel,
         UI_Player2_Panel,
         UI_Player3_Panel,
@@ -73,6 +82,7 @@ public class UI_Holdem : UI_Scene
         UI_Player5_Bet,
         UI_Player6_Bet,
         UI_Player7_Bet,
+        UI_Block,
     }
 
     bool isRoomOpened = false;
@@ -94,6 +104,7 @@ public class UI_Holdem : UI_Scene
         BetButtonBind();
         UISwitch(false);
         BetUISwitch(false);
+        TimerSwitch(false);
 
         GetGameObject((int)GameObjects.UI_TmpWinnerShow).SetActive(false);
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
@@ -101,6 +112,16 @@ public class UI_Holdem : UI_Scene
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);
 
         SetRoomButton(isRoomOpened);
+
+        StartCoroutine(LoadingScreenSwitch(false, 2f));
+    }
+
+    IEnumerator LoadingScreenSwitch(bool isOn, float time)
+    {
+        // Debug.Log("코루틴 시작");  // 로그 찍기
+        yield return new WaitForSeconds(time);
+        //Debug.Log("2초 후");
+        GetGameObject((int)GameObjects.UI_Block).SetActive(isOn);
     }
 
     void SettingUIIconPos()
@@ -220,6 +241,25 @@ public class UI_Holdem : UI_Scene
         }
     }
 
+    public void UpdateSeedMoney()
+    {
+        for (int i = 1; i <= 7; i++)
+        {
+            int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = HoldemGameControl.Players.GetPlayerSeedMoney(gameIndex).ToString();
+        }
+    }
+
+    public void TimerSwitch(bool isOn)
+    {
+        GetGameObject((int)GameObjects.UI_Timer).SetActive(isOn);
+    }
+
+    public void SetTimerText(float time)
+    {
+        GetText((int)Texts.UI_TimerText).text = time.ToString("F1");    //time.Tostring("F1")는 소숫점 첫째자리까지만 표기
+    }
+
     void SeatBind()
     {
         for (int i = 0; i < 7; i++)
@@ -237,6 +277,7 @@ public class UI_Holdem : UI_Scene
     {
         if (!isRoomOpened)
         {
+            DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
             ColorUtility.TryParseHtmlString("#FF0000", out Color targetColor);
             GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
 
@@ -245,6 +286,7 @@ public class UI_Holdem : UI_Scene
         }
         else
         {
+            DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
             ColorUtility.TryParseHtmlString("#CFBFBF", out Color targetColor);
             GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
 
@@ -283,14 +325,14 @@ public class UI_Holdem : UI_Scene
 
     void RequestBet(string betType)
     {
-        if (HoldemGameControl.Players.GetPlayerTurn(User.NowHoldemPlayer.GameIndex) == false)
+        if (HoldemGameControl.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
         {
             if (betType == "Die")       // 자신의 턴이 아니면 die만 켜져있어서 die만 누를테지만 혹시 모르니
             {
-                if (HoldemGameControl.Players.GetPlayerDieReserve(User.NowHoldemPlayer.GameIndex) == false)
-                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowHoldemPlayer.GameIndex, true);
+                if (HoldemGameControl.Players.GetPlayerDieReserve(User.NowGamePlayer.GameIndex) == false)
+                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, true);
                 else
-                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowHoldemPlayer.GameIndex, false);
+                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, false);
             }
             return;     // 자신의 턴이 아닐때 die가 아니면 모두 리턴
         }
@@ -357,7 +399,7 @@ public class UI_Holdem : UI_Scene
 
     private void LeaveRoomClicked(PointerEventData data)
     {
-        HoldemScene holdemScene = new HoldemScene();
+        HoldemScene holdemScene = (HoldemScene)Managers.Scene.CurrentScene;
         holdemScene.RequestLeaveRoom();
     }
 }

@@ -5,7 +5,7 @@ using Photon.Pun;
 using Unity.VisualScripting;
 
 
-public class HoldemScene : BaseScene
+public class HoldemScene : GameScene
 {
     const int MAX_PLAYER = 7;
 
@@ -36,7 +36,7 @@ public class HoldemScene : BaseScene
         Managers.Seat.Init(MAX_PLAYER);
     }
 
-    public void UpdateSeatUI(int index, string nickname)
+    public override void UpdateSeatUI(int index, string nickname)
     {
         _holdemUI.UpdatePlayerName(index + 1, nickname);
 
@@ -44,12 +44,12 @@ public class HoldemScene : BaseScene
             _holdemUI.UpdatePlayerIcon(index + 1, nickname);
     }
 
-    public void UpdateBetUI(bool isOn)
+    public override void UpdateBetUI(bool isOn)
     {
         _holdemUI.BetUISwitch(isOn);
     }
 
-    public void ReadyForGameStart()
+    public override void ReadyForGameStart()
     {
         _holdemUI.GameStartButtonOn();
     }

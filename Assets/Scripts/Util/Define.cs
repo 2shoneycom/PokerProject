@@ -12,6 +12,7 @@ public class Define
         Lobby,
         Friend,
         PlayerInfo,
+        Poker,
     }
 
     public enum UIEvent

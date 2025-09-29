@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Google.MiniJSON;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEditor;
 using UnityEngine;
 
 class SyncSystem : MonoBehaviourPun
@@ -66,6 +67,18 @@ class SyncSystem : MonoBehaviourPun
     {
         User.NowUser.HoldemBettingMoney(uid, amount);
     }
+
+    public void PokerBetMoneyToTarget(string uid, int amount)
+    {
+        photonView.RPC("RPC_PokerBetMoneyToTarget", RpcTarget.All, uid, amount);
+    }
+
+    [PunRPC]
+    private void RPC_PokerBetMoneyToTarget(string uid, int amount)
+    {
+        User.NowUser.PokerBettingMoney(uid, amount);
+    }
+
 
     #endregion
 
@@ -209,7 +222,19 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemPlayerUID()
     {
-        Managers.Seat.ConverToPlayers();
+        Managers.Seat.HoldemConvertToPlayers();
+    }
+
+    public IEnumerator SyncHoldemDealerIndex(int index)
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncHoldemDealerIndex", RpcTarget.All, index);
+    }
+
+    [PunRPC]
+    private void RPC_SyncHoldemDealerIndex(int index)
+    {
+        HoldemGameControl.Control.SetDealer(index);
     }
 
     public IEnumerator SyncHoldemPotMoney(int money, bool isNextStage = false)
@@ -325,18 +350,6 @@ class SyncSystem : MonoBehaviourPun
         HoldemGameControl.Card.SetCardDeck(cardDeck);
     }
 
-    public IEnumerator SyncHoldemDealerIndex(int index)
-    {
-        yield return null;
-        photonView.RPC("RPC_SyncHoldemDealerIndex", RpcTarget.All, index);
-    }
-
-    [PunRPC]
-    private void RPC_SyncHoldemDealerIndex(int index)
-    {
-        HoldemGameControl.Control.SetDealer(index);
-    }
-
     public void HoldemAddCard(string toPlayer)
     {
         photonView.RPC("RPC_HoldemAddCard", RpcTarget.All, toPlayer);
@@ -372,6 +385,316 @@ class SyncSystem : MonoBehaviourPun
 
     #endregion
 
+    //////////////////////////////////////////////////////
+
+    #region PokerGameControl
+
+    public void PokerStartSync()
+    {
+        photonView.RPC("RPC_PokerStartSyncing", RpcTarget.All);
+    }
+    
+    [PunRPC]
+    private void RPC_PokerStartSyncing()
+    {
+        PokerGameControl.Control.StartGame();
+    }
+
+    public IEnumerator SyncPokerPlayerUID()
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncPokerPlayerUID", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerPlayerUID()
+    {
+        Managers.Seat.PokerConvertToPlayers();
+    }
+
+    public IEnumerator SyncPokerFirstPlayerIndex(int index)
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncPokerFirstPlayerIndex", RpcTarget.All, index);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerFirstPlayerIndex(int index)
+    {
+        PokerGameControl.Control.SetFirstPlayer(index);
+    }
+
+    public IEnumerator SyncPokerCurrentPlayer(int index)
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncPokerCurrentPlayer", RpcTarget.All, index);
+
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerCurrentPlayer(int index)
+    {
+        PokerGameControl.Control.SetCurrentPlayer(index);
+    }
+
+    public IEnumerator PokerNextStage(int state = 0)      // 1은 스테이지 세부 사항 카운트 증가
+    {
+        yield return null;
+        photonView.RPC("RPC_PokerNextStage", RpcTarget.All, state);
+    }
+
+    public void PokerNextStage_V2(int state = 0)
+    {
+        photonView.RPC("RPC_PokerNextStage", RpcTarget.All, state);
+    }
+
+    [PunRPC]
+    private void RPC_PokerNextStage(int state = 0)
+    {
+        PokerGameControl.Control.NextStage(state);
+    }
+
+    public IEnumerator PokerMakeCardSelPopup()
+    {
+        yield return null;
+        photonView.RPC("RPC_PokerMakeCardSelPopup", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_PokerMakeCardSelPopup()
+    {
+        PokerGameControl.Control.CardSelPopupOn();
+    }
+
+    public IEnumerator SyncPokerPotMoney(int money, int isNextStage = 0)
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncPokerPotMoney", RpcTarget.All, money, isNextStage);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerPotMoney(int money, int isNextStage = 0)
+    {
+        PokerGameControl.Control.PotMoney = money;
+
+        if (isNextStage == 0)
+        {
+            Debug.Log($"case {PokerGameControl.Control.StageCount} 종료, nextStage");
+            PokerGameControl.Control.NextStage();
+        }
+        else if (isNextStage == 1)
+        {
+            Debug.Log($"case {PokerGameControl.Control.StageCount} 종료, nextStage");
+            PokerGameControl.Control.NextStage(1);
+        }
+    }
+
+    public IEnumerator PokerAutoDieTimerSwitch(bool isOn)
+    {
+        yield return null;
+        photonView.RPC("RPC_PokerAutoDieTimerSwitch", RpcTarget.All, isOn);
+    }
+
+    [PunRPC]
+    private void RPC_PokerAutoDieTimerSwitch(bool isOn)
+    {
+        PokerGameControl.Control.AutoDieTimerSwitch(isOn);
+    }
+
+    public IEnumerator PokerClearGame()
+    {
+        yield return null;
+        photonView.RPC("RPC_PokerClearGame", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_PokerClearGame()
+    {
+        PokerGameControl.Control.ClearGame();
+    }
+
+    #endregion
+
+    #region PokerCardManager
+
+    public IEnumerator SyncPokerDeck()
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncPokerDeck", RpcTarget.All, PokerGameControl.Card.GetCardDeck());
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerDeck(int[] cardDeck)
+    {
+        PokerGameControl.Card.SetCardDeck(cardDeck);
+    }
+
+    public void PokerAddCard(string toPlayer)
+    {
+        photonView.RPC("RPC_PokerAddCard", RpcTarget.All, toPlayer);
+    }
+
+    [PunRPC]
+    private void RPC_PokerAddCard(string toPlayer)
+    {
+        PokerGameControl.Card.AddCardToPlayerStarter(toPlayer);
+    }
+
+
+    #endregion
+
+    #region PokerPlayerManager
+
+    public void SyncPokerMyBetting(int index, int amount)
+    {
+        photonView.RPC("RPC_SyncPokerMyBetting", RpcTarget.All, index, amount);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerMyBetting(int index, int amount)
+    {
+        PokerGameControl.Players.UpdatePlayerBetting(index, amount);
+    }
+
+    public void SyncPokerPlayerCard(string pUID, GameObject cardGO, int cardDetail, bool isOpenCard)
+    {
+        int cardViewID = cardGO.GetComponent<PhotonView>().ViewID;
+        photonView.RPC("RPC_SyncPokerPlayerCard", RpcTarget.All, pUID, cardViewID, cardDetail, isOpenCard);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerPlayerCard(string pUID, int cardViewID, int cardDetail, bool isOpenCard)
+    {
+        PokerGameControl.Players.SetPlayerCard(pUID, cardViewID, cardDetail, isOpenCard);
+    }
+
+    public void SyncPokerPlayerCardSel(int playerIndex, int delcardIndex, int opencardIndex)
+    {
+        photonView.RPC("RPC_SyncPokerPlayerCardSel", RpcTarget.All, playerIndex, delcardIndex, opencardIndex);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerPlayerCardSel(int playerIndex, int delcardIndex, int opencardIndex)
+    {
+        Debug.Log($"Player {playerIndex}, del : {delcardIndex}, open : {opencardIndex}");
+        PokerGameControl.Players.PlayerDelCardSel(playerIndex, delcardIndex);
+        PokerGameControl.Players.PlayerOpenCardSel(playerIndex, opencardIndex);
+    }
+
+    public IEnumerator PokerArrangeSelectedCard()
+    {
+        yield return null;
+        photonView.RPC("RPC_PokerArrangeSelectedCard", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_PokerArrangeSelectedCard()
+    {
+        PokerGameControl.Players.ArrangeSelectedCard();
+    }
+
+    public void SyncPokerIsTurn(int index, bool isOn)
+    {
+        photonView.RPC("RPC_SyncPokerIsTurn", RpcTarget.All, index, isOn);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerIsTurn(int index, bool isOn)
+    {
+        PokerGameControl.Players.UpdatePlayerTurn(index, isOn);
+    }
+
+    public void SyncPokerDieReserve(int index, bool isOn)
+    {
+        photonView.RPC("RPC_SyncPokerDieReserve", RpcTarget.All, index, isOn);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerDieReserve(int index, bool isOn)
+    {
+        PokerGameControl.Players.UpdatePlayerDieReserve(index, isOn);
+    }
+
+    public void SyncPokerIsOneLeft(bool isOn)
+    {
+        photonView.RPC("RPC_SyncPokerIsOneLeft", RpcTarget.All, isOn);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerIsOneLeft(bool isOn)
+    {
+        PokerGameControl.Players.IsOneLeft = isOn;
+    }
+
+    public void SyncPokerPlayerSeedMoney(int index, int amount)
+    {
+        photonView.RPC("RPC_SyncPokerPlayerSeedMoney", RpcTarget.All, index, amount);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerPlayerSeedMoney(int index, int amount)
+    {
+        PokerGameControl.Players.UpdatePlayerSeedMoney(index, amount);
+    }
+
+    public void SyncPokerWinnerList(string[] wList)
+    {
+        string json = Json.Serialize(wList);
+        photonView.RPC("RPC_SyncPokerWinnerList", RpcTarget.All, json);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerWinnerList(string json)
+    {
+        List<object> wListRaw = Json.Deserialize(json) as List<object>;
+        string[] wList = wListRaw.ConvertAll(obj => obj.ToString()).ToArray();
+        PokerGameControl.Players.SetWinnerList(wList);
+    }
+
+
+    #endregion
+
+    #region PokerBetManager
+
+    public IEnumerator PokerBetStart(int curplayer)
+    {
+        yield return null;
+        photonView.RPC("RPC_PokerBetStart", RpcTarget.All, curplayer);
+    }
+
+    [PunRPC]
+    private void RPC_PokerBetStart(int curplayer)
+    {
+        PokerGameControl.Bet.HandleBet(curplayer);
+    }
+
+    public void PokerBetProcess(int curPlayer, string betType, int betAmount = 0)
+    {
+        photonView.RPC("RPC_PokerBetProcess", RpcTarget.All, curPlayer, betType, betAmount);
+    }
+
+    [PunRPC]
+    public void RPC_PokerBetProcess(int curPlayer, string betType, int betAmount = 0)
+    {
+        PokerGameControl.Bet.BetProcess(curPlayer, betType, betAmount);
+    }
+
+    public void PokerBetEnd()
+    {
+        photonView.RPC("RPC_PokerBetEnd", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_PokerBetEnd()
+    {
+        PokerGameControl.Bet.CurrentStageBetEnd();
+    }
+
+
+    #endregion
+
+    //////////////////////////////////////////////////////
+
     #region SeatManager
 
     public void SyncSeatsToMaster()
@@ -405,6 +728,8 @@ class SyncSystem : MonoBehaviourPun
 
     #endregion
 
+
+
     public IEnumerator SyncHoldemResultUI()
     {
         yield return null;
@@ -416,4 +741,17 @@ class SyncSystem : MonoBehaviourPun
     {
         HoldemGameControl.Control.ShowResult();
     }
+
+    public IEnumerator SyncPokerResultUI()
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncPokerResultUI", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerResultUI()
+    {
+        PokerGameControl.Control.ShowResult();
+    }
+
 }

@@ -13,8 +13,8 @@ public class User
         }
     }
 
-    HoldemPlayer holdemPlayer;
-    public static HoldemPlayer NowHoldemPlayer { get { return NowUser.holdemPlayer; } }
+    GamePlayer gamemPlayer;
+    public static GamePlayer NowGamePlayer { get { return NowUser.gamemPlayer; } }
 
     private string uid;
     private string nickName;
@@ -39,7 +39,14 @@ public class User
         //SetUid(Random.Range(100000, 1000000).ToString());
         //SetNickName(Random.Range(10000, 100000).ToString());
         //SetSeedMoney(100000);
-        holdemPlayer = new HoldemPlayer();
+        gamemPlayer = new GamePlayer();
+        Managers.CurrentGameType = Define.GameType.Holdem;
+    }
+
+    public void SetPokerPlay()
+    {
+        gamemPlayer = new GamePlayer();
+        Managers.CurrentGameType = Define.GameType.Poker;
     }
 
     public void DecreaseMoney(string targetUID, int amount)
@@ -49,8 +56,20 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
-        Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
-        HoldemSyncSeedMoney();
+
+        switch (Managers.CurrentGameType)
+        {
+            case Define.GameType.Holdem:
+                Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
+                HoldemSyncSeedMoney();
+                break;
+            case Define.GameType.Poker:
+                Managers.DB.DBUpdateMoney(uid, -amount, "poker");
+                PokerSyncSeedMoney();
+                break;
+            case Define.GameType.BlackJack:
+                break;
+        }
     }
 
     public void IncreaseMoney(string targetUID, int amount)
@@ -60,11 +79,23 @@ public class User
 
         //////////////////////////////// DB와 소통
         seedMoney += amount;
-        Managers.DB.DBUpdateMoney(uid, amount, "holdem");
-        HoldemSyncSeedMoney();
+
+        switch (Managers.CurrentGameType)
+        {
+            case Define.GameType.Holdem:
+                Managers.DB.DBUpdateMoney(uid, amount, "holdem");
+                HoldemSyncSeedMoney();
+                break;
+            case Define.GameType.Poker:
+                Managers.DB.DBUpdateMoney(uid, amount, "poker");
+                PokerSyncSeedMoney();
+                break;
+            case Define.GameType.BlackJack:
+                break;
+        }
     }
 
-    public void HoldemBettingMoney(string targetUID, int amount, bool ttt = true)
+    public void HoldemBettingMoney(string targetUID, int amount)
     {
         if (targetUID != uid)
             return;
@@ -72,14 +103,31 @@ public class User
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
         Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
-        NowHoldemPlayer.SetBetMoney(NowHoldemPlayer.BetMoney + amount, ttt);
+        NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
         HoldemSyncSeedMoney();
     }
 
     public void HoldemSyncSeedMoney()      // seedmoney 수정시 항상 호출
     {
         if (HoldemGameControl.Control.IsPlaying)
-            SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowHoldemPlayer.GameIndex, (int)seedMoney);
+            SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
     }
 
+    public void PokerBettingMoney(string targetUID, int amount)
+    {
+        if (targetUID != uid)
+            return;
+
+        //////////////////////////////// DB와 소통
+        seedMoney -= amount;
+        Managers.DB.DBUpdateMoney(uid, -amount, "seven");
+        NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
+        PokerSyncSeedMoney();
+    }
+
+    public void PokerSyncSeedMoney()
+    {
+        if (PokerGameControl.Control.IsPlaying)
+            SyncSystem.Sync.SyncPokerPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
+    }
 }

@@ -23,7 +23,7 @@ public class HoldemGameControl : MonoBehaviour
         {
             instance = this;
             _betManager = new HoldemBetManager();
-            _holdemaPlayers = new HoldemPlayerManager();
+            _playerManager = new HoldemPlayerManager();
             _cardManager = new HoldemCardManager();
             _resultManager = new HoldemResultManager();
         }
@@ -36,8 +36,8 @@ public class HoldemGameControl : MonoBehaviour
     public const int MAX_PLAYER_NUM = 7;
     public const float RESULT_SHOW_TIME = 5.0f;
 
-    HoldemPlayerManager _holdemaPlayers;
-    public static HoldemPlayerManager Players { get { return Control._holdemaPlayers; } }
+    HoldemPlayerManager _playerManager;
+    public static HoldemPlayerManager Players { get { return Control._playerManager; } }
 
     HoldemBetManager _betManager;
     public static HoldemBetManager Bet { get { return Control._betManager; } }
@@ -49,7 +49,6 @@ public class HoldemGameControl : MonoBehaviour
     public static HoldemResultManager Result { get { return Control._resultManager; } }
 
 
-    HoldemScene _scene;
     UI_Holdem _holdemUI;
 
 
@@ -91,17 +90,15 @@ public class HoldemGameControl : MonoBehaviour
 
     void Start()
     {
-        _scene = (HoldemScene)Managers.Scene.CurrentScene;
         _holdemUI = (UI_Holdem)Managers.UI.SceneUI;
     }
 
     public void StartGame()
     {
-        Debug.Log("Start");
         if (isPlaying)
             return;
 
-        if (User.NowHoldemPlayer.SeatIndex == -1)
+        if (User.NowGamePlayer.SeatIndex == -1)
             return;
 
         isPlaying = true;
@@ -203,7 +200,6 @@ public class HoldemGameControl : MonoBehaviour
 
             // 배팅 1     프리플랍 -> bb의 다음사람(언더더건)부터 시작 / 2인일 경우엔 딜러부터  // 2인일때 무조건 bb다음이 딜러여서 따로 처리 필요 x
             case 7:
-                Debug.Log("첫 배팅( 프리 플랍)");
                 // 타이머 끄기 (타이머는 monobehaviour 필요)
                 StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
 
@@ -239,7 +235,6 @@ public class HoldemGameControl : MonoBehaviour
             case 11:
             // 배팅 4     리버 -> sb 부터 배팅 / 2인일 경우엔 bb부터
             case 13:
-                Debug.Log($"다른 배팅  {StageCount},  {StageDetail}");
                 // 타이머 끄기 (타이머는 monobehaviour 필요)
                 StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
 
@@ -315,6 +310,7 @@ public class HoldemGameControl : MonoBehaviour
                 ranNum = Random.Range(0, MAX_PLAYER_NUM);
             } while (Players.GetPlayerUID(ranNum) == "");
             _playerD = ranNum;
+            isFirst = false;
         }
         else
         {
@@ -375,12 +371,14 @@ public class HoldemGameControl : MonoBehaviour
                 Debug.Log("Duplicate Time Handle");
             }
             Debug.Log("Timer start");
+            _holdemUI.TimerSwitch(isOn);
             dieTimer = StartCoroutine(Bet.AutoDieTimer(HoldemBetManager.AUTO_DIE_TIMER));
         }
         else
         {
             if (dieTimer != null)
             {
+                _holdemUI.TimerSwitch(isOn);
                 StopCoroutine(dieTimer);
                 Debug.Log("Time stop");
             }
@@ -419,7 +417,7 @@ public class HoldemGameControl : MonoBehaviour
         isPlaying = false;
 
         // 자신 게임 관련 초기화 (사실 베팅금만 초기화)
-        User.NowHoldemPlayer.ClearSetting();
+        User.NowGamePlayer.ClearSetting();
 
         // 딜러 카드 삭제 및 관련 초기화
         Card.ClearDealerCard();
@@ -442,13 +440,30 @@ public class HoldemGameControl : MonoBehaviour
         }
     }
 
-    public void Request_SyncHoldemPotMoney(int amount, bool isNextStage = false)     // 코루틴 호출시키기 위한 함수
+    public void UpdatePlayerSeedMoneyUI()
     {
-        StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(PotMoney + amount, isNextStage));
+        _holdemUI.UpdateSeedMoney();
     }
 
     public void UpdatePlayerBetMoneyUI()
     {
         _holdemUI.UpdateBetMoney();
+    }
+
+    public IEnumerator PlayerEnterHoldemRoom(float time, Player newPlayer)
+    {
+        yield return new WaitForSeconds(time);
+
+        if (IsPlaying)
+        {
+            GiveHoldemGameControlSyncData(newPlayer);
+            Players.GiveHoldemPlayerManagerSyncData(newPlayer);
+            Card.GiveHoldemCardManagerSyncData(newPlayer);
+        }
+    }
+
+    void GiveHoldemGameControlSyncData(Player newPlayer)
+    {
+
     }
 }
