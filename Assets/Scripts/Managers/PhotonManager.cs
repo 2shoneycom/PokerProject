@@ -18,6 +18,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private bool isWaitingForJoinOtherGame = false;
     private int currentBetMoney;
     private Define.GameType currentGameType;
+    private Define.Difficulty currentDifficulty;
 
     void Start()
     {
@@ -173,6 +174,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public void JoinGame(int betMoney, Define.GameType gameType)
     {
+        currentGameType = gameType;
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
         StartCoroutine(Loading(0.5f));
     }
@@ -313,7 +315,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         _loadingUI.SetConnectionInfoText("Success to Enter Room");
 
         // 방의 gameType 가져오기
-        Define.GameType gameType = Define.GameType.Holdem; // 기본값
+        Define.GameType gameType = Define.GameType.Holdem; // 기본값          /////////////////////////////////////////////////////////
         currentGameType = gameType;
 
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("gameType"))

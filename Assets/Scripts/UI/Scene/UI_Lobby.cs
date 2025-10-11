@@ -62,7 +62,6 @@ public class UI_Lobby : UI_Scene
         BindEvent(GetImage((int)Images.UI_IconFriend).gameObject, MoveToFriendScene);
         BindEvent(GetImage((int)Images.UI_IconSetting).gameObject, SettingClicked);
         BindEvent(GetImage((int)Images.UI_IconGift).gameObject, GiftClicked);
-        //BindEvent(GetButton((int)Buttons.UI_ButtonBlackJack).gameObject, LoginManager.Instance.LogOut);
         BindEvent(GetImage((int)Images.UI_IconWeb).gameObject, WebClicked);
 
         _scene = (LobbyScene)Managers.Scene.CurrentScene;
