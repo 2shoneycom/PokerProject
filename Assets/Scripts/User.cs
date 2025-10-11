@@ -43,7 +43,7 @@ public class User
     public void SetPokerPlay()
     {
         gamemPlayer = new GamePlayer();
-        Managers.CurrentGameType = Define.GameType.Seven;
+        Managers.CurrentGameType = Define.GameType.Poker;
     }
 
     public void SetJackPlay()
@@ -66,7 +66,7 @@ public class User
                 Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
                 HoldemSyncSeedMoney();
                 break;
-            case Define.GameType.Seven:
+            case Define.GameType.Poker:
                 Managers.DB.DBUpdateMoney(uid, -amount, "poker");
                 PokerSyncSeedMoney();
                 break;
@@ -91,7 +91,7 @@ public class User
                 Managers.DB.DBUpdateMoney(uid, amount, "holdem");
                 HoldemSyncSeedMoney();
                 break;
-            case Define.GameType.Seven:
+            case Define.GameType.Poker:
                 Managers.DB.DBUpdateMoney(uid, amount, "poker");
                 PokerSyncSeedMoney();
                 break;

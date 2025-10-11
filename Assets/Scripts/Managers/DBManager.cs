@@ -122,7 +122,7 @@ public class DBManager
         string userId = Managers.Auth.userId;
         var tasks = new List<Task>();
 
-        string[] gameTypes = { "holdem", "seven", "blackjack" };
+        string[] gameTypes = { "holdem", "poker", "blackjack" };
         foreach (string gameType in gameTypes)
         {
             tasks.Add(InitializeMoneyRank(userId, gameType));
@@ -172,7 +172,7 @@ public class DBManager
         deleteTasks.Add(dbRef.Child("Users").Child(userId).RemoveValueAsync());
 
         // 2. MoneyRank/{gameType}/{userId} 삭제
-        string[] gameTypes = { "holdem", "seven", "blackjack" };
+        string[] gameTypes = { "holdem", "poker", "blackjack" };
         foreach (string gameType in gameTypes)
         {
             deleteTasks.Add(dbRef.Child("MoneyRank").Child(gameType).Child(userId).RemoveValueAsync());

@@ -56,7 +56,7 @@ public class UI_PokerPopup : UI_Popup
 
     void EnterBeginnerRoom(PointerEventData data)
     {
-        Managers.Photon.JoinPoker();
+        Managers.Photon.JoinGame(0, Define.GameType.Poker);
     }
 
     void CreateBeginnerRoom(PointerEventData data)

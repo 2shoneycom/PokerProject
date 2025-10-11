@@ -175,39 +175,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public void JoinGame(int betMoney, Define.GameType gameType)
     {
         currentGameType = gameType;
+        currentBetMoney = betMoney;
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
-        StartCoroutine(Loading(0.5f));
-    }
-
-    public void JoinPoker()
-    {
-        _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
-        StartCoroutine(Loading(0.5f));
-    }
-
-    public void JoinJack()
-    {
-        _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
-        StartCoroutine(Loading(0.5f));
-    }
-
-    IEnumerator Loading(float sec)
-    {
-        yield return new WaitForSeconds(sec);
-        JoinRoom();
-    }
-
-    void JoinRoom()
-    {
-        if (PhotonNetwork.IsConnected)
-        {
-            _loadingUI.SetConnectionInfoText("Entering Room..");
-            PhotonNetwork.JoinRandomRoom();
-        }
-        else
-        {
-            Reconnect();
-        }
+        StartCoroutine(LoadingJoinGame(0.5f, currentBetMoney, currentGameType));
     }
 
     // roomID로 해당 방 들어가는 함수
@@ -322,6 +292,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             string gameTypeStr = PhotonNetwork.CurrentRoom.CustomProperties["gameType"].ToString();
             gameType = (Define.GameType)Enum.Parse(typeof(Define.GameType), gameTypeStr);
+            currentGameType = gameType;
         }
 
         // gameType에 따라 다른 씬 로드
@@ -330,8 +301,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             case Define.GameType.Holdem:
                 Managers.Scene.PhotonLoadScene(Define.Scene.Holdem);
                 break;
-            case Define.GameType.Seven:
-                Managers.Scene.PhotonLoadScene(Define.Scene.Seven);
+            case Define.GameType.Poker:
+                Managers.Scene.PhotonLoadScene(Define.Scene.Poker);
                 break;
             case Define.GameType.BlackJack:
                 Managers.Scene.PhotonLoadScene(Define.Scene.BlackJack);

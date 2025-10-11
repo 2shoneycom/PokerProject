@@ -13,7 +13,7 @@ public class PokerScene : GameScene
     {
         base.Init();
 
-        SceneType = Define.Scene.Seven;
+        SceneType = Define.Scene.Poker;
         _pokerUI = Managers.UI.ShowSceneUI<UI_Poker>();
         this.GetOrAddComponent<PokerGameControl>();
         this.GetOrAddComponent<SyncSystem>();
