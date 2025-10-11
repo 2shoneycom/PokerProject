@@ -55,7 +55,7 @@ public class Managers : MonoBehaviour
             {
                 case Define.GameType.Holdem:
                     return HoldemGameControl.Control.IsPlaying;
-                case Define.GameType.Poker:
+                case Define.GameType.Seven:
                     return PokerGameControl.Control.IsPlaying;
                 case Define.GameType.BlackJack:
                     return JackGameControl.Control.IsPlaying;
@@ -73,7 +73,7 @@ public class Managers : MonoBehaviour
             {
                 case Define.GameType.Holdem:
                     return HoldemGameControl.MAX_PLAYER_NUM;
-                case Define.GameType.Poker:
+                case Define.GameType.Seven:
                     return PokerGameControl.MAX_PLAYER_NUM;
                 case Define.GameType.BlackJack:
                     return JackGameControl.MAX_PLAYER_NUM;

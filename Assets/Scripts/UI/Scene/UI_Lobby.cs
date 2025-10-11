@@ -80,7 +80,7 @@ public class UI_Lobby : UI_Scene
     void PokerClicked(PointerEventData data)
     {
         PopupSetting(true);
-        Managers.CurrentGameType = Define.GameType.Poker;
+        Managers.CurrentGameType = Define.GameType.Seven;
         _popup = Managers.UI.ShowPopupUI<UI_PokerPopup>();
 
         GetText((int)Texts.UI_LobbyTitleText).text = "세븐 포커";

@@ -196,7 +196,16 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
 
     void JoinRoom()
-        StartCoroutine(LoadingJoinGame(0.5f, betMoney, gameType));
+    {
+        if (PhotonNetwork.IsConnected)
+        {
+            _loadingUI.SetConnectionInfoText("Entering Room..");
+            PhotonNetwork.JoinRandomRoom();
+        }
+        else
+        {
+            Reconnect();
+        }
     }
 
     // roomID로 해당 방 들어가는 함수
@@ -547,11 +556,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             Debug.LogWarning("나간 사람의 CustomProperties에 uid가 없습니다.");
         }
     }
-    
-    
+
+
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        if(PhotonNetwork.IsMasterClient)                            // Room 입장과 Scene 입장은 별개이므로 N초의 로딩 시간 적용
+        if (PhotonNetwork.IsMasterClient)                            // Room 입장과 Scene 입장은 별개이므로 N초의 로딩 시간 적용
             HoldemGameControl.Control.PlayerEnterHoldemRoom(1f, newPlayer);
     }
 

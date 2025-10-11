@@ -15,7 +15,7 @@ public class GamePlayer
             {
                 case Define.GameType.Holdem:
                     return HoldemGameControl.Control.ConvertUItoGame(seatedIndex);
-                case Define.GameType.Poker:
+                case Define.GameType.Seven:
                     return PokerGameControl.Control.ConvertUItoGame(seatedIndex);
                 case Define.GameType.BlackJack:
                     return seatedIndex;

@@ -12,7 +12,7 @@ public class Define
         Lobby,
         Friend,
         PlayerInfo,
-        Poker,
+        Seven,
         BlackJack,
     }
 
@@ -42,6 +42,6 @@ public class Define
         None,
         Holdem,
         Seven,
-        Black,
+        BlackJack,
     }
 }
