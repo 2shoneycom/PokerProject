@@ -729,7 +729,6 @@ public class JackGameControl : MonoBehaviour
 
     void MoneySetting(int playerIndex, int splitNum, int amount)
     {
-        Debug.Log("MoneySetting multi call?");
         User.NowUser.IncreaseMoney(User.NowUser.GetUid(), amount);
         SyncSystem.Sync.SyncJackMyBettingReset(playerIndex, splitNum);
 
@@ -738,9 +737,17 @@ public class JackGameControl : MonoBehaviour
         /////////
 
         int isWinOrLose = 0;
-        if (amount == 0) isWinOrLose = 0;
+        if (amount == 0)
+        {
+            isWinOrLose = 0;
+            Managers.Audio.PlaySFX(Define.SFX.Lose);
+        }
         else if (amount == User.NowGamePlayer.GetBlackJackBaseBet()) isWinOrLose = 1;
-        else isWinOrLose = 2;
+        else
+        {
+            isWinOrLose = 2;
+            Managers.Audio.PlaySFX(Define.SFX.Win);
+        }
 
         SyncSystem.Sync.SyncJackIsGameEnd(playerIndex, splitNum, isWinOrLose);
     }

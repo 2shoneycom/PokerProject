@@ -13,6 +13,7 @@ public class LobbyScene : BaseScene
 
         SceneType = Define.Scene.Login;
         Managers.UI.ShowSceneUI<UI_Lobby>();
+        Managers.Audio.PlayBGM(Define.BGM.Lobby);
 
         if (isReward != false)           ///////////////////////////////////
             Managers.UI.ShowPopupUI<UI_DailyCheck>();

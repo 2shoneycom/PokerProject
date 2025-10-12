@@ -8,6 +8,7 @@ public abstract class GameScene : BaseScene
     protected override void Init()
     {
         base.Init();
+        Managers.Audio.PlayBGM(Define.BGM.Game);
     }
 
 

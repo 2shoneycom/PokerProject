@@ -13,6 +13,7 @@ public class LoginScene : BaseScene
         base.Init();
         SceneType = Define.Scene.Login;
         Managers.UI.ShowSceneUI<UI_Login>();
+        Managers.Audio.PlayBGM(Define.BGM.Login);
     }
 
     public override void Clear()

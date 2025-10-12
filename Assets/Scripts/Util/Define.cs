@@ -44,4 +44,21 @@ public class Define
         Poker,
         BlackJack,
     }
+
+    public enum BGM
+    {
+        Login,
+        Lobby,
+        Friend,
+        PlayerInfo,
+        Game,
+    }
+
+    public enum SFX
+    {
+        Win,
+        Lose,
+        Button,
+        Card,
+    }
 }

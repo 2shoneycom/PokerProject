@@ -15,6 +15,7 @@ public class NickNameManager
 {
     UI_EditNickName _editNickName;
     UI_PlayerInfo _playerInfo;
+
     public void EditNickName(string newNickName, UI_EditNickName ui)
     {
         _playerInfo = (UI_PlayerInfo)Managers.UI.SceneUI;

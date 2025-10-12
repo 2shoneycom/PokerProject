@@ -47,6 +47,8 @@ public class PokerCardManager
 
         OnAddCard -= AddCardOrPopCard;
         OnAddCard += AddCardOrPopCard;
+        OnAddCard -= Managers.Audio.PlayCardSFX;
+        OnAddCard += Managers.Audio.PlayCardSFX;
     }
 
     void Setup()

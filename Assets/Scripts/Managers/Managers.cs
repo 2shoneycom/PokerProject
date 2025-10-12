@@ -21,6 +21,7 @@ public class Managers : MonoBehaviour
     NickNameManager _nickname = new NickNameManager();
     PhotonManager _photon;
     WebManager _web = new WebManager();
+    AudioManager _audio = new AudioManager();
 
     public static ResourceManager Resource { get { return Instance._resource; } }
     public static SceneManagerEx Scene { get { return Instance._scene; } }
@@ -33,6 +34,7 @@ public class Managers : MonoBehaviour
     public static PhotonManager Photon { get { return Instance._photon; } }
     public static WebManager Web { get { return Instance._web; } }
     public static NickNameManager NickName { get { return Instance._nickname; } }
+    public static AudioManager Audio { get { return Instance._audio; } }
 
     Define.GameType gameType = Define.GameType.None;
     public static Define.GameType CurrentGameType
@@ -93,7 +95,8 @@ public class Managers : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (Input.GetMouseButtonDown(0))
+            Audio.PlaySFX(Define.SFX.Button);
     }
 
     void OnDestroy()
@@ -117,6 +120,7 @@ public class Managers : MonoBehaviour
 
             DB.Init();
             Scene.Init();
+            Audio.Init();
         }
     }
 
@@ -124,5 +128,6 @@ public class Managers : MonoBehaviour
     {
         Scene.Clear();
         UI.Clear();
+        Audio.Claer();
     }
 }

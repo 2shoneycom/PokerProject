@@ -10,6 +10,7 @@ public class PlayerInfoScene : BaseScene
 
         SceneType = Define.Scene.PlayerInfo;
         Managers.UI.ShowSceneUI<UI_PlayerInfo>();
+        Managers.Audio.PlayBGM(Define.BGM.PlayerInfo);
     }
 
     public override void Clear()

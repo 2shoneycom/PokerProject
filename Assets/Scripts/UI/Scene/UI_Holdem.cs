@@ -375,15 +375,22 @@ public class UI_Holdem : UI_Scene
         List<string> wList = HoldemGameControl.Players.GetWinnerList();
         int len = wList.Count;
 
+        bool amIWin = false;
         for (int i = 0; i < len; i++)
         {
             panelText.text += HoldemGameControl.Players.GetPlayerNickNameByUID(wList[i]);
+
+            if (wList[i] == User.NowUser.GetUid()) 
+                amIWin = true;
 
             if (i != len - 1)
             {
                 panelText.text += ", ";
             }
         }
+
+        if (amIWin) Managers.Audio.PlaySFX(Define.SFX.Win);
+        else Managers.Audio.PlaySFX(Define.SFX.Lose);
 
         pl.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.InOutQuad);
         StartCoroutine(WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME));

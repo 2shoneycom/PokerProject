@@ -359,15 +359,22 @@ public class UI_Poker : UI_Scene
         List<string> wList = PokerGameControl.Players.GetWinnerList();
         int len = wList.Count;
 
+        bool amIWin = false;
         for (int i = 0; i < len; i++)
         {
             panelText.text += PokerGameControl.Players.GetPlayerNickNameByUID(wList[i]);
+
+            if (wList[i] == User.NowUser.GetUid())
+                amIWin = true;
 
             if (i != len - 1)
             {
                 panelText.text += ", ";
             }
         }
+
+        if (amIWin) Managers.Audio.PlaySFX(Define.SFX.Win);
+        else Managers.Audio.PlaySFX(Define.SFX.Lose);
 
         pl.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.InOutQuad);
         StartCoroutine(WaitWinnerPanel(PokerGameControl.RESULT_SHOW_TIME));

@@ -58,9 +58,13 @@ public class HoldemCardManager
 
         OnAddCard -= AddCardOrPopCard;
         OnAddCard += AddCardOrPopCard;
+        OnAddCard -= Managers.Audio.PlayCardSFX;
+        OnAddCard += Managers.Audio.PlayCardSFX;
 
         OnAddCardToDealer -= AddCardToDealer;
         OnAddCardToDealer += AddCardToDealer;
+        OnAddCardToDealer -= Managers.Audio.PlayCardSFX;
+        OnAddCardToDealer += Managers.Audio.PlayCardSFX;
     }
 
     void Setup()

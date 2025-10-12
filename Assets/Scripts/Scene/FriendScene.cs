@@ -10,6 +10,7 @@ public class FriendScene : BaseScene
 
         SceneType = Define.Scene.Friend;
         Managers.UI.ShowSceneUI<UI_Friend>();
+        Managers.Audio.PlayBGM(Define.BGM.Friend);
     }
 
     public override void Clear()
