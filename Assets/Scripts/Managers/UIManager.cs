@@ -9,6 +9,34 @@ public class UIManager      // Canvas의 sort order을 관리하기위해
 
     Stack<UI_Popup> _popupStack = new Stack<UI_Popup>();
     UI_Scene _sceneUI = null;
+    Material onTurnMaterial = null;
+    Material offTurnMaterial = null;
+    public float effectSpeed = 1.0f;
+
+    public Material OnTurnMaterial
+    {
+        get
+        {
+            if (onTurnMaterial == null)
+            {
+                onTurnMaterial = Managers.Resource.Load<Material>("Art/Materials/OnMaterial");
+            }
+            return onTurnMaterial;
+        }
+    }
+
+    public Material OffTurnMaterial
+    {
+        get
+        {
+            if (offTurnMaterial == null)
+            {
+                offTurnMaterial = Managers.Resource.Load<Material>("Art/Materials/OffMaterial");
+            }
+            return offTurnMaterial;
+        }
+    }
+
 
     public UI_Scene SceneUI { get { return _sceneUI; } }
 

@@ -1,11 +1,13 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using DG.Tweening;
 
 public class UI_Holdem : UI_Scene
 {
@@ -52,6 +54,13 @@ public class UI_Holdem : UI_Scene
 
     enum Images
     {
+        UI_Player1,
+        UI_Player2,
+        UI_Player3,
+        UI_Player4,
+        UI_Player5,
+        UI_Player6,
+        UI_Player7,
         UI_Player1_Icon,
         UI_Player2_Icon,
         UI_Player3_Icon,
@@ -85,6 +94,7 @@ public class UI_Holdem : UI_Scene
         UI_Block,
     }
 
+    Image onTurnPlayer = null;
     bool isRoomOpened = false;
 
     public override void Init()
@@ -114,6 +124,35 @@ public class UI_Holdem : UI_Scene
         SetRoomButton(isRoomOpened);
 
         StartCoroutine(LoadingScreenSwitch(false, 2f));
+    }
+
+    private void Update()
+    {
+        OnTurnEffect();
+    }
+
+    void OnTurnEffect()
+    {
+        if (onTurnPlayer == null) return;
+
+        // 시간에 따라 Hue 값 변경 (0~1 범위를 순환)
+        float h = Mathf.PingPong(Time.time * Managers.UI.effectSpeed, 1f);
+        Color rainbow = Color.HSVToRGB(h, 1f, 1f);
+
+        onTurnPlayer.material.SetColor("_SolidOutline", rainbow);
+    }
+
+    public void SetOnTurnPlayer(int playerIndex)
+    {
+        onTurnPlayer = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{playerIndex}"));
+    }
+
+    public void ResetOnTurnPlayer()
+    {
+        Image exTurnPlayer = onTurnPlayer;
+        onTurnPlayer = null;
+
+        onTurnPlayer.material = Managers.UI.OffTurnMaterial;
     }
 
     IEnumerator LoadingScreenSwitch(bool isOn, float time)
