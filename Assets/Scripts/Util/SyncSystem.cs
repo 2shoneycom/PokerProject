@@ -489,17 +489,8 @@ class SyncSystem : MonoBehaviourPun
     private void RPC_SyncPokerPotMoney(int money, int isNextStage = 0)
     {
         PokerGameControl.Control.PotMoney = money;
-
-        if (isNextStage == 0)
-        {
-            Debug.Log($"case {PokerGameControl.Control.StageCount} 종료, nextStage");
-            PokerGameControl.Control.NextStage();
-        }
-        else if (isNextStage == 1)
-        {
-            Debug.Log($"case {PokerGameControl.Control.StageCount} 종료, nextStage");
-            PokerGameControl.Control.NextStage(1);
-        }
+        Debug.Log($"case {PokerGameControl.Control.StageCount} 종료, nextStage");
+        PokerGameControl.Control.NextStage(isNextStage);
     }
 
     public IEnumerator PokerAutoDieTimerSwitch(bool isOn)

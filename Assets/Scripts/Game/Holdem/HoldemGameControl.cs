@@ -278,15 +278,18 @@ public class HoldemGameControl : MonoBehaviour
                 // 타이머 끄기
                 StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
 
-                EndGame();
+                StartCoroutine(EndGame());
 
+                break;
+
+            case 15:
                 // UI 보여주기 & 플레이어 카드 공개
                 StartCoroutine(SyncSystem.Sync.SyncHoldemResultUI());
 
                 break;
 
             // 새로운 게임 준비
-            case 15:
+            case 16:
                 StartCoroutine(SyncSystem.Sync.HoldemClearGame());
 
                 break;
@@ -387,7 +390,7 @@ public class HoldemGameControl : MonoBehaviour
         }
     }
 
-    void EndGame()
+    IEnumerator EndGame()
     {
         // 우승자 리스트 가져오기
         List<string> winnerList = Result.GetWinner();
@@ -401,16 +404,18 @@ public class HoldemGameControl : MonoBehaviour
                 Debug.Log("우승자: " + winnerUID);
             }
         }
-        // 팟머니 0으로
-        StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(0));
+        //StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(0));
         SyncSystem.Sync.SyncHoldemWinnerList(winnerList.ToArray());
+        yield return new WaitForSeconds(0.2f);
+        StartCoroutine(SyncSystem.Sync.HoldemNextStage(0));
     }
 
     public void ShowResult()
     {
         // 플레이어 카드 보이기
         Players.ShowPlayerCard();
-
+        // 팟머니 0으로
+        PotMoney = 0;
         _holdemUI.SetWinnerPanel(true);
     }
 
@@ -430,9 +435,9 @@ public class HoldemGameControl : MonoBehaviour
         _holdemUI.UpdateBetMoney();
 
         // 인원수 체크를 하고 2 이상이면 바로 시작
-        if (Managers.Seat.GetOccupiedCount() >= 2)
+        if (Managers.Seat.GetOccupiedCount() >= 2 && PhotonNetwork.IsMasterClient)
         {
-            StartGame();
+            SyncSystem.Sync.HoldemStartSync();
         }
         else
         {

@@ -231,16 +231,6 @@ public class PokerPlayerManager
             cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(cardDetail);
     }
 
-    public int GetPlayerCardEmptyIndex(int playerIndex)
-    {
-        for(int i = 0; i < PokerCardManager.PLAYER_CARD_NUM; i++)
-        {
-            if (playerCardGO[playerIndex][i] == null)
-                return i;
-        }
-        return -1;
-    }
-
     public void PlayerDelCardSel(int playerIndex, int cardIndex)
     {
         playerCardSels[playerIndex, 0] = cardIndex;
@@ -376,12 +366,9 @@ public class PokerPlayerManager
             if (GetPlayerUID(i) == "" || playerIsAlive[i] == false)
                 continue;
 
-            GameObject cardGO = playerCardGO[i][0];
-            cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(playerCardDetails[i, 0]);
-            cardGO = playerCardGO[i][1];
-            cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(playerCardDetails[i, 1]);
-            cardGO = playerCardGO[i][7];
-            cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(playerCardDetails[i, 7]);
+            SetCardOpen(i, 0);
+            SetCardOpen(i, 1);
+            SetCardOpen(i, 7);
         }
     }
 

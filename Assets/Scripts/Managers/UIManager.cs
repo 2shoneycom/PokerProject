@@ -11,7 +11,7 @@ public class UIManager      // Canvas의 sort order을 관리하기위해
     UI_Scene _sceneUI = null;
     Material onTurnMaterial = null;
     Material offTurnMaterial = null;
-    public float effectSpeed = 1.0f;
+    public float effectSpeed = 0.7f;
 
     public Material OnTurnMaterial
     {

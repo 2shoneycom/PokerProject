@@ -334,14 +334,18 @@ public class PokerGameControl : MonoBehaviour
                 // 타이머 끄기 (타이머는 monobehaviour 필요)
                 StartCoroutine(SyncSystem.Sync.PokerAutoDieTimerSwitch(false));
 
-                EndGame();
+                StartCoroutine(EndGame());
 
+                break;
+
+            case 21:
                 // UI 보여주기 & 플레이어 카드 공개
                 StartCoroutine(SyncSystem.Sync.SyncPokerResultUI());
+
                 break;
 
             // 새로운 게임 준비
-            case 21:
+            case 22:
                 StartCoroutine(SyncSystem.Sync.PokerClearGame());
                 break;
         }
@@ -455,7 +459,7 @@ public class PokerGameControl : MonoBehaviour
         }
     }
 
-    void EndGame()
+    IEnumerator EndGame()
     {
         // 우승자 리스트 가져오기
         List<string> winnerList = new List<string>();
@@ -471,6 +475,8 @@ public class PokerGameControl : MonoBehaviour
             }
         }
         SyncSystem.Sync.SyncPokerWinnerList(winnerList.ToArray());
+        yield return new WaitForSeconds(0.2f);
+        StartCoroutine(SyncSystem.Sync.PokerNextStage(0));
     }
 
     public void ShowResult()
@@ -495,9 +501,9 @@ public class PokerGameControl : MonoBehaviour
         _pokerUI.UpdateBetMoney();
 
         // 인원수 체크를 하고 2 이상이면 바로 시작
-        if (Managers.Seat.GetOccupiedCount() >= 2)
+        if (Managers.Seat.GetOccupiedCount() >= 2 && PhotonNetwork.IsMasterClient)
         {
-            StartGame();
+            SyncSystem.Sync.PokerStartSync();
         }
         else
         {

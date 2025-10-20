@@ -40,6 +40,8 @@ public class PokerScene : GameScene
 
         if (nickname != SeatManager.DEFAULT_NULL_SEAT)
             _pokerUI.UpdatePlayerIcon(index + 1, nickname);
+        else
+            _pokerUI.UpdatePlayerIcon(index + 1, nickname, true);
     }
 
     public override void UpdateBetUI(bool isOn)

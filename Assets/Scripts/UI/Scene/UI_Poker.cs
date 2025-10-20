@@ -9,6 +9,9 @@ using UnityEngine.UI;
 
 public class UI_Poker : UI_Scene
 {
+    const float originIconSize = 1.15f;
+    const float biggerIconSize = 1.65f;
+
     enum Buttons
     {
         UI_Buttons_Die,
@@ -91,6 +94,7 @@ public class UI_Poker : UI_Scene
         Bind<TextMeshProUGUI>(typeof(Texts));
         Bind<Image>(typeof(Images));
         Bind<GameObject>(typeof(GameObjects));
+        winnerIndex = new List<int>();
 
         SettingUIIconPos();
 
@@ -246,9 +250,9 @@ public class UI_Poker : UI_Scene
         GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{index}_NameText")).text = pNickName;
     }
 
-    public void UpdatePlayerIcon(int index, string pNickName)
+    public void UpdatePlayerIcon(int index, string pNickName, bool isOn = false)
     {
-        GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{index}_Panel")).SetActive(false);
+        GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{index}_Panel")).SetActive(isOn);
     }
 
     public void UpdatePotMoney()
@@ -382,11 +386,13 @@ public class UI_Poker : UI_Scene
         return GetImage((int)index).gameObject;
     }
 
+    List<int> winnerIndex;
     public void SetWinnerPanel(bool isOn)
     {
         GameObject pl = GetGameObject((int)GameObjects.UI_TmpWinnerShow);
         pl.transform.localScale = Vector3.zero;
         pl.SetActive(isOn);
+        BetButtonInteractiveSwitch("Die", false);
 
         if (!isOn)
             return;
@@ -397,6 +403,7 @@ public class UI_Poker : UI_Scene
 
         List<string> wList = PokerGameControl.Players.GetWinnerList();
         int len = wList.Count;
+        winnerIndex.Clear();
 
         bool amIWin = false;
         for (int i = 0; i < len; i++)
@@ -405,6 +412,8 @@ public class UI_Poker : UI_Scene
 
             if (wList[i] == User.NowUser.GetUid())
                 amIWin = true;
+
+            winnerIndex.Add(PokerGameControl.Players.GetPlayerGameIndexByUID(wList[i]));
 
             if (i != len - 1)
             {
@@ -416,8 +425,30 @@ public class UI_Poker : UI_Scene
         else Managers.Audio.PlaySFX(Define.SFX.Lose);
 
         pl.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.InOutQuad);
+        WinnerIconBigger();
         StartCoroutine(WaitWinnerPanel(PokerGameControl.RESULT_SHOW_TIME));
     }
+
+    void WinnerIconBigger()
+    {
+        for (int i = 0; i < winnerIndex.Count; i++)
+        {
+            int uiI = PokerGameControl.Control.ConvertGameToUI(winnerIndex[i]);
+            GameObject go = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{uiI + 1}")).gameObject;
+            go.transform.DOScale(Vector3.one * biggerIconSize, 1.0f).SetEase(Ease.InOutQuad);
+        }
+    }
+
+    void WinnerIconOrigin()
+    {
+        for (int i = 0; i < winnerIndex.Count; i++)
+        {
+            int uiI = PokerGameControl.Control.ConvertGameToUI(winnerIndex[i]);
+            GameObject go = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{uiI + 1}")).gameObject;
+            go.transform.DOScale(Vector3.one * originIconSize, 0.3f);
+        }
+    }
+
 
     IEnumerator WaitWinnerPanel(float sec)
     {
@@ -425,6 +456,7 @@ public class UI_Poker : UI_Scene
         yield return new WaitForSeconds(sec);
 
         Debug.Log("Winner Timer End");
+        WinnerIconOrigin();
         SetWinnerPanel(false);
         PokerGameControl.Control.NextStage();
     }

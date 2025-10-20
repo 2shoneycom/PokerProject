@@ -42,6 +42,8 @@ public class HoldemScene : GameScene
 
         if (nickname != SeatManager.DEFAULT_NULL_SEAT)
             _holdemUI.UpdatePlayerIcon(index + 1, nickname);
+        else
+            _holdemUI.UpdatePlayerIcon(index + 1, nickname, true);
     }
 
     public override void UpdateBetUI(bool isOn)

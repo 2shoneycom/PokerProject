@@ -11,6 +11,9 @@ using UnityEngine.UI;
 
 public class UI_Holdem : UI_Scene
 {
+    const float originIconSize = 1.3f;
+    const float biggerIconSize = 1.8f;
+
     enum Buttons
     {
         UI_Buttons_Die,
@@ -107,6 +110,7 @@ public class UI_Holdem : UI_Scene
         Bind<TextMeshProUGUI>(typeof(Texts));
         Bind<Image>(typeof(Images));
         Bind<GameObject>(typeof(GameObjects));
+        winnerIndex = new List<int>();
 
         SettingUIIconPos();
 
@@ -263,9 +267,9 @@ public class UI_Holdem : UI_Scene
         GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{index}_NameText")).text = pNickName;
     }
 
-    public void UpdatePlayerIcon(int index, string pNickName)
+    public void UpdatePlayerIcon(int index, string pNickName, bool isOn = false)
     {
-        GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{index}_Panel")).SetActive(false);
+        GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{index}_Panel")).SetActive(isOn);
     }
 
     public void UpdatePotMoney()
@@ -400,11 +404,13 @@ public class UI_Holdem : UI_Scene
         return GetImage((int)index).gameObject;
     }
 
+    List<int> winnerIndex;
     public void SetWinnerPanel(bool isOn)
     {
         GameObject pl = GetGameObject((int)GameObjects.UI_TmpWinnerShow);
         pl.transform.localScale = Vector3.zero;
         pl.SetActive(isOn);
+        BetButtonInteractiveSwitch("Die", false);
 
         if (!isOn)
             return;
@@ -414,17 +420,19 @@ public class UI_Holdem : UI_Scene
         panelText.text = "Winner!!\n\n";
 
         List<string> wList = HoldemGameControl.Players.GetWinnerList();
-        int len = wList.Count;
+        winnerIndex.Clear();
 
         bool amIWin = false;
-        for (int i = 0; i < len; i++)
+        for (int i = 0; i < wList.Count; i++)
         {
             panelText.text += HoldemGameControl.Players.GetPlayerNickNameByUID(wList[i]);
 
             if (wList[i] == User.NowUser.GetUid()) 
                 amIWin = true;
 
-            if (i != len - 1)
+            winnerIndex.Add(HoldemGameControl.Players.GetPlayerGameIndexByUID(wList[i]));
+
+            if (i != wList.Count - 1)
             {
                 panelText.text += "\n";
             }
@@ -434,13 +442,35 @@ public class UI_Holdem : UI_Scene
         else Managers.Audio.PlaySFX(Define.SFX.Lose);
 
         pl.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.InOutQuad);
+        WinnerIconBigger();
         StartCoroutine(WaitWinnerPanel(HoldemGameControl.RESULT_SHOW_TIME));
+    }
+
+    void WinnerIconBigger()
+    {
+        for (int i = 0; i < winnerIndex.Count; i++)
+        {
+            int uiI = HoldemGameControl.Control.ConvertGameToUI(winnerIndex[i]);
+            GameObject go = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{uiI + 1}")).gameObject;
+            go.transform.DOScale(Vector3.one * biggerIconSize, 1.0f).SetEase(Ease.InOutQuad);
+        }
+    }
+
+    void WinnerIconOrigin()
+    {
+        for (int i = 0; i < winnerIndex.Count; i++)
+        {
+            int uiI = HoldemGameControl.Control.ConvertGameToUI(winnerIndex[i]);
+            GameObject go = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{uiI + 1}")).gameObject;
+            go.transform.DOScale(Vector3.one * originIconSize, 0.3f);
+        }
     }
 
     IEnumerator WaitWinnerPanel(float sec)
     {
         yield return new WaitForSeconds(sec);
 
+        WinnerIconOrigin();
         SetWinnerPanel(false);
         HoldemGameControl.Control.NextStage();
     }
