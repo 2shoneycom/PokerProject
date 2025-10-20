@@ -120,6 +120,8 @@ public class HoldemGameControl : MonoBehaviour
 
     public void NextStage(int state = 0)        // 1은 스테이지 세부 사항 카운트 증가
     {
+        _holdemUI.ResetOnTurnPlayer();
+
         if (state == 0)
         {
             StageCount++;

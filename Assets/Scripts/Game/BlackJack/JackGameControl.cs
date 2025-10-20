@@ -111,6 +111,8 @@ public class JackGameControl : MonoBehaviour
 
     public void NextStage(int state = 0)        // 1은 스테이지 세부 사항 카운트 증가
     {
+        _jackUI.ResetOnTurnPlayer();
+
         if (state == 0)
         {
             StageCount++;
@@ -777,6 +779,7 @@ public class JackGameControl : MonoBehaviour
         isNormalBetEnd = false;
         _jackUI.TimerSwitch(true);
         betTimer = StartCoroutine(NormalBetTimer(NORMAL_BETTING_TIME));
+        _jackUI.SetOnTurnPlayer(playerIndex + 1);
 
         if (playerIndex != User.NowGamePlayer.GameIndex) return;
 

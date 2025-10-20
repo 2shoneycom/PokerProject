@@ -145,6 +145,7 @@ public class UI_Holdem : UI_Scene
     public void SetOnTurnPlayer(int playerIndex)
     {
         onTurnPlayer = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{playerIndex}"));
+        onTurnPlayer.material = Managers.UI.OnTurnMaterial;
     }
 
     public void ResetOnTurnPlayer()
@@ -152,7 +153,8 @@ public class UI_Holdem : UI_Scene
         Image exTurnPlayer = onTurnPlayer;
         onTurnPlayer = null;
 
-        onTurnPlayer.material = Managers.UI.OffTurnMaterial;
+        if (exTurnPlayer != null)
+            exTurnPlayer.material = Managers.UI.OffTurnMaterial;
     }
 
     IEnumerator LoadingScreenSwitch(bool isOn, float time)
@@ -409,7 +411,7 @@ public class UI_Holdem : UI_Scene
 
         var panelText = GetText((int)Texts.UI_TmpWinnerShow_Text);
 
-        panelText.text = "Winner : ";
+        panelText.text = "Winner!!\n\n";
 
         List<string> wList = HoldemGameControl.Players.GetWinnerList();
         int len = wList.Count;
@@ -424,7 +426,7 @@ public class UI_Holdem : UI_Scene
 
             if (i != len - 1)
             {
-                panelText.text += ", ";
+                panelText.text += "\n";
             }
         }
 

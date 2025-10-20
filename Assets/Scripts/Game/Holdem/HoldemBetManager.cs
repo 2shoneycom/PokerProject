@@ -98,7 +98,7 @@ public class HoldemBetManager
             _isBetting = true;
         }
 
-        _holdemUI.SetOnTurnPlayer(curPlayer + 1);
+        _holdemUI.SetOnTurnPlayer(HoldemGameControl.Control.ConvertGameToUI(curPlayer) + 1);
 
         if (HoldemGameControl.Players.GetPlayerUID(curPlayer) != User.NowUser.GetUid())
             return;
@@ -190,7 +190,6 @@ public class HoldemBetManager
     public void BetProcess(int curPlayer, string betType, int betAmount)
     {
         HoldemGameControl.Players.UpdatePlayerTurn(curPlayer, false);
-        _holdemUI.ResetOnTurnPlayer();
 
         if (betType != "Die")
         {

@@ -46,6 +46,11 @@ public class UI_Poker : UI_Scene
 
     enum Images
     {
+        UI_Player1,
+        UI_Player2,
+        UI_Player3,
+        UI_Player4,
+        UI_Player5,
         UI_Player1_Icon,
         UI_Player2_Icon,
         UI_Player3_Icon,
@@ -73,6 +78,7 @@ public class UI_Poker : UI_Scene
         UI_Block,
     }
 
+    Image onTurnPlayer = null;
     bool isRoomOpened = false;
 
     public override void Init()
@@ -102,6 +108,37 @@ public class UI_Poker : UI_Scene
         SetRoomButton(isRoomOpened);
 
         StartCoroutine(LoadingScreenSwitch(false, 2f));
+    }
+
+    private void Update()
+    {
+        OnTurnEffect();
+    }
+
+    void OnTurnEffect()
+    {
+        if (onTurnPlayer == null) return;
+
+        // 시간에 따라 Hue 값 변경 (0~1 범위를 순환)
+        float h = Mathf.PingPong(Time.time * Managers.UI.effectSpeed, 1f);
+        Color rainbow = Color.HSVToRGB(h, 1f, 1f);
+
+        onTurnPlayer.material.SetColor("_SolidOutline", rainbow);
+    }
+
+    public void SetOnTurnPlayer(int playerIndex)
+    {
+        onTurnPlayer = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{playerIndex}"));
+        onTurnPlayer.material = Managers.UI.OnTurnMaterial;
+    }
+
+    public void ResetOnTurnPlayer()
+    {
+        Image exTurnPlayer = onTurnPlayer;
+        onTurnPlayer = null;
+
+        if (exTurnPlayer != null)
+            exTurnPlayer.material = Managers.UI.OffTurnMaterial;
     }
 
     IEnumerator LoadingScreenSwitch(bool isOn, float time)
@@ -330,7 +367,9 @@ public class UI_Poker : UI_Scene
 
     void OpenRoomClicked(PointerEventData data)
     {
-
+        Managers.Photon.OpenRoomToPublic();
+        isRoomOpened = true;
+        SetRoomButton(true);
     }
 
     void MoveRoomClicked(PointerEventData data)
@@ -354,7 +393,7 @@ public class UI_Poker : UI_Scene
 
         var panelText = GetText((int)Texts.UI_TmpWinnerShow_Text);
 
-        panelText.text = "Winner : ";
+        panelText.text = "Winner!!\n\n";
 
         List<string> wList = PokerGameControl.Players.GetWinnerList();
         int len = wList.Count;
@@ -369,7 +408,7 @@ public class UI_Poker : UI_Scene
 
             if (i != len - 1)
             {
-                panelText.text += ", ";
+                panelText.text += "\n";
             }
         }
 

@@ -74,6 +74,8 @@ public class PokerBetManager
             _isBetting = true;
         }
 
+        _pokerUI.SetOnTurnPlayer(PokerGameControl.Control.ConvertGameToUI(curPlayer) + 1);
+
         if (PokerGameControl.Players.GetPlayerUID(curPlayer) != User.NowUser.GetUid())
             return;
 

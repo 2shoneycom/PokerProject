@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -100,12 +101,12 @@ public class UI_BlackJack : UI_Scene
         UI_Player5_Bet,
     }
 
+    TextMeshProUGUI onTurnPlayer = null;
     bool isRoomOpened = false;
 
     public override void Init()
     {
         base.Init();
-
 
         Bind<Button>(typeof(Buttons));
         Bind<TextMeshProUGUI>(typeof(Texts));
@@ -113,8 +114,6 @@ public class UI_BlackJack : UI_Scene
         Bind<GameObject>(typeof(GameObjects));
 
         StartCoroutine(LoadingScreenSwitch(false, 2f));
-
-        //SettingUIIconPos();
 
         SeatBind();
         ChipButtonBind();
@@ -125,6 +124,35 @@ public class UI_BlackJack : UI_Scene
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);
 
         SetRoomButton(isRoomOpened);
+    }
+
+    private void Update()
+    {
+        OnTurnEffect();
+    }
+
+    void OnTurnEffect()
+    {
+        if (onTurnPlayer == null) return;
+
+        // 시간에 따라 Hue 값 변경 (0~1 범위를 순환)
+        float h = Mathf.PingPong(Time.time * Managers.UI.effectSpeed, 1f);
+        Color rainbow = Color.HSVToRGB(h, 1f, 1f);
+        onTurnPlayer.color = rainbow;
+    }
+
+    public void SetOnTurnPlayer(int playerIndex)
+    {
+        onTurnPlayer = GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{playerIndex}_NameText"));
+    }
+
+    public void ResetOnTurnPlayer()
+    {
+        TextMeshProUGUI exTurnPlayer = onTurnPlayer;
+        onTurnPlayer = null;
+
+        if (exTurnPlayer != null)
+            exTurnPlayer.color = Color.white;
     }
 
     IEnumerator LoadingScreenSwitch(bool isOn, float time)
@@ -469,7 +497,9 @@ public class UI_BlackJack : UI_Scene
 
     void OpenRoomClicked(PointerEventData data)
     {
-
+        Managers.Photon.OpenRoomToPublic();
+        isRoomOpened = true;
+        SetRoomButton(true);
     }
 
     void MoveRoomClicked(PointerEventData data)
