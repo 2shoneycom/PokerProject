@@ -287,6 +287,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("Success to Enter Room");
         _loadingUI.SetConnectionInfoText("Success to Enter Room");
 
+        Managers.DB.SetUserStatus(Define.Status.Playing);
+
         // 방의 gameType 가져오기
         Define.GameType gameType = Define.GameType.Holdem; // 기본값          /////////////////////////////////////////////////////////
         currentGameType = gameType;
