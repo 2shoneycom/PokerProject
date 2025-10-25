@@ -73,4 +73,17 @@ public class HoldemScene : GameScene
         Managers.Scene.LoadScene(Define.Scene.Lobby);
         Managers.DB.SetUserStatus(Define.Status.Online);    // 홀덤씬 -> 로비씬 (status: online)
     }
+
+    public override void OnMasterChanged()
+    {
+        // 마스터가 나간 경우 처리
+    }
+
+    public override void OnPlayerLeft(string uid)
+    {
+        // 1. 카드 받기도 전에 나간 경우 -> 그냥 카드까지 받게 하고 die 처리
+        // 2. 내 차례가 아닌 딜링 하는 경우 -> die 처리
+        // 3. 내 차례 였던 경우 -> die 처리
+
+    }
 }

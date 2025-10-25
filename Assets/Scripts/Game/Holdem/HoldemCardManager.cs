@@ -204,7 +204,7 @@ public class HoldemCardManager
 
     public void AddCardToPlayerStarter(string playerUID = "")
     {
-        OnAddCard?.Invoke(playerUID);           // 카드 효과음 등 추가 필요
+        OnAddCard?.Invoke(playerUID);
     }
 
     public void AddCardToDealerStarter()

@@ -23,7 +23,6 @@ public class JackGameControl : MonoBehaviour
             _betManager = new JackBetManager();
             _playerManager = new JackPlayerManager();
             _cardManager = new JackCardManager();
-            //_resultManager = new PokerResultManager();
         }
         else
         {

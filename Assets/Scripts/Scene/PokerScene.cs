@@ -70,4 +70,14 @@ public class PokerScene : GameScene
         Managers.Photon.LeaveRoom();
         Managers.Scene.LoadScene(Define.Scene.Lobby);
     }
+
+    public override void OnMasterChanged()
+    {
+
+    }
+
+    public override void OnPlayerLeft(string uid)
+    {
+
+    }
 }

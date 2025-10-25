@@ -45,16 +45,12 @@ public class BlackJackScene : GameScene
         _jackUI.UpdatePlayerName(index + 1, nickname);
 
         if(nickname != SeatManager.DEFAULT_NULL_SEAT)
-        {
             _jackUI.UpdatePlayerButton(index + 1);
-        }
 
         if (nickname == User.NowUser.GetNickName())
         {
             for (int i = 0; i < MAX_PLAYER; i++)
-            {
                 _jackUI.UpdatePlayerButton(i + 1);
-            }
         }
     }
 
@@ -83,5 +79,15 @@ public class BlackJackScene : GameScene
         // 방을 나가고 로비씬으로 이동
         Managers.Photon.LeaveRoom();
         Managers.Scene.LoadScene(Define.Scene.Lobby);
+    }
+
+    public override void OnMasterChanged()
+    {
+
+    }
+
+    public override void OnPlayerLeft(string uid)
+    {
+
     }
 }

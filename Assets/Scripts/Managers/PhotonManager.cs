@@ -146,7 +146,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             {
                 MaxPlayers = 10,
                 IsVisible = false, // 방이 리스트에 나타나게 설정
-                IsOpen = false,    // 새로운 플레이어가 들어올 수 있도록 설정
+                IsOpen = true,    // 새로운 플레이어가 들어올 수 있도록 설정
                 CleanupCacheOnLeave = false,
                 CustomRoomProperties = new ExitGames.Client.Photon.Hashtable {
                     { "betMoney", betMoney },
@@ -167,7 +167,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.InRoom)
         {
             PhotonNetwork.CurrentRoom.IsVisible = true;
-            PhotonNetwork.CurrentRoom.IsOpen = true;
+            //PhotonNetwork.CurrentRoom.IsOpen = true;
             Debug.Log("방이 공개되었습니다.");
         }
     }
@@ -490,7 +490,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             TakeOwnerShip();
-            HoldemGameControl.Control.ProcessStage();
+            GameScene curGameScene = (GameScene)Managers.Scene.CurrentScene;
+            curGameScene.OnMasterChanged();
         }
     }
 
@@ -523,13 +524,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             string uid = otherPlayer.CustomProperties["uid"].ToString();
             Managers.Seat.LeaveSeat(uid);
+            GameScene curGameScene = (GameScene)Managers.Scene.CurrentScene;
+            curGameScene.OnPlayerLeft(uid);
         }
         else
         {
             Debug.LogWarning("나간 사람의 CustomProperties에 uid가 없습니다.");
         }
     }
-
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
