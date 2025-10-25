@@ -1,7 +1,8 @@
+using DG.Tweening;
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -82,7 +83,6 @@ public class UI_Poker : UI_Scene
     }
 
     Image onTurnPlayer = null;
-    bool isRoomOpened = false;
 
     public override void Init()
     {
@@ -109,7 +109,7 @@ public class UI_Poker : UI_Scene
         BindEvent(GetGameObject((int)GameObjects.UI_Backspace), LeaveRoomClicked);
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);
 
-        SetRoomButton(isRoomOpened);
+        SetRoomButton();
 
         StartCoroutine(LoadingScreenSwitch(false, 2f));
     }
@@ -301,24 +301,36 @@ public class UI_Poker : UI_Scene
         }
     }
 
-    void SetRoomButton(bool isRoomOpened)
+    void SetRoomButton()
     {
+        bool isRoomOpened = PhotonNetwork.CurrentRoom.IsVisible;
+
+        if (PhotonNetwork.IsMasterClient == false) isRoomOpened = true;
+
         if (!isRoomOpened)
-        {
-            ColorUtility.TryParseHtmlString("#FF0000", out Color targetColor);
-            GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
-
-            GetText((int)Texts.UI_RoomButton_Text).text = "방 공개";
-            BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
-        }
+            SetRoomOpen();
         else
-        {
-            ColorUtility.TryParseHtmlString("#CFBFBF", out Color targetColor);
-            GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
+            SetRoomMove();
+    }
 
-            GetText((int)Texts.UI_RoomButton_Text).text = "방 이동";
-            BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
-        }
+    void SetRoomOpen()
+    {
+        DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
+        ColorUtility.TryParseHtmlString("#FF0000", out Color targetColor);
+        GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
+
+        GetText((int)Texts.UI_RoomButton_Text).text = "방 공개";
+        BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
+    }
+
+    void SetRoomMove()
+    {
+        DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
+        ColorUtility.TryParseHtmlString("#CFBFBF", out Color targetColor);
+        GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
+
+        GetText((int)Texts.UI_RoomButton_Text).text = "방 이동";
+        BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
     }
 
     void IconFriendClicked(PointerEventData data)
@@ -351,7 +363,7 @@ public class UI_Poker : UI_Scene
 
     void RequestBet(string betType)
     {
-        if (!PokerGameControl.Control.IsPlaying) 
+        if (!PokerGameControl.Control.IsPlaying)
             return;
 
         if (PokerGameControl.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
@@ -372,13 +384,14 @@ public class UI_Poker : UI_Scene
     void OpenRoomClicked(PointerEventData data)
     {
         Managers.Photon.OpenRoomToPublic();
-        isRoomOpened = true;
-        SetRoomButton(true);
+        SetRoomMove();
     }
 
     void MoveRoomClicked(PointerEventData data)
     {
-
+        Define.Difficulty difficulty = Managers.CurrentDifficulty;
+        Define.GameType gameType = Managers.CurrentGameType;
+        Managers.Photon.JoinOtherGame(difficulty, gameType);
     }
 
     public GameObject GetPlayerGameObjcet(int index)

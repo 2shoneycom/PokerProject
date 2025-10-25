@@ -100,30 +100,31 @@ public class HoldemBetManager
 
         _holdemUI.SetOnTurnPlayer(HoldemGameControl.Control.ConvertGameToUI(curPlayer) + 1);
 
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if (HoldemGameControl.Players.IsOneLeft || IsBetEnd())
+            {
+                // 1명 남앗거나 정상 배팅 종료의 경우
+                Debug.Log("bet end in IsBetEnd");
+                SyncSystem.Sync.HoldemBetEnd();
+                return;
+            }
+            // 이미 죽엇다면 처리
+            if (HoldemGameControl.Players.GetPlayerState(CurBetPlayer) == false)
+            {
+                SyncSystem.Sync.HoldemNextStage_V2(1);
+                return;
+            }
+            // 예약 죽음햇다면 처리
+            if (HoldemGameControl.Players.GetPlayerDieReserve(CurBetPlayer) == true)
+            {
+                PlayerBetSelected("Die");
+                return;
+            }
+        }
+
         if (HoldemGameControl.Players.GetPlayerUID(curPlayer) != User.NowUser.GetUid())
             return;
-
-        if (HoldemGameControl.Players.IsOneLeft || IsBetEnd())
-        {
-            // 1명 남앗거나 정상 배팅 종료의 경우
-            Debug.Log("bet end in IsBetEnd");
-            SyncSystem.Sync.HoldemBetEnd();
-            return;
-        }
-
-        // 내가 이미 죽엇다면 처리
-        if (HoldemGameControl.Players.GetPlayerState(CurBetPlayer) == false)
-        {
-            SyncSystem.Sync.HoldemNextStage_V2(1);
-            return;
-        }
-
-        // 내가 예약 죽음햇다면 처리
-        if (HoldemGameControl.Players.GetPlayerDieReserve(CurBetPlayer) == true)
-        {
-            PlayerBetSelected("Die");
-            return;
-        }
 
         SyncSystem.Sync.SyncHoldemIsTurn(CurBetPlayer, true);
         // 알맞은 버튼 키기

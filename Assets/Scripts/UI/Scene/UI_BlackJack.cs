@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -102,7 +103,6 @@ public class UI_BlackJack : UI_Scene
     }
 
     TextMeshProUGUI onTurnPlayer = null;
-    bool isRoomOpened = false;
 
     public override void Init()
     {
@@ -116,14 +116,14 @@ public class UI_BlackJack : UI_Scene
         StartCoroutine(LoadingScreenSwitch(false, 2f));
 
         SeatBind();
-        ChipButtonBind();
+        ChipButtonSetting();
         BetUISwitch(false);
         TimerSwitch(false);
 
         BindEvent(GetGameObject((int)GameObjects.UI_Backspace), LeaveRoomClicked);
         BindEvent(GetGameObject((int)GameObjects.UI_IconFriend), IconFriendClicked);
 
-        SetRoomButton(isRoomOpened);
+        SetRoomButton();
     }
 
     private void Update()
@@ -177,22 +177,63 @@ public class UI_BlackJack : UI_Scene
         }
     }
 
-    void ChipButtonBind()
+    void ChipButtonSetting()
     {
-        GetGameObject((int)GameObjects.UI_ChipButtonLL).BindEvent
-            (PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, 500); });
+        int baseBet;
+        Define.Difficulty difficulty = Managers.CurrentDifficulty;
+        switch (difficulty)
+        {
+            case Define.Difficulty.Beginner:
+                baseBet = 500;
+                break;
+            case Define.Difficulty.Amateur:
+                baseBet = 5000;
+                break;
+            case Define.Difficulty.Pro:
+                baseBet = 50000;
+                break;
+            default:
+                baseBet = 500; // 기본값 설정
+                break;
+        }
 
-        GetGameObject((int)GameObjects.UI_ChipButtonLM).BindEvent
-            (PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, 1000); });
+        GameObject chipGO = GetGameObject((int)GameObjects.UI_ChipButtonLL);
+        SetRightText(GetText((int)Texts.UI_ChipButtonLL_Text), baseBet);
+        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
 
-        GetGameObject((int)GameObjects.UI_ChipButtonMM).BindEvent
-            (PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, 2000); });
+        baseBet *= 2;
+        chipGO = GetGameObject((int)GameObjects.UI_ChipButtonLM);
+        SetRightText(GetText((int)Texts.UI_ChipButtonLM_Text), baseBet);
+        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
 
-        GetGameObject((int)GameObjects.UI_ChipButtonRM).BindEvent
-            (PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, 4000); });
+        baseBet *= 2;
+        chipGO = GetGameObject((int)GameObjects.UI_ChipButtonMM);
+        SetRightText(GetText((int)Texts.UI_ChipButtonMM_Text), baseBet);
+        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
 
-        GetGameObject((int)GameObjects.UI_ChipButtonRR).BindEvent
-            (PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, 8000); });
+        baseBet *= 2;
+        chipGO = GetGameObject((int)GameObjects.UI_ChipButtonRM);
+        SetRightText(GetText((int)Texts.UI_ChipButtonRM_Text), baseBet);
+        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
+
+        baseBet *= 2;
+        chipGO = GetGameObject((int)GameObjects.UI_ChipButtonRR);
+        SetRightText(GetText((int)Texts.UI_ChipButtonRR_Text), baseBet);
+        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
+    }
+
+    void SetRightText(TextMeshProUGUI target, int money)
+    {
+        string text = "";
+        if (money / 1000 == 0)
+        {
+            text += money;
+        }
+        else
+        {
+            text += (money / 1000) + "," + 000;
+        }
+        target.text = text;
     }
 
     public void FirstBetSetting()
@@ -475,36 +516,49 @@ public class UI_BlackJack : UI_Scene
         Managers.UI.ShowPopupUI<UI_InviteFriendPopup>();
     }
 
-    void SetRoomButton(bool isRoomOpened)
+    void SetRoomButton()
     {
+        bool isRoomOpened = PhotonNetwork.CurrentRoom.IsVisible;
+
+        if (PhotonNetwork.IsMasterClient == false) isRoomOpened = true;
+
         if (!isRoomOpened)
-        {
-            ColorUtility.TryParseHtmlString("#FF0000", out Color targetColor);
-            GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
-
-            GetText((int)Texts.UI_RoomButton_Text).text = "방 공개";
-            BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
-        }
+            SetRoomOpen();
         else
-        {
-            ColorUtility.TryParseHtmlString("#CFBFBF", out Color targetColor);
-            GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
+            SetRoomMove();
+    }
 
-            GetText((int)Texts.UI_RoomButton_Text).text = "방 이동";
-            BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
-        }
+    void SetRoomOpen()
+    {
+        DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
+        ColorUtility.TryParseHtmlString("#FF0000", out Color targetColor);
+        GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
+
+        GetText((int)Texts.UI_RoomButton_Text).text = "방 공개";
+        BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
+    }
+
+    void SetRoomMove()
+    {
+        DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
+        ColorUtility.TryParseHtmlString("#CFBFBF", out Color targetColor);
+        GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
+
+        GetText((int)Texts.UI_RoomButton_Text).text = "방 이동";
+        BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
     }
 
     void OpenRoomClicked(PointerEventData data)
     {
         Managers.Photon.OpenRoomToPublic();
-        isRoomOpened = true;
-        SetRoomButton(true);
+        SetRoomMove();
     }
 
     void MoveRoomClicked(PointerEventData data)
     {
-
+        Define.Difficulty difficulty = Managers.CurrentDifficulty;
+        Define.GameType gameType = Managers.CurrentGameType;
+        Managers.Photon.JoinOtherGame(difficulty, gameType);
     }
 
     public void UpdatePlayerName(int index, string pNickName)

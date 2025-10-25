@@ -52,9 +52,24 @@ public class PokerBetManager
     //임의로 정한 값
     public int GetBaseBetAmount(Define.Difficulty diff)
     {
-        int baseBet = 500;
+        int baseBet;
 
-        return baseBet * 2;
+        switch (diff)
+        {
+            case Define.Difficulty.Beginner:
+                baseBet = 1000;
+                break;
+            case Define.Difficulty.Amateur:
+                baseBet = 10000;
+                break;
+            case Define.Difficulty.Pro:
+                baseBet = 100000;
+                break;
+            default:
+                baseBet = 1000; // 기본값 설정
+                break;
+        }
+        return baseBet;
     }
 
     public void HandleBet(int curPlayer)

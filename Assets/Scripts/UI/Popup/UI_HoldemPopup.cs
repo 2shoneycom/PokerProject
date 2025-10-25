@@ -32,8 +32,6 @@ public class UI_HoldemPopup : UI_Popup
         }
     }
 
-    private Define.GameType _gameType = Define.GameType.Holdem;
-
     public override void Init()
     {
         base.Init();
@@ -43,6 +41,8 @@ public class UI_HoldemPopup : UI_Popup
         BindEvent(GetButton((int)Buttons.UI_Beginner).gameObject, BeginnerButton);
         BindEvent(GetButton((int)Buttons.UI_Amateur).gameObject, AmateurButton);
         BindEvent(GetButton((int)Buttons.UI_Pro).gameObject, ProButton);
+        BindEvent(GetButton((int)Buttons.UI_EnterRoomButton).gameObject, EnterRoomClicked);
+        BindEvent(GetButton((int)Buttons.UI_CreateRoomButton).gameObject, CreateRoomClicked);
 
         EnterPanel.SetActive(false);
     }
@@ -51,57 +51,28 @@ public class UI_HoldemPopup : UI_Popup
     {
         SetEnterPanel(Buttons.UI_Beginner);
         Managers.CurrentDifficulty = Define.Difficulty.Beginner;
-
-        BindEvent(GetButton((int)Buttons.UI_EnterRoomButton).gameObject, EnterBeginnerRoom);
-        BindEvent(GetButton((int)Buttons.UI_CreateRoomButton).gameObject, CreateBeginnerRoom);
-    }
-
-    void EnterBeginnerRoom(PointerEventData data)
-    {
-        Managers.Photon.JoinGame(500, _gameType);
-    }
-
-    void CreateBeginnerRoom(PointerEventData data)
-    {
-        Managers.Photon.CreateGame(500, _gameType);
     }
 
     void AmateurButton(PointerEventData data)
     {
         SetEnterPanel(Buttons.UI_Amateur);
         Managers.CurrentDifficulty = Define.Difficulty.Amateur;
-
-        BindEvent(GetButton((int)Buttons.UI_EnterRoomButton).gameObject, EnterAmateurRoom);
-        BindEvent(GetButton((int)Buttons.UI_CreateRoomButton).gameObject, CreateAmateurRoom);
-    }
-
-    void EnterAmateurRoom(PointerEventData data)
-    {
-        Managers.Photon.JoinGame(5000, _gameType);
-    }
-
-    void CreateAmateurRoom(PointerEventData data)
-    {
-        Managers.Photon.CreateGame(5000, _gameType);
     }
 
     void ProButton(PointerEventData data)
     {
         SetEnterPanel(Buttons.UI_Pro);
         Managers.CurrentDifficulty = Define.Difficulty.Pro;
-
-        BindEvent(GetButton((int)Buttons.UI_EnterRoomButton).gameObject, EnterProRoom);
-        BindEvent(GetButton((int)Buttons.UI_CreateRoomButton).gameObject, CreateProRoom);
     }
 
-    void EnterProRoom(PointerEventData data)
+    void EnterRoomClicked(PointerEventData data)
     {
-        Managers.Photon.JoinGame(50000, _gameType);
+        Managers.Photon.JoinGame(Managers.CurrentDifficulty, Managers.CurrentGameType);
     }
 
-    void CreateProRoom(PointerEventData data)
+    void CreateRoomClicked(PointerEventData data)
     {
-        Managers.Photon.CreateGame(50000, _gameType);
+        Managers.Photon.CreateGame(Managers.CurrentDifficulty, Managers.CurrentGameType);
     }
 
     void SetEnterPanel(Buttons button)
