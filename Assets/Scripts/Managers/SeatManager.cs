@@ -111,6 +111,12 @@ public class SeatManager
             // UI 업데이트
             curGameScene.UpdateSeatUI(targetIndex / 2, DEFAULT_NULL_SEAT);
         }
+
+        if (occupiedCount < 2 && PhotonNetwork.IsMasterClient && Managers.IsNowPlayingGame == false && 
+            Managers.CurrentGameType != Define.GameType.BlackJack)
+        {
+            curGameScene.ReadyForGameStart(false);
+        }
     }
 
     private int GetSeatIndex(string uid)

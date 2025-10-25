@@ -49,7 +49,7 @@ public class PokerScene : GameScene
         _pokerUI.BetUISwitch(isOn);
     }
 
-    public override void ReadyForGameStart()
+    public override void ReadyForGameStart(bool isOn = true)
     {
         _pokerUI.GameStartButtonOn();
     }

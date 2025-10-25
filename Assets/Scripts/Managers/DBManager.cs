@@ -679,7 +679,7 @@ public class DBManager
         {
             {"from", myNickName},
             {"roomID", Managers.Photon.currentRoomName},
-            {"gameType", Managers.Photon.GetGameType().ToString()},
+            {"gameType", Managers.CurrentGameType.ToString()},
             {"createdAt", now},
             {"expiresAt", expiresAt}
         };

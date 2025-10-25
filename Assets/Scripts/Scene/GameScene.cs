@@ -17,7 +17,7 @@ public abstract class GameScene : BaseScene
     }
 
     public abstract void UpdateSeatUI(int index, string nickname);
-    public abstract void ReadyForGameStart();
+    public abstract void ReadyForGameStart(bool isOn = true);
     public abstract void UpdateBetUI(bool isOn);
     public abstract void OnMasterChanged();
     public abstract void OnPlayerLeft(string uid);

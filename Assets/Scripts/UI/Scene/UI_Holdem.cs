@@ -239,10 +239,10 @@ public class UI_Holdem : UI_Scene
         }
     }
 
-    public void GameStartButtonOn()
+    public void GameStartButtonOn(bool isOn = true)
     {
         GameObject bt = GetButton((int)Buttons.UI_GameStartButton).gameObject;
-        bt.SetActive(true);
+        bt.SetActive(isOn);
 
         bt.DisBindEvent(GameStartButtonClicked);
         bt.BindEvent(GameStartButtonClicked);
@@ -403,9 +403,9 @@ public class UI_Holdem : UI_Scene
 
     void MoveRoomClicked(PointerEventData data)
     {
-        int betMoney = Managers.Photon.GetCurrentRoomBetMoney();
-        Define.GameType gameType = Managers.Photon.GetCurrentRoomGameType();
-        Managers.Photon.JoinOtherGame(betMoney, gameType);
+        Define.Difficulty difficulty = Managers.CurrentDifficulty;
+        Define.GameType gameType = Managers.CurrentGameType;
+        Managers.Photon.JoinOtherGame(difficulty, gameType);
     }
 
     public GameObject GetPlayerGameObjcet(int index)

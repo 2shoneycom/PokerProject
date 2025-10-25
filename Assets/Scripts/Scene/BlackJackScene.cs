@@ -59,7 +59,7 @@ public class BlackJackScene : GameScene
         _jackUI.BetUISwitch(isOn);
     }
 
-    public override void ReadyForGameStart()
+    public override void ReadyForGameStart(bool isOn = true)
     {
         _jackUI.GameStartButtonSetting();
     }

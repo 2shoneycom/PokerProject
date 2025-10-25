@@ -41,6 +41,8 @@ public class UI_JackPopup : UI_Popup
         BindEvent(GetButton((int)Buttons.UI_Beginner).gameObject, BeginnerButton);
         BindEvent(GetButton((int)Buttons.UI_Amateur).gameObject, AmateurButton);
         BindEvent(GetButton((int)Buttons.UI_Pro).gameObject, ProButton);
+        BindEvent(GetButton((int)Buttons.UI_EnterRoomButton).gameObject, EnterRoomClicked);
+        BindEvent(GetButton((int)Buttons.UI_CreateRoomButton).gameObject, CreateRoomClicked);
 
         EnterPanel.SetActive(false);
     }
@@ -49,29 +51,28 @@ public class UI_JackPopup : UI_Popup
     {
         SetEnterPanel(Buttons.UI_Beginner);
         Managers.CurrentDifficulty = Define.Difficulty.Beginner;
-
-        BindEvent(GetButton((int)Buttons.UI_EnterRoomButton).gameObject, EnterBeginnerRoom);
-        BindEvent(GetButton((int)Buttons.UI_CreateRoomButton).gameObject, CreateBeginnerRoom);
-    }
-
-    void EnterBeginnerRoom(PointerEventData data)
-    {
-        Managers.Photon.JoinGame(0, Define.GameType.BlackJack);
-    }
-
-    void CreateBeginnerRoom(PointerEventData data)
-    {
-
     }
 
     void AmateurButton(PointerEventData data)
     {
         SetEnterPanel(Buttons.UI_Amateur);
+        Managers.CurrentDifficulty = Define.Difficulty.Amateur;
     }
 
     void ProButton(PointerEventData data)
     {
         SetEnterPanel(Buttons.UI_Pro);
+        Managers.CurrentDifficulty = Define.Difficulty.Pro;
+    }
+
+    void EnterRoomClicked(PointerEventData data)
+    {
+        Managers.Photon.JoinGame(Managers.CurrentDifficulty, Managers.CurrentGameType);
+    }
+
+    void CreateRoomClicked(PointerEventData data)
+    {
+        Managers.Photon.CreateGame(Managers.CurrentDifficulty, Managers.CurrentGameType);
     }
 
     void SetEnterPanel(Buttons button)

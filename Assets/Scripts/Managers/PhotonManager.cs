@@ -13,22 +13,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private Dictionary<string, RoomInfo> availableRooms = new Dictionary<string, RoomInfo>();
     UI_Loading _loadingUI;
     UI_Login _loginUI;
-    public string currentRoomName = "";
-
     private bool isWaitingForJoinOtherGame = false;
-    private int currentBetMoney;
-    private Define.GameType currentGameType;
-    private Define.Difficulty currentDifficulty;
+
+    public string currentRoomName = "";
 
     void Start()
     {
         DontDestroyOnLoad(gameObject);
-    }
-
-    /* 현재 게임 종류 반환 */
-    public Define.GameType GetGameType()
-    {
-        return currentGameType;
     }
 
     #region Connect
@@ -84,7 +75,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 // 사용 가능한 방 표시 및 업데이트
                 if (availableRooms.ContainsKey(room.Name))
                 {
-                    Debug.Log($"Room {room.Name} betMoney: {room.CustomProperties["betMoney"]}");
+                    Debug.Log($"Room {room.Name} Difficulty: {room.CustomProperties["difficulty"]}");
                     availableRooms[room.Name] = room;
                 }
                 else
@@ -96,27 +87,27 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void CreateGame(int betMoney, Define.GameType gameType)
+    public void CreateGame(Define.Difficulty difficulty, Define.GameType gameType)
     {
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
-        StartCoroutine(LoadingCreateGame(0.5f, betMoney, gameType));
+        StartCoroutine(LoadingCreateGame(0.5f, difficulty, gameType));
     }
 
-    IEnumerator LoadingCreateGame(float sec, int betMoney, Define.GameType gameType)
+    IEnumerator LoadingCreateGame(float sec, Define.Difficulty difficulty, Define.GameType gameType)
     {
         yield return new WaitForSeconds(sec);
         if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InLobby)
         {
-            CreateRoom(betMoney, gameType);
+            CreateRoom(difficulty, gameType);
         }
         else
         {
             // 연결되어있지 않으면 Reconnect 후 콜백에서 CreateRoom 호출
-            StartCoroutine(WaitForLobbyAndCreateRoom(betMoney, gameType));
+            StartCoroutine(WaitForLobbyAndCreateRoom(difficulty, gameType));
         }
     }
 
-    IEnumerator WaitForLobbyAndCreateRoom(int betMoney, Define.GameType gameType)
+    IEnumerator WaitForLobbyAndCreateRoom(Define.Difficulty difficulty, Define.GameType gameType)
     {
         if (!PhotonNetwork.IsConnected)
         {
@@ -133,15 +124,15 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 yield return null;
         }
 
-        CreateRoom(betMoney, gameType);
+        CreateRoom(difficulty, gameType);
     }
 
-    void CreateRoom(int betMoney, Define.GameType gameType, bool isOpen = false)
+    void CreateRoom(Define.Difficulty difficulty, Define.GameType gameType, bool isOpen = false)
     {
         if (PhotonNetwork.IsConnectedAndReady)
         {
             _loadingUI.SetConnectionInfoText("Creating New Room..");
-            string roomName = gameType.ToString() + betMoney + UnityEngine.Random.Range(1000, 9999);
+            string roomName = gameType.ToString() + difficulty.ToString() + UnityEngine.Random.Range(1000, 9999);
             RoomOptions roomOptions = new RoomOptions
             {
                 MaxPlayers = 10,
@@ -149,10 +140,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 IsOpen = true,    // 새로운 플레이어가 들어올 수 있도록 설정
                 CleanupCacheOnLeave = false,
                 CustomRoomProperties = new ExitGames.Client.Photon.Hashtable {
-                    { "betMoney", betMoney },
+                    { "difficulty", difficulty.ToString() },
                     { "gameType", gameType.ToString() }
                 },
-                CustomRoomPropertiesForLobby = new string[] { "betMoney", "gameType" }
+                CustomRoomPropertiesForLobby = new string[] { "difficulty", "gameType" }
             };
             PhotonNetwork.CreateRoom(roomName, roomOptions);
         }
@@ -172,12 +163,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void JoinGame(int betMoney, Define.GameType gameType)
+    public void JoinGame(Define.Difficulty difficulty, Define.GameType gameType)
     {
-        currentGameType = gameType;
-        currentBetMoney = betMoney;
         _loadingUI = Managers.UI.ShowPopupUI<UI_Loading>();
-        StartCoroutine(LoadingJoinGame(0.5f, currentBetMoney, currentGameType));
+        StartCoroutine(LoadingJoinGame(0.5f, difficulty, gameType));
     }
 
     // roomID로 해당 방 들어가는 함수
@@ -195,20 +184,20 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
-    IEnumerator LoadingJoinGame(float sec, int betMoney, Define.GameType gameType)
+    IEnumerator LoadingJoinGame(float sec, Define.Difficulty difficulty, Define.GameType gameType)
     {
         yield return new WaitForSeconds(sec);
         if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InLobby)
         {
-            JoinOrCreateRoom(betMoney, gameType);
+            JoinOrCreateRoom(difficulty, gameType);
         }
         else
         {
-            StartCoroutine(WaitForLobbyAndJoinRoom(betMoney, gameType));
+            StartCoroutine(WaitForLobbyAndJoinRoom(difficulty, gameType));
         }
     }
 
-    IEnumerator WaitForLobbyAndJoinRoom(int betMoney, Define.GameType gameType)
+    IEnumerator WaitForLobbyAndJoinRoom(Define.Difficulty difficulty, Define.GameType gameType)
     {
         Reconnect();
 
@@ -224,33 +213,34 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 yield return null;
         }
 
-        JoinOrCreateRoom(betMoney, gameType);
+        JoinOrCreateRoom(difficulty, gameType);
     }
 
-    void JoinOrCreateRoom(int betMoney, Define.GameType gameType)
+    void JoinOrCreateRoom(Define.Difficulty difficulty, Define.GameType gameType)
     {
         List<RoomInfo> matchingRooms = new List<RoomInfo>();
 
         foreach (RoomInfo room in availableRooms.Values)
         {
-            if (room.CustomProperties.ContainsKey("betMoney") && room.CustomProperties.ContainsKey("gameType"))
+            if (room.CustomProperties.ContainsKey("difficulty") && room.CustomProperties.ContainsKey("gameType"))
             {
-                object betObj = room.CustomProperties["betMoney"];
+                object diffObj = room.CustomProperties["difficulty"];
                 object gameTypeObj = room.CustomProperties["gameType"];
 
-                if (betObj == null || gameTypeObj == null)
+                if (diffObj == null || gameTypeObj == null)
                 {
-                    Debug.Log($"Room {room.Name} betMoney or gameType is null.");
+                    Debug.Log($"Room {room.Name} difficulty or gameType is null.");
                     continue;
                 }
 
-                int roomBetMoney = Convert.ToInt32(betObj);
+                string roomDifficultyStr = diffObj.ToString();
+                Define.Difficulty roomDifficulty = (Define.Difficulty)Enum.Parse(typeof(Define.Difficulty), roomDifficultyStr);
                 string roomGameTypeStr = gameTypeObj.ToString();
                 Define.GameType roomGameType = (Define.GameType)Enum.Parse(typeof(Define.GameType), roomGameTypeStr);
 
-                Debug.Log($"Room {room.Name} betMoney: {roomBetMoney}, gameType: {roomGameType}");
+                Debug.Log($"Room {room.Name} difficulty: {roomDifficulty}, gameType: {roomGameType}");
 
-                if (roomBetMoney == betMoney && roomGameType == gameType && room.PlayerCount < room.MaxPlayers)
+                if (roomDifficulty == difficulty && roomGameType == gameType && room.PlayerCount < room.MaxPlayers)
                 {
                     matchingRooms.Add(room);
                 }
@@ -262,12 +252,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             int rand = UnityEngine.Random.Range(0, matchingRooms.Count);
             PhotonNetwork.JoinRoom(matchingRooms[rand].Name);
-            Debug.Log($"Entering Room ({betMoney}, {gameType})...");
+            Debug.Log($"Entering Room ({difficulty}, {gameType})...");
         }
         else
         {
-            Debug.Log($"No available room for betMoney {betMoney}, gameType {gameType}");
-            CreateRoom(betMoney, gameType, true);
+            Debug.Log($"No available room for difficulty {difficulty}, gameType {gameType}");
+            CreateRoom(difficulty, gameType, true);
         }
     }
 
@@ -275,9 +265,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.LogError($"OnJoinRoomFailed: {returnCode}, {message}");
         _loadingUI.SetConnectionInfoText($"JoinRoom Failed: {message}");
-        int betmoney = 1000;//Managers.CurrentDifficulty;
+        Define.Difficulty curDiff = Managers.CurrentDifficulty;
         Define.GameType curgt = Managers.CurrentGameType;
-        JoinOrCreateRoom(betmoney, curgt);
+        JoinOrCreateRoom(curDiff, curgt);
     }
 
     public override void OnJoinedRoom()
@@ -289,13 +279,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         // 방의 gameType 가져오기
         Define.GameType gameType = Define.GameType.Holdem; // 기본값          /////////////////////////////////////////////////////////
-        currentGameType = gameType;
 
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("gameType"))
         {
             string gameTypeStr = PhotonNetwork.CurrentRoom.CustomProperties["gameType"].ToString();
             gameType = (Define.GameType)Enum.Parse(typeof(Define.GameType), gameTypeStr);
-            currentGameType = gameType;
         }
 
         // gameType에 따라 다른 씬 로드
@@ -321,20 +309,18 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         SetMyPhotonPlayerInfo(PhotonNetwork.LocalPlayer);
     }
 
-    public void JoinOtherGame(int betMoney, Define.GameType gameType)
+    public void JoinOtherGame(Define.Difficulty difficulty, Define.GameType gameType)
     {
         if (PhotonNetwork.InRoom)
         {
             isWaitingForJoinOtherGame = true;
-            currentBetMoney = betMoney;
-            currentGameType = gameType;
 
             PhotonNetwork.LeaveRoom();
             Debug.Log("Leaving current room...");
         }
         else
         {
-            JoinOtherRoom(betMoney, gameType);
+            JoinOtherRoom(difficulty, gameType);
         }
     }
 
@@ -345,25 +331,25 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (isWaitingForJoinOtherGame)
         {
             isWaitingForJoinOtherGame = false;
-            StartCoroutine(LoadingJoinOtherRoom(0.5f, currentBetMoney, currentGameType));
+            StartCoroutine(LoadingJoinOtherRoom(0.5f, Managers.CurrentDifficulty, Managers.CurrentGameType));
         }
     }
 
-    IEnumerator LoadingJoinOtherRoom(float sec, int betMoney, Define.GameType gameType)
+    IEnumerator LoadingJoinOtherRoom(float sec, Define.Difficulty difficulty, Define.GameType gameType)
     {
         yield return new WaitForSeconds(sec);
 
         if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InLobby)
         {
-            JoinOtherRoom(betMoney, gameType);
+            JoinOtherRoom(difficulty, gameType);
         }
         else
         {
-            StartCoroutine(WaitForLobbyAndJoinOtherRoom(betMoney, gameType));
+            StartCoroutine(WaitForLobbyAndJoinOtherRoom(difficulty, gameType));
         }
     }
 
-    IEnumerator WaitForLobbyAndJoinOtherRoom(int betMoney, Define.GameType gameType)
+    IEnumerator WaitForLobbyAndJoinOtherRoom(Define.Difficulty difficulty, Define.GameType gameType)
     {
         Reconnect();
 
@@ -379,36 +365,36 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 yield return null;
         }
 
-        JoinOtherRoom(betMoney, gameType);
+        JoinOtherRoom(difficulty, gameType);
     }
 
-    void JoinOtherRoom(int betMoney, Define.GameType gameType)
+    void JoinOtherRoom(Define.Difficulty difficulty, Define.GameType gameType)
     {
         if (PhotonNetwork.IsConnectedAndReady)
         {
-            Debug.Log($"Searching Other Room ({betMoney}, {gameType})...");
+            Debug.Log($"Searching Other Room ({difficulty}, {gameType})...");
 
             List<RoomInfo> matchingRooms = new List<RoomInfo>();
 
             foreach (RoomInfo room in availableRooms.Values)
             {
-                if (room.CustomProperties.ContainsKey("betMoney") && room.CustomProperties.ContainsKey("gameType"))
+                if (room.CustomProperties.ContainsKey("difficulty") && room.CustomProperties.ContainsKey("gameType"))
                 {
-                    object betObj = room.CustomProperties["betMoney"];
+                    object diffObj = room.CustomProperties["difficulty"];
                     object gameTypeObj = room.CustomProperties["gameType"];
 
-                    if (betObj == null || gameTypeObj == null)
+                    if (diffObj == null || gameTypeObj == null)
                     {
-                        Debug.Log($"Room {room.Name} betMoney or gameType is null.");
+                        Debug.Log($"Room {room.Name} difficulty or gameType is null.");
                         continue;
                     }
 
-                    int roomBetMoney = Convert.ToInt32(betObj);
+                    string roomDifficultyStr = diffObj.ToString();
+                    Define.Difficulty roomDifficulty = (Define.Difficulty)Enum.Parse(typeof(Define.Difficulty), roomDifficultyStr);
                     string roomGameTypeStr = gameTypeObj.ToString();
-
                     Define.GameType roomGameType = (Define.GameType)Enum.Parse(typeof(Define.GameType), roomGameTypeStr);
 
-                    if (roomBetMoney == betMoney &&
+                    if (roomDifficulty == difficulty &&
                         roomGameType == gameType &&
                         room.PlayerCount < room.MaxPlayers &&                        
                         room.Name != currentRoomName)
@@ -422,54 +408,18 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             {
                 int rand = UnityEngine.Random.Range(0, matchingRooms.Count);
                 PhotonNetwork.JoinRoom(matchingRooms[rand].Name);
-                Debug.Log($"Entering Other Room ({betMoney}, {gameType})...");
+                Debug.Log($"Entering Other Room ({difficulty}, {gameType})...");
             }
             else
             {
-                Debug.Log($"No other available room for betMoney {betMoney}, gameType {gameType}. Creating new room.");
+                Debug.Log($"No other available room for betMoney {difficulty}, gameType {gameType}. Creating new room.");
 
-                CreateRoom(betMoney, gameType, true);
+                CreateRoom(difficulty, gameType, true);
             }
         }
         else
         {
             Reconnect();
-        }
-    }
-
-    public int GetCurrentRoomBetMoney()
-    {
-        if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("betMoney"))
-        {
-            return (int)PhotonNetwork.CurrentRoom.CustomProperties["betMoney"];
-        }
-        else
-        {
-            Debug.LogWarning("현재 방 정보가 없거나 betMoney 프로퍼티가 없음");
-            return -1;
-        }
-    }
-
-    public Define.GameType GetCurrentRoomGameType()
-    {
-        if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey("gameType"))
-        {
-            string gameTypeStr = PhotonNetwork.CurrentRoom.CustomProperties["gameType"].ToString();
-            try
-            {
-                Define.GameType gameType = (Define.GameType)Enum.Parse(typeof(Define.GameType), gameTypeStr);
-                return gameType;
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"gameType 변환 오류: {gameTypeStr}, {e.Message}");
-                return Define.GameType.None;
-            }
-        }
-        else
-        {
-            Debug.LogWarning("현재 방 정보가 없거나 gameType 프로퍼티가 없음");
-            return Define.GameType.None;
         }
     }
 

@@ -51,9 +51,9 @@ public class HoldemScene : GameScene
         _holdemUI.BetUISwitch(isOn);
     }
 
-    public override void ReadyForGameStart()
+    public override void ReadyForGameStart(bool isOn = true)
     {
-        _holdemUI.GameStartButtonOn();
+        _holdemUI.GameStartButtonOn(isOn);
     }
 
     void Update()
