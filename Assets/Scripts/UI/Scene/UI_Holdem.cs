@@ -332,22 +332,22 @@ public class UI_Holdem : UI_Scene
 
     void SetRoomOpen()
     {
-        DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
-        ColorUtility.TryParseHtmlString("#CFBFBF", out Color targetColor);
-        GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
-
-        GetText((int)Texts.UI_RoomButton_Text).text = "방 이동";
-        BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
-    }
-
-    void SetRoomMove()
-    {
         DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
         ColorUtility.TryParseHtmlString("#FF0000", out Color targetColor);
         GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
 
         GetText((int)Texts.UI_RoomButton_Text).text = "방 공개";
         BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
+    }
+
+    void SetRoomMove()
+    {
+        DisBindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, OpenRoomClicked);
+        ColorUtility.TryParseHtmlString("#CFBFBF", out Color targetColor);
+        GetButton((int)Buttons.UI_RoomButton).GetComponent<Image>().color = targetColor;
+
+        GetText((int)Texts.UI_RoomButton_Text).text = "방 이동";
+        BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
     }
 
     void IconFriendClicked(PointerEventData data)

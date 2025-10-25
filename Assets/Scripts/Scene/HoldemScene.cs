@@ -84,6 +84,13 @@ public class HoldemScene : GameScene
         // 1. 카드 받기도 전에 나간 경우 -> 그냥 카드까지 받게 하고 die 처리
         // 2. 내 차례가 아닌 딜링 하는 경우 -> die 처리
         // 3. 내 차례 였던 경우 -> die 처리
+        if (HoldemGameControl.Control.IsPlaying == false) return;
+        if (PhotonNetwork.IsMasterClient == false) return;
 
+        int gameIndex = HoldemGameControl.Players.GetPlayerGameIndexByUID(uid);
+        if (HoldemGameControl.Bet.CurBetPlayer == gameIndex)
+            HoldemGameControl.Bet.PlayerBetSelected("Die");
+        else
+            SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, true);
     }
 }

@@ -13,7 +13,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private Dictionary<string, RoomInfo> availableRooms = new Dictionary<string, RoomInfo>();
     UI_Loading _loadingUI;
     UI_Login _loginUI;
-    public string currentRoomName;
+    public string currentRoomName = "";
 
     private bool isWaitingForJoinOtherGame = false;
     private int currentBetMoney;
@@ -136,7 +136,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         CreateRoom(betMoney, gameType);
     }
 
-    void CreateRoom(int betMoney, Define.GameType gameType)
+    void CreateRoom(int betMoney, Define.GameType gameType, bool isOpen = false)
     {
         if (PhotonNetwork.IsConnectedAndReady)
         {
@@ -145,7 +145,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             RoomOptions roomOptions = new RoomOptions
             {
                 MaxPlayers = 10,
-                IsVisible = false, // 방이 리스트에 나타나게 설정
+                IsVisible = isOpen, // 방이 리스트에 나타나게 설정
                 IsOpen = true,    // 새로운 플레이어가 들어올 수 있도록 설정
                 CleanupCacheOnLeave = false,
                 CustomRoomProperties = new ExitGames.Client.Photon.Hashtable {
@@ -267,7 +267,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         else
         {
             Debug.Log($"No available room for betMoney {betMoney}, gameType {gameType}");
-            CreateRoom(betMoney, gameType);
+            CreateRoom(betMoney, gameType, true);
         }
     }
 
@@ -275,6 +275,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.LogError($"OnJoinRoomFailed: {returnCode}, {message}");
         _loadingUI.SetConnectionInfoText($"JoinRoom Failed: {message}");
+        int betmoney = 1000;//Managers.CurrentDifficulty;
+        Define.GameType curgt = Managers.CurrentGameType;
+        JoinOrCreateRoom(betmoney, curgt);
     }
 
     public override void OnJoinedRoom()
@@ -407,9 +410,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
                     if (roomBetMoney == betMoney &&
                         roomGameType == gameType &&
-                        room.PlayerCount < room.MaxPlayers &&
-                        PhotonNetwork.CurrentRoom != null &&
-                        room.Name != PhotonNetwork.CurrentRoom.Name)
+                        room.PlayerCount < room.MaxPlayers &&                        
+                        room.Name != currentRoomName)
                     {
                         matchingRooms.Add(room);
                     }
@@ -426,7 +428,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             {
                 Debug.Log($"No other available room for betMoney {betMoney}, gameType {gameType}. Creating new room.");
 
-                CreateRoom(betMoney, gameType);
+                CreateRoom(betMoney, gameType, true);
             }
         }
         else
