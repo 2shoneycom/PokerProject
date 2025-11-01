@@ -16,7 +16,7 @@ public class PokerCardManager
 
     public const int PLAYER_CARD_NUM = 8;
     const float ICON_OFFSET = 3f;
-    const float CARD_OFFSET = 3.7f;
+    const float CARD_OFFSET = 1.6f;
 
     WaitForSeconds cardMoveDelay = new WaitForSeconds(0.3f);
 
@@ -36,7 +36,6 @@ public class PokerCardManager
     public static Action<string> OnAddCard;
 
     bool isInited = false;
-
     public void Init()
     {
         if (isInited)
@@ -66,6 +65,10 @@ public class PokerCardManager
         cardNum = new List<int>(FULL_CARD_LEN);
         leavePlayerCard = new List<GameObject>();
 
+        Sprite[] cardSpritesHeart = LoadCardSprite("heart");
+        Sprite[] cardSpritesClub = LoadCardSprite("club");
+        Sprite[] cardSpritesDiamondAndSpade = LoadCardSprite();
+
         for (int i = 0; i < FULL_CARD_LEN; i++)
         {
             int cS = i / 13;
@@ -75,24 +78,40 @@ public class PokerCardManager
             {
                 case 0:     // Clover
                     cardShape.Add('C');
-                    cardSprite = Managers.Resource.Load<Sprite>($"Art/Cards/Clubs/{cN}_club");
+                    cardSprite = LoadSpriteInArray(cardSpritesClub, "club", cN);
                     break;
                 case 1:     // Diamond
                     cardShape.Add('D');
-                    cardSprite = Managers.Resource.Load<Sprite>($"Art/Cards/Diamonds/{cN}_diamond");
+                    cardSprite = LoadSpriteInArray(cardSpritesDiamondAndSpade, "diamond", cN);
                     break;
                 case 2:     // Heart
                     cardShape.Add('H');
-                    cardSprite = Managers.Resource.Load<Sprite>($"Art/Cards/Hearts/{cN}_heart");
+                    cardSprite = LoadSpriteInArray(cardSpritesHeart, "heart", cN);
                     break;
                 case 3:     // Spade
                     cardShape.Add('S');
-                    cardSprite = Managers.Resource.Load<Sprite>($"Art/Cards/Spades/{cN}_spade");
+                    cardSprite = LoadSpriteInArray(cardSpritesDiamondAndSpade, "spade", cN);
                     break;
             }
             cardNum.Add(cN);
             cardSprites.Add(cardSprite);
         }
+    }
+
+    Sprite[] LoadCardSprite(string shape = "diamondAndspade")
+    {
+        return Managers.Resource.LoadAll<Sprite>($"Art/Cards/Card_{shape}");
+    }
+
+    Sprite LoadSpriteInArray(Sprite[] sprites, string cS, int cN)
+    {
+        Sprite target = System.Array.Find(sprites, s => s.name == $"Card_{cS}_{cN}");
+        if(target == null)
+        {
+            Debug.Log($"카드 스프라이트 로드 오류 {cS} / {cN}");
+            return null;
+        }
+        return target;
     }
 
     private void SetupPlayerCardPos()
@@ -144,6 +163,11 @@ public class PokerCardManager
                     if (j != 4)
                         playerCardPos[i, j].x += CARD_OFFSET;
                 }
+            }
+        
+            for(int j = 1; j < PLAYER_CARD_NUM; j++)
+            {
+                playerCardPos[i, j].z = playerCardPos[i, j - 1].z - 1f;
             }
         }
     }

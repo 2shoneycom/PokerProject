@@ -201,25 +201,25 @@ public class UI_BlackJack : UI_Scene
         SetRightText(GetText((int)Texts.UI_ChipButtonLL_Text), baseBet);
         chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
 
-        baseBet *= 2;
+        int a = baseBet * 2;
         chipGO = GetGameObject((int)GameObjects.UI_ChipButtonLM);
-        SetRightText(GetText((int)Texts.UI_ChipButtonLM_Text), baseBet);
-        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
+        SetRightText(GetText((int)Texts.UI_ChipButtonLM_Text), a);
+        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, a); });
 
-        baseBet *= 2;
+        int b = a * 2;
         chipGO = GetGameObject((int)GameObjects.UI_ChipButtonMM);
-        SetRightText(GetText((int)Texts.UI_ChipButtonMM_Text), baseBet);
-        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
+        SetRightText(GetText((int)Texts.UI_ChipButtonMM_Text), b);
+        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, b); });
 
-        baseBet *= 2;
+        int c = b * 2;
         chipGO = GetGameObject((int)GameObjects.UI_ChipButtonRM);
-        SetRightText(GetText((int)Texts.UI_ChipButtonRM_Text), baseBet);
-        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
+        SetRightText(GetText((int)Texts.UI_ChipButtonRM_Text), c);
+        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, c); });
 
-        baseBet *= 2;
+        int d = c * 2;
         chipGO = GetGameObject((int)GameObjects.UI_ChipButtonRR);
-        SetRightText(GetText((int)Texts.UI_ChipButtonRR_Text), baseBet);
-        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
+        SetRightText(GetText((int)Texts.UI_ChipButtonRR_Text), d);
+        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, d); });
     }
 
     void SetRightText(TextMeshProUGUI target, int money)
@@ -231,7 +231,7 @@ public class UI_BlackJack : UI_Scene
         }
         else
         {
-            text += (money / 1000) + "," + 000;
+            text += (money / 1000) + "," + "000";
         }
         target.text = text;
     }
