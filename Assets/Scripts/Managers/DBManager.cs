@@ -15,23 +15,48 @@ public class DataToSave
 {
     public string nickName;
     public long seedMoney;
-    public bool reward;
+    public int streak;
+    public string weekKey;
+    public string lastClaimDate;
     public string nickNameUpdatedDate;
     public Dictionary<string, object> invitation;
 
     public DataToSave() { }
-    public DataToSave(string nickName, long seedMoney, bool reward, string nickNameUpdatedDate = "20000101")
+    public DataToSave(string nickName, long seedMoney, int streak, string weekKey, string lastClaimDate = "2000-01-01", string nickNameUpdatedDate = "2000-01-01")
     {
         this.nickName = nickName;
         this.seedMoney = seedMoney;
-        this.reward = reward;
+        this.streak = streak;
+        this.weekKey = weekKey;
+        this.lastClaimDate = lastClaimDate;
         this.nickNameUpdatedDate = nickNameUpdatedDate;
         this.invitation = new Dictionary<string, object>();
     }
 }
-
 public class DBManager
 {
+    public struct ClaimView   // UI 초기 표시용
+    {
+        public bool canClaim;       // 오늘 보상 수령 가능?
+        public int streakToShow;   // 체크 개수(0~7)
+        public string todayKey;     // yyyy-MM-dd
+        public string weekKey;      // yyyy-MM-dd (월요일)
+        public long seedMoney;
+        public string message;
+    }
+
+    public struct ClaimResult // 수령 트랜잭션 결과
+    {
+        public bool committed;
+        public int streak;
+        public long seedMoney;
+        public string weekKey;
+        public string today;
+        public long reward;
+        public string message;
+    }
+
+
     public DatabaseReference dbRef;
     private DatabaseReference inviteRef;
     public DataToSave dts;
@@ -43,12 +68,22 @@ public class DBManager
 
     private void DataSetting()
     {
-        // 초기 데이터 설정
+        Debug.Log("[DataSetting] start");
+        var wk = WeekKey(DateTimeOffset.UtcNow);
+        Debug.Log("[DataSetting] computed weekKey=" + wk);
+
         dts = new DataToSave(
             "User" + UnityEngine.Random.Range(10000, 100000),
             1_000_000L,
-            false
-            );
+            0,
+            wk,
+            "2000-01-01", // lastClaimDate
+            "2000-01-01"  // nickNameUpdatedDate
+        );
+
+        Debug.Log("[DataSetting] dts seedMoney=" + dts.seedMoney +
+                  " weekKey=" + dts.weekKey +
+                  " streak=" + dts.streak);
     }
 
     public void GetUserInfo()
@@ -79,6 +114,11 @@ public class DBManager
                     string jsonData = snapshot.GetRawJsonValue();
                     DataToSave loadedData = JsonUtility.FromJson<DataToSave>(jsonData);
 
+                    if (string.IsNullOrEmpty(loadedData.weekKey)) loadedData.weekKey = WeekKeyKst();
+                    if (string.IsNullOrEmpty(loadedData.lastClaimDate)) loadedData.lastClaimDate = "2000-01-01";
+                    if (string.IsNullOrEmpty(loadedData.nickNameUpdatedDate)) loadedData.nickNameUpdatedDate = "2000-01-01";
+
+                    dts = loadedData;
                     // 데이터 적용
                     User.NowUser.SetNickName(loadedData.nickName);
                     User.NowUser.SetSeedMoney(loadedData.seedMoney);
@@ -100,6 +140,172 @@ public class DBManager
             });
     }
 
+    private static TimeZoneInfo Kst()
+    {
+        try { return TimeZoneInfo.FindSystemTimeZoneById("Asia/Seoul"); }
+        catch (TimeZoneNotFoundException)
+        {
+            Debug.LogWarning("[Time] 'Asia/Seoul' not found. Try 'Korea Standard Time'.");
+            try { return TimeZoneInfo.FindSystemTimeZoneById("Korea Standard Time"); }
+            catch (Exception e2)
+            {
+                Debug.LogError("[Time] No KST timezone. Fallback to fixed UTC+9. " + e2);
+                return TimeZoneInfo.CreateCustomTimeZone("KST", TimeSpan.FromHours(9), "KST", "KST");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("[Time] Kst() failed: " + e);
+            return TimeZoneInfo.CreateCustomTimeZone("KST", TimeSpan.FromHours(9), "KST", "KST");
+        }
+    }
+
+    private static DateTime TodayKst() => TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, Kst()).Date;
+    private static string TodayKeyKst() => TodayKst().ToString("yyyy-MM-dd");
+
+    public static string WeekKeyKst()
+    {
+        var today = TodayKst();
+        int mondayZero = (((int)today.DayOfWeek + 6) % 7); // 월=0 … 일=6
+        return today.AddDays(-mondayZero).ToString("yyyy-MM-dd");
+    }
+
+    private static string WeekKey(DateTimeOffset utcNow)
+    {
+        try
+        {
+            var kstNow = TimeZoneInfo.ConvertTime(utcNow, Kst()).Date;
+            int mondayZero = ((int)kstNow.DayOfWeek + 6) % 7;
+            var monday = kstNow.AddDays(-mondayZero);
+            return monday.ToString("yyyy-MM-dd");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("[Time] WeekKey() failed: " + e);
+            return "2000-01-01";
+        }
+    }
+
+    public ClaimView ComputeDailyStateFromCache()
+    {
+        var cached = dts ?? new DataToSave("", 0, 0, "2000-01-01", "2000-01-01", "2000-01-01");
+
+        string today = TodayKeyKst();
+        string nowWeek = WeekKeyKst();
+
+        // 주간 리셋 반영(표시용)
+        int streak = (cached.weekKey == nowWeek) ? cached.streak : 0;
+        bool alreadyToday = (cached.lastClaimDate == today);
+
+        return new ClaimView
+        {
+            canClaim = !alreadyToday,
+            streakToShow = Mathf.Clamp(streak, 0, 7),
+            todayKey = today,
+            weekKey = nowWeek,
+            seedMoney = cached.seedMoney,
+            message = alreadyToday ? "오늘은 이미 수령함" : "수령 가능"
+        };
+    }
+
+    public void RunDailyClaimTransaction(Action<ClaimResult> onDone)
+    {
+        var uid = Managers.Auth.userId;
+        if (string.IsNullOrEmpty(uid))
+        {
+            onDone?.Invoke(new ClaimResult { committed = false, message = "No UID" });
+            return;
+        }
+
+        string today = TodayKeyKst();
+        string nowWeek = WeekKeyKst();
+        var userRef = dbRef.Child("Users").Child(uid);
+
+        long rewardGiven = 0;
+
+        userRef.RunTransaction(mutable =>
+        {
+            var d = mutable?.Value as Dictionary<string, object> ?? new Dictionary<string, object>();
+            string weekKey = d.TryGetValue("weekKey", out var wk) ? wk as string : null;
+            string last = d.TryGetValue("lastClaimDate", out var l) ? l as string : null;
+            int streak = d.TryGetValue("streak", out var s) ? Convert.ToInt32(s) : 0;
+            long seedMoney = d.TryGetValue("seedMoney", out var sm) ? Convert.ToInt64(sm) : 0;
+
+            if (weekKey != nowWeek) { weekKey = nowWeek; streak = 0; }
+            if (last == today) return TransactionResult.Abort();
+
+            streak += 1;
+            rewardGiven = CalcWeeklyReward(streak);
+            seedMoney += rewardGiven;
+
+            d["weekKey"] = weekKey;
+            d["lastClaimDate"] = today;
+            d["streak"] = streak;
+            d["seedMoney"] = seedMoney;
+
+            // ✅ 캐시 즉시 갱신
+            if (dts == null) dts = new DataToSave("", 0, 0, nowWeek, "2000-01-01", "2000-01-01");
+            dts.weekKey = weekKey;
+            dts.lastClaimDate = today;
+            dts.streak = streak;
+            dts.seedMoney = seedMoney;
+
+            mutable.Value = d;
+            return TransactionResult.Success(mutable);
+        })
+        .ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                onDone?.Invoke(new ClaimResult { committed = false, message = task.Exception?.Message });
+                return;
+            }
+            if (task.IsCanceled)
+            {
+                onDone?.Invoke(new ClaimResult { committed = false, message = "tx canceled" });
+                return;
+            }
+
+            var snap = task.Result;
+            var last = snap.Child("lastClaimDate").Value?.ToString();
+
+            if (last == today)
+            {
+                int streak = snap.Child("streak").Exists ? Convert.ToInt32(snap.Child("streak").Value) : dts.streak;
+                long seed = snap.Child("seedMoney").Exists ? Convert.ToInt64(snap.Child("seedMoney").Value) : dts.seedMoney;
+
+                try { User.NowUser.SetSeedMoney(seed); } catch { }
+
+                onDone?.Invoke(new ClaimResult
+                {
+                    committed = true,
+                    streak = streak,
+                    seedMoney = seed,
+                    weekKey = nowWeek,
+                    today = today,
+                    reward = rewardGiven,
+                    message = "ok",
+                });
+            }
+            else
+            {
+                onDone?.Invoke(new ClaimResult { committed = false, message = "already claimed today" });
+            }
+        });
+    }
+
+    // 보상 정책
+    private static long CalcWeeklyReward(int weeklyStreak) => weeklyStreak switch
+    {
+        <= 1 => 100_000,
+        <= 2 => 100_000,
+        <= 3 => 300_000,
+        <= 4 => 500_000,
+        <= 5 => 1_000_000,
+        <= 6 => 3_000_000,
+        _ => 5_000_000,
+    };
+
     private void SaveNewUserData()
     {
         // Users 저장 (기존 코드 유지)
@@ -107,8 +313,10 @@ public class DBManager
     {
         { "nickName", dts.nickName },
         { "seedMoney", dts.seedMoney },
-        { "reward", dts.reward },
-        { "nickNameUpdatedDate", dts.nickNameUpdatedDate }
+        { "streak", dts.streak },
+        { "nickNameUpdatedDate", dts.nickNameUpdatedDate },
+        { "weekKey", dts.weekKey },
+        { "lastClaimDate", dts.lastClaimDate }
     };
 
         dbRef.Child("Users").Child(Managers.Auth.userId)
@@ -261,7 +469,7 @@ public class DBManager
     public void ChangeNickName(string newNickName)
     {
         DateTime utcNow = DateTime.UtcNow;
-        string date = utcNow.ToString("yyyyMMdd");
+        string date = utcNow.ToString("yyyy-MM-dd");
 
         var updates = new Dictionary<string, object>
         {
@@ -300,7 +508,7 @@ public class DBManager
                 string date = snapshot.Value.ToString();
                 DateTime parsedDate = DateTime.ParseExact(
                     date,
-                    "yyyyMMdd",
+                    "yyyy-MM-dd",
                     null,
                     System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal
                 );
