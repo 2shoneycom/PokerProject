@@ -1,80 +1,31 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using Firebase.Database;
 using Firebase.Extensions;
 using UnityEngine;
-using Firebase.Database;
+
+public class RewardResult
+{
+    public bool committed;      // 커밋됨(=이번 클릭으로 수령 성공)
+    public string today;        // yyyy-MM-dd
+    public string weekKey;      // yyyy-MM-dd(월요일)
+    public int streak;          // 이번주 누적
+    public long seedMoney;      // 최신 시드머니
+    public long reward;         // 이번에 받은 금액(중복이면 0)
+    public string message;      // 로그/표시용
+}
 
 public class RewardManager
 {
-    public void DailyGift()
+    // 팝업 열기 전에 UI 초기상태(버튼 활성/체크개수 등) 계산
+    public DBManager.ClaimView PrepareDailyState()
     {
-        Debug.Log("daily gift start");
-
-        string userId = Managers.Auth.userId;
-        if (string.IsNullOrEmpty(userId))
-        {
-            Debug.LogError("User ID is not set");
-            return;
-        }
-
-        var userRef = Managers.DB.dbRef.Child("Users").Child(userId);
-
-        userRef.GetValueAsync().ContinueWithOnMainThread(task =>
-        {
-            if (task.IsFaulted)
-            {
-                Debug.LogError("Data fetch failed: " + task.Exception);
-                return; 
-            }
-
-            DataSnapshot snapshot = task.Result;
-            Debug.Log("data loaded success");
-
-            string jsonData = snapshot.GetRawJsonValue();
-            if (string.IsNullOrEmpty(jsonData))
-            {
-                Debug.LogError("jsonData is null or empty!");
-                return;
-            }
-
-            Debug.Log("jsonData: " + jsonData);
-
-            DataToSave loadedData = JsonUtility.FromJson<DataToSave>(jsonData);
-            if (loadedData == null)
-            {
-                Debug.LogError("Failed to parse data to DataToSave");
-                return;
-            }
-
-            Debug.Log("Parsed Data - reward: " + loadedData.reward + ", seedMoney: " + loadedData.seedMoney);
-
-            if (loadedData.reward)
-            {
-                Debug.Log("You already received");
-            }
-            else
-            {
-                Dictionary<string, object> updateData = new Dictionary<string, object>()
-                {
-                    { "nickName", loadedData.nickName },
-                    { "reward", true },
-                    { "seedMoney", loadedData.seedMoney += 1_000_000 }
-                };
-
-                userRef.SetValueAsync(updateData).ContinueWithOnMainThread(saveTask =>
-                {
-                    if (saveTask.IsFaulted || saveTask.IsCanceled)
-                    {
-                        Debug.LogError("data save fail: " + saveTask.Exception);
-                    }
-                    else
-                    {
-                        User.NowUser.SetSeedMoney(loadedData.seedMoney);
-                        Debug.Log("data save success");
-                    }
-                });
-            }
-        });
+        return Managers.DB.ComputeDailyStateFromCache();
     }
 
+    // 보상 수령(원자적)
+    public void DailyGift(System.Action<DBManager.ClaimResult> onDone)
+    {
+        Managers.DB.RunDailyClaimTransaction(onDone);
+    }
 }
