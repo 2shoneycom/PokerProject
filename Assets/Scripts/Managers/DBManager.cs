@@ -1,15 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Firebase.Extensions;
-using Google;
+using System.Net;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using UnityEngine;
-using TMPro;
 using Firebase.Auth;
 using Firebase.Database;
-using System.Net;
-using System;
-using System.Runtime.Serialization;
+using Firebase.Extensions;
+using Google;
+using TMPro;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
 
 public class DataToSave
 {
@@ -35,31 +36,10 @@ public class DataToSave
 }
 public class DBManager
 {
-    public struct ClaimView   // UI 초기 표시용
-    {
-        public bool canClaim;       // 오늘 보상 수령 가능?
-        public int streakToShow;   // 체크 개수(0~7)
-        public string todayKey;     // yyyy-MM-dd
-        public string weekKey;      // yyyy-MM-dd (월요일)
-        public long seedMoney;
-        public string message;
-    }
-
-    public struct ClaimResult // 수령 트랜잭션 결과
-    {
-        public bool committed;
-        public int streak;
-        public long seedMoney;
-        public string weekKey;
-        public string today;
-        public long reward;
-        public string message;
-    }
-
-
     public DatabaseReference dbRef;
     private DatabaseReference inviteRef;
     public DataToSave dts;
+    private bool isClaimed;
 
     public void Init()
     {
@@ -119,9 +99,41 @@ public class DBManager
                     if (string.IsNullOrEmpty(loadedData.nickNameUpdatedDate)) loadedData.nickNameUpdatedDate = "2000-01-01";
 
                     dts = loadedData;
+
+                    if (loadedData.lastClaimDate == TodayKeyKst())
+                    {
+                        isClaimed = true;
+                    }
+                    else
+                    {
+                        isClaimed = false;
+                    }
+
+                    int streak = loadedData.streak;
+
+                    if (loadedData.weekKey != WeekKeyKst())
+                    {
+                        var updates = new Dictionary<string, object>
+                        {
+                            { "weekKey", WeekKeyKst() },
+                            { "streak", 0 }
+                        };
+                        dbRef.Child("Users").Child(Managers.Auth.userId).UpdateChildrenAsync(updates).ContinueWithOnMainThread(setTask =>
+                        {
+                            if (setTask.IsFaulted)
+                                Debug.LogError("weekKey update fail");
+                            else
+                                Debug.Log("weekKey upadte success");
+                        });
+
+                        streak = 0;
+                    }
+
                     // 데이터 적용
                     User.NowUser.SetNickName(loadedData.nickName);
                     User.NowUser.SetSeedMoney(loadedData.seedMoney);
+                    User.NowUser.SetisDailyClaimed(isClaimed);
+                    User.NowUser.Setstreak(streak);
                     Debug.Log("user data load success");
                 }
                 // 새로운 사용자인 경우
@@ -131,6 +143,8 @@ public class DBManager
                     SaveNewUserData(); // 데이터베이스에 저장
                     User.NowUser.SetNickName(dts.nickName);
                     User.NowUser.SetSeedMoney(dts.seedMoney);
+                    User.NowUser.SetisDailyClaimed(false);
+                    User.NowUser.Setstreak(0);
                     Debug.Log("new user data create success");
                 }
 
@@ -186,110 +200,39 @@ public class DBManager
         }
     }
 
-    public ClaimView ComputeDailyStateFromCache()
+    public void GetDailyReward(int streak, Action onSucces)
     {
-        var cached = dts ?? new DataToSave("", 0, 0, "2000-01-01", "2000-01-01", "2000-01-01");
+        streak += 1;
 
-        string today = TodayKeyKst();
-        string nowWeek = WeekKeyKst();
+        DateTime utcNow = DateTime.UtcNow;
+        string date = utcNow.ToString("yyyy-MM-dd");
 
-        // 주간 리셋 반영(표시용)
-        int streak = (cached.weekKey == nowWeek) ? cached.streak : 0;
-        bool alreadyToday = (cached.lastClaimDate == today);
+        long seedMoney = User.NowUser.GetSeedMoney();
 
-        return new ClaimView
+        seedMoney += CalcWeeklyReward(streak);
+
+        var updates = new Dictionary<string, object>
         {
-            canClaim = !alreadyToday,
-            streakToShow = Mathf.Clamp(streak, 0, 7),
-            todayKey = today,
-            weekKey = nowWeek,
-            seedMoney = cached.seedMoney,
-            message = alreadyToday ? "오늘은 이미 수령함" : "수령 가능"
+            { "seedMoney", seedMoney },
+            { "streak", streak },
+            { "lastClaimDate", date }
         };
-    }
 
-    public void RunDailyClaimTransaction(Action<ClaimResult> onDone)
-    {
-        var uid = Managers.Auth.userId;
-        if (string.IsNullOrEmpty(uid))
-        {
-            onDone?.Invoke(new ClaimResult { committed = false, message = "No UID" });
-            return;
-        }
-
-        string today = TodayKeyKst();
-        string nowWeek = WeekKeyKst();
-        var userRef = dbRef.Child("Users").Child(uid);
-
-        long rewardGiven = 0;
-
-        userRef.RunTransaction(mutable =>
-        {
-            var d = mutable?.Value as Dictionary<string, object> ?? new Dictionary<string, object>();
-            string weekKey = d.TryGetValue("weekKey", out var wk) ? wk as string : null;
-            string last = d.TryGetValue("lastClaimDate", out var l) ? l as string : null;
-            int streak = d.TryGetValue("streak", out var s) ? Convert.ToInt32(s) : 0;
-            long seedMoney = d.TryGetValue("seedMoney", out var sm) ? Convert.ToInt64(sm) : 0;
-
-            if (weekKey != nowWeek) { weekKey = nowWeek; streak = 0; }
-            if (last == today) return TransactionResult.Abort();
-
-            streak += 1;
-            rewardGiven = CalcWeeklyReward(streak);
-            seedMoney += rewardGiven;
-
-            d["weekKey"] = weekKey;
-            d["lastClaimDate"] = today;
-            d["streak"] = streak;
-            d["seedMoney"] = seedMoney;
-
-            // ✅ 캐시 즉시 갱신
-            if (dts == null) dts = new DataToSave("", 0, 0, nowWeek, "2000-01-01", "2000-01-01");
-            dts.weekKey = weekKey;
-            dts.lastClaimDate = today;
-            dts.streak = streak;
-            dts.seedMoney = seedMoney;
-
-            mutable.Value = d;
-            return TransactionResult.Success(mutable);
-        })
-        .ContinueWithOnMainThread(task =>
+        dbRef.Child("Users").Child(Managers.Auth.userId).UpdateChildrenAsync(updates).ContinueWithOnMainThread(task =>
         {
             if (task.IsFaulted)
             {
-                onDone?.Invoke(new ClaimResult { committed = false, message = task.Exception?.Message });
-                return;
-            }
-            if (task.IsCanceled)
-            {
-                onDone?.Invoke(new ClaimResult { committed = false, message = "tx canceled" });
-                return;
-            }
-
-            var snap = task.Result;
-            var last = snap.Child("lastClaimDate").Value?.ToString();
-
-            if (last == today)
-            {
-                int streak = snap.Child("streak").Exists ? Convert.ToInt32(snap.Child("streak").Value) : dts.streak;
-                long seed = snap.Child("seedMoney").Exists ? Convert.ToInt64(snap.Child("seedMoney").Value) : dts.seedMoney;
-
-                try { User.NowUser.SetSeedMoney(seed); } catch { }
-
-                onDone?.Invoke(new ClaimResult
-                {
-                    committed = true,
-                    streak = streak,
-                    seedMoney = seed,
-                    weekKey = nowWeek,
-                    today = today,
-                    reward = rewardGiven,
-                    message = "ok",
-                });
+                Debug.LogError("Daily Reward Fail: " + task.Exception);
             }
             else
             {
-                onDone?.Invoke(new ClaimResult { committed = false, message = "already claimed today" });
+                User.NowUser.SetSeedMoney(seedMoney);
+                User.NowUser.SetisDailyClaimed(true);
+                User.NowUser.Setstreak(streak);
+                
+                Debug.Log("Daily Reward Success: " + streak);
+
+                onSucces?.Invoke();
             }
         });
     }

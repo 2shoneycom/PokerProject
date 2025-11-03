@@ -19,15 +19,21 @@ public class User
     private string uid;
     private string nickName;
     private long seedMoney;
+    private bool isDailyClaimed;
+    private int streak;
 
     public void SetUid(string value) => uid = value;
     public void SetNickName(string value) => nickName = value;
     public void SetSeedMoney(long value) => seedMoney = value;
+    public void SetisDailyClaimed(bool value) => isDailyClaimed = value;
+    public void Setstreak(int value) => streak = value;
 
     // 값 읽기용 getter도 필요하다면 추가
     public string GetUid() => uid;
     public string GetNickName() => nickName;
     public long GetSeedMoney() => seedMoney;
+    public bool GetisDailyClaimed() => isDailyClaimed;
+    public int Getstreak() => streak;
 
     public void UpdateMoney(long value)
     {
