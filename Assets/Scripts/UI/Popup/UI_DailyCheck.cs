@@ -46,7 +46,6 @@ public class UI_DailyCheck : UI_Popup
         isClaimed = User.NowUser.GetisDailyClaimed();
         streak = User.NowUser.Getstreak();
 
-        RefreshDailyGrid(streak);
         RefreshButton(isClaimed);
     }
 
@@ -64,29 +63,34 @@ public class UI_DailyCheck : UI_Popup
                 _lobby = (UI_Lobby)Managers.UI.SceneUI;
                 _lobby.SetMoneyText(User.NowUser.GetSeedMoney());
 
-                RefreshDailyGrid(streak);
+                TurnOffCertainDailyGrid(streak);
                 RefreshButton(isClaimed);
             });
         }
     }
 
-    private void RefreshDailyGrid(int streak)
+    private void TurnOffCertainDailyGrid(int streak)
     {
         GameObject grid = Get<GameObject>((int)GameObjects.UI_DailyList);
-        int idx = 0;
+        int idx = 1;
         foreach (Transform child in grid.transform)
         {
-            var item = child.GetComponent<UI_DailyItem>();
-
-            if (idx < streak)
+            if (idx == streak)
+            {
+                var item = child.GetComponent<UI_DailyItem>();
                 item.BlockSwitch(true);
-
+                break;
+            }
             idx++;
         }
     }
 
     private void RefreshButton(bool isClaimed)
     {
+        if (isClaimed)
+            Debug.Log("isClaimed = true");
+        else
+            Debug.Log("isClaimed = false");
         var btn = GetButton((int)Buttons.UI_GetRewardButton);
         var label = btn.GetComponentInChildren<TextMeshProUGUI>();
 

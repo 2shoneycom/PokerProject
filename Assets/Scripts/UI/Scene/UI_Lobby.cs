@@ -144,6 +144,6 @@ public class UI_Lobby : UI_Scene
 
     public void SetMoneyText(long value)
     {
-        GetText((int)Texts.UI_Money_Text).text = value.ToString();
+        GetText((int)Texts.UI_Money_Text).text = value.ToString("N0");
     }
 }
