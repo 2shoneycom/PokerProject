@@ -30,6 +30,7 @@ public class UI_DailyItem : UI_Base
 
     string text;
     int order = 0;
+    bool amIOn = false;
 
     public override void Init()
     {
@@ -39,7 +40,7 @@ public class UI_DailyItem : UI_Base
         SpriteLoad();
 
         Setting();
-        CurStateLoad(true);
+        BlockSwitch(amIOn);
     }
 
     void SpriteLoad()
@@ -65,10 +66,12 @@ public class UI_DailyItem : UI_Base
         else mySprite = img_big;
 
         GetImage((int)Images.UI_DailyItemImage).sprite = mySprite;
+
+        amIOn = order < User.NowUser.Getstreak();
     }
 
-    public void CurStateLoad(bool isOn)
+    public void BlockSwitch(bool isOn)
     {
-        GetGameObject((int)GameObjects.UI_Block).SetActive(!isOn);
+        GetGameObject((int)GameObjects.UI_Block).SetActive(isOn);
     }
 }

@@ -79,7 +79,7 @@ public class UI_DailyCheck : UI_Popup
             var item = child.GetComponent<UI_DailyItem>();
 
             if (idx < streak)
-                item.CurStateLoad(false);
+                item.BlockSwitch(true);
 
             idx++;
         }
