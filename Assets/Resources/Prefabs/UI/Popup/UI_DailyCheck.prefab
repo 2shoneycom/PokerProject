@@ -141,7 +141,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC8FC\uAC04 \uCD9C\uC11D \uBCF4\uC0C1"
+  m_text: "\uC5F0\uC18D \uCD9C\uC11D \uBCF4\uC0C1"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7fb07af95e832cb44b2e446e9765bcca, type: 2}
   m_sharedMaterial: {fileID: 5689341340292952692, guid: 7fb07af95e832cb44b2e446e9765bcca, type: 2}
@@ -237,8 +237,8 @@ RectTransform:
   m_GameObject: {fileID: 2721656469689169734}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1456272019406308477}
   - {fileID: 3514972314440365954}
@@ -517,10 +517,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 3040181412884592892}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 2.7767, y: -52.064}
-  m_SizeDelta: {x: 840, y: 120}
+  m_AnchorMin: {x: 0.24, y: 0.415}
+  m_AnchorMax: {x: 0.76, y: 0.58}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3070328093247623182
 CanvasRenderer:
