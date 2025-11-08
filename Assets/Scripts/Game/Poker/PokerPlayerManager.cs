@@ -70,7 +70,7 @@ public class PokerPlayerManager
             playerSeedMoney[i] = 0;
 
             playerCardGO[i].Clear();
-            for(int j = 0; j < PokerCardManager.PLAYER_CARD_NUM; j++)
+            for (int j = 0; j < PokerCardManager.PLAYER_CARD_NUM; j++)
             {
                 playerCardGO[i].Add(null);
                 playerCardDetails[i, j] = 0;
@@ -245,7 +245,7 @@ public class PokerPlayerManager
     {
         if (!PokerGameControl.Control.IsPlaying) return;
 
-        for(int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
+        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
             if (pokerPlayerUID[i] == "") continue;
 
@@ -302,7 +302,7 @@ public class PokerPlayerManager
 
     public bool FindBetEndTerm()
     {
-        for(int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
+        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
             if (GetPlayerUID(i) == "" || GetPlayerState(i) == false)
                 continue;
@@ -379,7 +379,7 @@ public class PokerPlayerManager
             if (GetPlayerUID(i) == "")
                 continue;
 
-            for(int j = 0; j < PokerCardManager.PLAYER_CARD_NUM; j++)
+            for (int j = 0; j < PokerCardManager.PLAYER_CARD_NUM; j++)
             {
                 if (j == 3) continue;
 

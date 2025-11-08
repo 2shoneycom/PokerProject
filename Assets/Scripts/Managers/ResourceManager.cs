@@ -11,6 +11,11 @@ public class ResourceManager
         return Resources.Load<T>(path);
     }
 
+    public T[] LoadAll<T>(string path) where T : Object
+    {
+        return Resources.LoadAll<T>(path);
+    }
+
     public GameObject PhotonInstantiate(string path, Transform pos = null)
     {
         path = $"Prefabs/{path}";
