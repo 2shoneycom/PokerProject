@@ -37,7 +37,7 @@ public class UI_DailyCheck : UI_Popup
         {
             GameObject item = Managers.UI.MakeSubItem<UI_DailyItem>(parent: gridPanel.transform).gameObject;
             UI_DailyItem dailyItem = item.GetOrAddComponent<UI_DailyItem>();
-            dailyItem.SetInfo($"{i + 1}");
+            dailyItem.SetOrder(i);
         }
 
         BindEvent(GetGameObject((int)GameObjects.UI_PopupClose), (PointerEventData) => { ClosePopupUI(); });
@@ -79,9 +79,7 @@ public class UI_DailyCheck : UI_Popup
             var item = child.GetComponent<UI_DailyItem>();
 
             if (idx < streak)
-                item.SetInfo($"X");
-            else
-                item.SetInfo($"{idx + 1}");
+                item.CurStateLoad(false);
 
             idx++;
         }

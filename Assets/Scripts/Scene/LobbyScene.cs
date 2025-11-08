@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class LobbyScene : BaseScene
 {
-
-    bool isReward = false;
-
     protected override void Init()
     {
         base.Init();
@@ -15,7 +12,7 @@ public class LobbyScene : BaseScene
         Managers.UI.ShowSceneUI<UI_Lobby>();
         Managers.Audio.PlayBGM(Define.BGM.Lobby);
 
-        if (isReward != false)           ///////////////////////////////////
+        if (User.NowUser.GetisDailyClaimed() == false)
             Managers.UI.ShowPopupUI<UI_DailyCheck>();
     }
 

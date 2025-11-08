@@ -17,7 +17,6 @@ public class Managers : MonoBehaviour
     LoginManager _login = new LoginManager();
     DBManager _db = new DBManager();
     AuthManager _auth = new AuthManager();
-    RewardManager _reward = new RewardManager();
     NickNameManager _nickname = new NickNameManager();
     PhotonManager _photon;
     WebManager _web = new WebManager();
@@ -30,7 +29,6 @@ public class Managers : MonoBehaviour
     public static LoginManager Login { get { return Instance._login; } }
     public static DBManager DB { get { return Instance._db; } }
     public static AuthManager Auth { get { return Instance._auth; } }
-    public static RewardManager Reward { get { return Instance._reward; } }
     public static PhotonManager Photon { get { return Instance._photon; } }
     public static WebManager Web { get { return Instance._web; } }
     public static NickNameManager NickName { get { return Instance._nickname; } }
