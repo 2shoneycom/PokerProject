@@ -1,11 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class UI_FriendDelPopup : UI_Popup
 {
+    enum Texts
+    {
+        UI_DelPopupTitle,
+    }
+
     enum Buttons
     {
         UI_YesButton,
@@ -18,9 +24,18 @@ public class UI_FriendDelPopup : UI_Popup
     {
         base.Init();
         Bind<Button>(typeof(Buttons));
+        Bind<TextMeshProUGUI>(typeof(Texts));
+        SetText();
 
         BindEvent(GetButton((int)Buttons.UI_YesButton).gameObject, YesClick);
         BindEvent(GetButton((int)Buttons.UI_NoButton).gameObject, NoClick);
+    }
+
+    void SetText()
+    {
+        string text = caller.GetFriendName();
+        text += " 님을 친구 목록에서 삭제할까요?";
+        GetText((int)Texts.UI_DelPopupTitle).text = text;
     }
 
     public void InitCaller(UI_FriendList caller) { this.caller = caller; }

@@ -9,7 +9,10 @@ public class UI_InviteFriendPopup : UI_Popup
         UI_Block,
         UI_FriendList,
         UI_FriendList_Contents,
+        UI_FriendText,
     }
+
+    bool isOn = true;
 
     public override void Init()
     {
@@ -38,6 +41,8 @@ public class UI_InviteFriendPopup : UI_Popup
                         // 온라인 상태인 친구만...
                         if (status == Define.Status.Online)
                         {
+                            TextSwitch();
+
                             GameObject friendGO = Managers.UI.MakeSubItem<UI_InviteFriendList>(go.transform).gameObject;
                             UI_InviteFriendList friend = friendGO.GetOrAddComponent<UI_InviteFriendList>();
                             friend.Init();
@@ -60,5 +65,12 @@ public class UI_InviteFriendPopup : UI_Popup
                 Debug.Log("친구 목록을 불러오지 못했습니다.");
             }
         });
+    }
+
+    void TextSwitch()
+    {
+        if (!isOn) return;
+        isOn = false;
+        GetGameObject((int)GameObjects.UI_FriendText).SetActive(false);
     }
 }

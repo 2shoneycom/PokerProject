@@ -81,6 +81,11 @@ public class UI_FriendList : UI_FriendBase
         GetText((int)Texts.UI_FriendList_FriendNameText).text = name;
     }
 
+    public string GetFriendName()
+    {
+        return GetText((int)Texts.UI_FriendList_FriendNameText).text;
+    }
+
     public void SetFriendIcon()
     {
 

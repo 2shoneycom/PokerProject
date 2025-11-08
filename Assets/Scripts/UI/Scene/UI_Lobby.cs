@@ -49,7 +49,7 @@ public class UI_Lobby : UI_Scene
         Bind<Image>(typeof(Images));
 
         GetText((int)Texts.UI_Profile_Text).text = User.NowUser.GetNickName();
-        GetText((int)Texts.UI_Money_Text).text = User.NowUser.GetSeedMoney().ToString();
+        GetText((int)Texts.UI_Money_Text).text = User.NowUser.GetSeedMoney().ToString("N0");
 
         BindEvent(GetImage((int)Images.UI_Backspace).gameObject, BackspaceClick);
         GetImage((int)Images.UI_Backspace).gameObject.SetActive(false);

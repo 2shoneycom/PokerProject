@@ -63,6 +63,6 @@ public class UI_PlayerInfo : UI_Scene
     public void SetPlayerInfo()
     {
         GetText((int)Texts.UI_MainInfo_UserName).text = User.NowUser.GetNickName();
-        GetText((int)Texts.UI_MainInfo_Money_Text).text = User.NowUser.GetSeedMoney().ToString();
+        GetText((int)Texts.UI_MainInfo_Money_Text).text = User.NowUser.GetSeedMoney().ToString("N0");
     }
 }
