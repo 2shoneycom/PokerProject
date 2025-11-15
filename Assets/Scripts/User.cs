@@ -48,6 +48,11 @@ public class User
 
     public bool GetIsNotEnough()
     {
+        if (User.NowUser.GetSeedMoney() < Managers.GetCurGameBaseBet())
+        {
+            User.NowUser.SetIsNotEnough(true);
+        }
+
         return isNotEnoughMoney;
     }
 
@@ -97,7 +102,7 @@ public class User
     public void IncreaseMoney(string targetUID, int amount)
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} User.cs 파일의 IncreaseMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
-    
+
         if (targetUID != uid)
             return;
 

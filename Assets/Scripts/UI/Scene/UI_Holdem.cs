@@ -377,8 +377,8 @@ public class UI_Holdem : UI_Scene
         {
             foreach(string bet in BetType)
             {
-                if (betType == "Die") continue;
-                GetText((int)Enum.Parse(typeof(Texts), $"UI_Buttons_{betType}Money_Text")).gameObject.SetActive(false);
+                if (bet == "Die") continue;
+                GetText((int)Enum.Parse(typeof(Texts), $"UI_Buttons_{bet}Money_Text")).gameObject.SetActive(false);
             }
             return;
         }

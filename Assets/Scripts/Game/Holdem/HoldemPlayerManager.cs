@@ -146,7 +146,7 @@ public class HoldemPlayerManager
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 UpdatePlayerBetting 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        playerBettingMoney[index] = amount;
+        playerBettingMoney[index] += amount;
         playerIsBet[index] = true;
         HoldemGameControl.Control.UpdatePlayerBetMoneyUI();
     }

@@ -92,7 +92,7 @@ public class JackPlayerManager
                 {
                     GameObject cardGO = playerCardGO[i, j][k];
 
-                    if (cardGO.GetPhotonView().IsMine)
+                    if (cardGO != null && cardGO.GetPhotonView().IsMine)
                         Managers.Resource.PhotonDestroy(cardGO);
                 }
             }
