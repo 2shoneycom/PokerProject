@@ -87,10 +87,6 @@ public class UI_DailyCheck : UI_Popup
 
     private void RefreshButton(bool isClaimed)
     {
-        if (isClaimed)
-            Debug.Log("isClaimed = true");
-        else
-            Debug.Log("isClaimed = false");
         var btn = GetButton((int)Buttons.UI_GetRewardButton);
         var label = btn.GetComponentInChildren<TextMeshProUGUI>();
 
