@@ -143,6 +143,7 @@ public class HoldemGameControl : MonoBehaviour
     public void ProcessStage()
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 ProcessStage 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+        Debug.Log($"ProcessStage 함수의 StageCount: {StageCount}"); // 디버깅 추적용 (25.11.15 승헌)
 
         switch (StageCount)
         {

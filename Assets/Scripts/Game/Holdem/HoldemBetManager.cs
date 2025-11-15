@@ -86,6 +86,7 @@ public class HoldemBetManager
     public void HandleBet(int curPlayer)
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} HoldemBetManager.cs 파일의 HandleBet 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+        Debug.Log($"HandleBet 함수의 curPlayer: {curPlayer}"); // 디버깅 추적용 (25.11.15 승헌)
         
         // 관전자는 리턴
         if (!HoldemGameControl.Control.IsPlaying)
@@ -164,10 +165,10 @@ public class HoldemBetManager
         }
 
         if (HoldemGameControl.Players.GetPlayerIsBet(CurBetPlayer) &&
-            User.NowGamePlayer.BetMoney == HoldemGameControl.Players.FindHighestBet())
+            HoldemGameControl.Players.GetPlayerBet(CurBetPlayer) == HoldemGameControl.Players.FindHighestBet())
         {
             Debug.Log($"highest bet money : {HoldemGameControl.Players.FindHighestBet()}");
-            Debug.Log($"my bet money : {User.NowGamePlayer.BetMoney}");
+            Debug.Log($"{curBetPlayer}의 bet money : {User.NowGamePlayer.BetMoney}");
             return true;
         }
         return false;
