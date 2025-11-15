@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Define
 {
+    public static int DEBUG_INDEX = 0;   // 디버깅 용 (25.11.12 승헌)
+
     public enum Scene
     {
         Unknown,

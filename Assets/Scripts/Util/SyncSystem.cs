@@ -50,23 +50,32 @@ class SyncSystem : MonoBehaviourPun
 
     public void IncreaseMoneyToTarget(string uid, int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 IncreaseMoneyToTarget 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         photonView.RPC("RPC_IncreaseMoneyToTarget", RpcTarget.All, uid, amount);
     }
 
     [PunRPC]
     private void RPC_IncreaseMoneyToTarget(string uid, int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_IncreaseMoneyToTarget 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         User.NowUser.IncreaseMoney(uid, amount);
     }
 
     public void HoldemBetMoneyToTarget(string uid, int amount)
     {
+        Debug.Log("HoldemBetManager.cs 파일의 BaseBetting 함수로부터"); // 디버깅 추적용 (25.11.12 승헌)
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemBetMoneyToTarget 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         photonView.RPC("RPC_HoldemBetMoneyToTarget", RpcTarget.All, uid, amount);
     }
 
     [PunRPC]
     private void RPC_HoldemBetMoneyToTarget(string uid, int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemBetMoneyToTarget 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         User.NowUser.HoldemBettingMoney(uid, amount);
     }
 
@@ -99,12 +108,17 @@ class SyncSystem : MonoBehaviourPun
 
     public void SyncHoldemMyBetting(int index, int amount)
     {
+        Debug.Log("HoldemBetManager.cs 파일의 SyncHoldemMyBetting 함수로부터"); // 디버깅 추적용 (25.11.12 승헌)
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemMyBetting 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+        
         photonView.RPC("RPC_SyncHoldemMyBetting", RpcTarget.All, index, amount);
     }
 
     [PunRPC]
     private void RPC_SyncHoldemMyBetting(int index, int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemMyBetting 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Players.UpdatePlayerBetting(index, amount);
     }
 
@@ -132,23 +146,31 @@ class SyncSystem : MonoBehaviourPun
 
     public void SyncHoldemIsTurn(int index, bool isOn)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemIsTurn 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
+
         photonView.RPC("RPC_SyncHoldemIsTurn", RpcTarget.All, index, isOn);
     }
 
     [PunRPC]
     private void RPC_SyncHoldemIsTurn(int index, bool isOn)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemIsTurn 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
+
         HoldemGameControl.Players.UpdatePlayerTurn(index, isOn);
     }
 
     public void SyncHoldemPlayerSeedMoney(int index, int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemPlayerSeedMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         photonView.RPC("RPC_SyncHoldemPlayerSeedMoney", RpcTarget.All, index, amount);
     }
 
     [PunRPC]
     private void RPC_SyncHoldemPlayerSeedMoney(int index, int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemPlayerSeedMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Players.UpdatePlayerSeedMoney(index, amount);
     }
 
@@ -187,6 +209,8 @@ class SyncSystem : MonoBehaviourPun
 
     public void SyncHoldemWinnerList(string[] wList)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemWinnerList 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         string json = Json.Serialize(wList);
         photonView.RPC("RPC_SyncHoldemWinnerList", RpcTarget.All, json);
     }
@@ -194,6 +218,8 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemWinnerList(string json)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemWinnerList 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         List<object> wListRaw = Json.Deserialize(json) as List<object>;
         string[] wList = wListRaw.ConvertAll(obj => obj.ToString()).ToArray();
         HoldemGameControl.Players.SetWinnerList(wList);
@@ -217,17 +243,24 @@ class SyncSystem : MonoBehaviourPun
 
     public void HoldemStartSync()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemStartSync 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         photonView.RPC("RPC_HoldemStartSyncing", RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_HoldemStartSyncing()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemStartSyncing 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Control.StartGame();
     }
 
     public IEnumerator SyncHoldemPlayerUID()
     {
+        Debug.Log("HoldemGameControl.cs 파일의 ProcessStage 함수로부터"); // 디버깅 추적용 (25.11.12 승헌)
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemPlayerUID 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return null;
         photonView.RPC("RPC_SyncHoldemPlayerUID", RpcTarget.All);
     }
@@ -235,11 +268,16 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemPlayerUID()
     {
+        // Debug.Log("SyncSystem.cs 파일의 SyncHoldemPlayerUID 함수로부터"); // 디버깅 추적용 (25.11.12 승헌)
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemPlayerUID 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         Managers.Seat.HoldemConvertToPlayers();
     }
 
     public IEnumerator SyncHoldemDealerIndex(int index)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemDealerIndex 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return null;
         photonView.RPC("RPC_SyncHoldemDealerIndex", RpcTarget.All, index);
     }
@@ -247,11 +285,15 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemDealerIndex(int index)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemDealerIndex 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Control.SetDealer(index);
     }
 
     public IEnumerator SyncHoldemPotMoney(int money, bool isNextStage = false)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemPotMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return null;
         photonView.RPC("RPC_SyncHoldemPotMoney", RpcTarget.All, money, isNextStage);
     }
@@ -259,17 +301,21 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemPotMoney(int money, bool isNextStage)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemPotMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Control.PotMoney = money;
 
         if (isNextStage)
         {
-            Debug.Log($"case {HoldemGameControl.Control.StageCount} 종료, nextStage");
+            // Debug.Log($"case {HoldemGameControl.Control.StageCount} 종료, nextStage");
             HoldemGameControl.Control.NextStage();
         }
     }
 
     public IEnumerator HoldemNextStage(int state = 0)      // 1은 스테이지 세부 사항 카운트 증가
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemNextStage 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return null;
         photonView.RPC("RPC_HoldemNextStage", RpcTarget.All, state);
     }
@@ -277,16 +323,22 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_HoldemNextStage(int state = 0)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemNextStage 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Control.NextStage(state);
     }
 
     public void HoldemNextStage_V2(int state = 0)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemNextStage_V2 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         photonView.RPC("RPC_HoldemNextStage", RpcTarget.All, state);
     }
 
     public IEnumerator HoldemAutoDieTimerSwitch(bool isOn)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemAutoDieTimerSwitch 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return null;
         photonView.RPC("RPC_HoldemAutoDieTimerSwitch", RpcTarget.All, isOn);
     }
@@ -294,11 +346,15 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_HoldemAutoDieTimerSwitch(bool isOn)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemAutoDieTimerSwitch 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Control.AutoDieTimerSwitch(isOn);
     }
 
     public IEnumerator HoldemClearGame()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemClearGame 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return null;
         photonView.RPC("RPC_HoldemClearGame", RpcTarget.All);
     }
@@ -306,6 +362,8 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_HoldemClearGame()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemClearGame 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Control.ClearGame();
     }
 
@@ -315,6 +373,8 @@ class SyncSystem : MonoBehaviourPun
 
     public IEnumerator HoldemBetStart(int curplayer)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemBetStart 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return null;
         photonView.RPC("RPC_HoldemBetStart", RpcTarget.All, curplayer);
     }
@@ -322,28 +382,38 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_HoldemBetStart(int curplayer)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemBetStart 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Bet.HandleBet(curplayer);
     }
 
     public void HoldemBetProcess(int curPlayer, string betType, int betAmount = 0)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemBetProcess 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         photonView.RPC("RPC_HoldemBetProcess", RpcTarget.All, curPlayer, betType, betAmount);
     }
 
     [PunRPC]
     public void RPC_HoldemBetProcess(int curPlayer, string betType, int betAmount = 0)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemBetProcess 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Bet.BetProcess(curPlayer, betType, betAmount);
     }
 
     public void HoldemBetEnd()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemBetEnd 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         photonView.RPC("RPC_HoldemBetEnd", RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_HoldemBetEnd()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemBetEnd 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Bet.CurrentStageBetEnd();
     }
 
@@ -353,6 +423,8 @@ class SyncSystem : MonoBehaviourPun
 
     public IEnumerator SyncHoldemDeck()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemDeck 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return null;
         photonView.RPC("RPC_SyncHoldemDeck", RpcTarget.All, HoldemGameControl.Card.GetCardDeck());
     }
@@ -360,28 +432,38 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemDeck(int[] cardDeck)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemDeck 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Card.SetCardDeck(cardDeck);
     }
 
     public void HoldemAddCard(string toPlayer)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemAddCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         photonView.RPC("RPC_HoldemAddCard", RpcTarget.All, toPlayer);
     }
 
     [PunRPC]
     private void RPC_HoldemAddCard(string toPlayer)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemAddCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Card.AddCardToPlayerStarter(toPlayer);
     }
 
     public void HoldemDealerCard()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 HoldemDealerCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         photonView.RPC("RPC_HoldemDealerCard", RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_HoldemDealerCard()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemDealerCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Card.AddCardToDealerStarter();
     }
 
@@ -1120,6 +1202,8 @@ class SyncSystem : MonoBehaviourPun
 
     public IEnumerator SyncHoldemResultUI()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemResultUI 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return null;
         photonView.RPC("RPC_SyncHoldemResultUI", RpcTarget.All);
     }
@@ -1127,6 +1211,8 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemResultUI()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemResultUI 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         HoldemGameControl.Control.ShowResult();
     }
 

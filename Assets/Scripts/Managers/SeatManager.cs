@@ -160,6 +160,9 @@ public class SeatManager
 
     public void HoldemConvertToPlayers()
     {
+        Debug.Log("SyncSystem.cs 파일의 RPC_SyncHoldemPlayerUID 함수로부터"); // 디버깅 추적용 (25.11.12 승헌)
+        Debug.Log($"#{++Define.DEBUG_INDEX} SeatManager.cs 파일의 HoldemConvertToPlayers 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         for (int i = 0; i < Managers.GetCurGameMaxPlayer; i++)
         {
             HoldemGameControl.Players.UpdatePlayerUID(i, seats[i * 2]);

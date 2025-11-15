@@ -348,6 +348,8 @@ public class DBManager
 
     public void DBUpdateMoney(string uid, long amount, string gameType)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} DBManager.cs 파일의 DBUpdateMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         // 1. Users/{uid}/seedMoney 업데이트
         UpdateUserSeedMoney(uid, amount);
 

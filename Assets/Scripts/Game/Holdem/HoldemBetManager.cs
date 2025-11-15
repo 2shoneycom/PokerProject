@@ -28,7 +28,7 @@ public class HoldemBetManager
     public int CurBetPlayer
     {
         get { return curBetPlayer; }
-        set {  curBetPlayer = value; }
+        set { curBetPlayer = value; }
     }
     public const float AUTO_DIE_TIMER = 10.0f;
 
@@ -46,6 +46,8 @@ public class HoldemBetManager
 
     public void BaseBetting(int playerIndex, bool isSB)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemBetManager.cs 파일의 BaseBetting 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         string pUID = HoldemGameControl.Players.GetPlayerUID(playerIndex);
         int dAmount = GetBaseBetAmount(Managers.CurrentDifficulty, isSB);
         SyncSystem.Sync.HoldemBetMoneyToTarget(pUID, dAmount);
@@ -77,12 +79,14 @@ public class HoldemBetManager
 
         if (isSB)
             return baseBet;
-        else 
+        else
             return baseBet * 2;
     }
 
     public void HandleBet(int curPlayer)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemBetManager.cs 파일의 HandleBet 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+        
         // 관전자는 리턴
         if (!HoldemGameControl.Control.IsPlaying)
             return;
@@ -102,22 +106,29 @@ public class HoldemBetManager
 
         if (PhotonNetwork.IsMasterClient)
         {
-            if (HoldemGameControl.Players.IsOneLeft || IsBetEnd())
+            if (HoldemGameControl.Players.IsOneLeft)
             {
-                // 1명 남앗거나 정상 배팅 종료의 경우
-                Debug.Log("bet end in IsBetEnd");
+                Debug.Log("HandleBet(#1): 1명만 남았음");
+                SyncSystem.Sync.HoldemBetEnd();
+                return;
+            }
+            if (IsBetEnd())
+            {
+                Debug.Log("HandleBet(#2): 정상적 베팅 종료");
                 SyncSystem.Sync.HoldemBetEnd();
                 return;
             }
             // 이미 죽엇다면 처리
             if (HoldemGameControl.Players.GetPlayerState(CurBetPlayer) == false)
             {
+                Debug.Log($"HandleBet(#3): {CurBetPlayer}번째 플레이어는 폴드함");
                 SyncSystem.Sync.HoldemNextStage_V2(1);
                 return;
             }
             // 예약 죽음햇다면 처리
             if (HoldemGameControl.Players.GetPlayerDieReserve(CurBetPlayer) == true)
             {
+                Debug.Log($"HandleBet(#4): {CurBetPlayer}번째 플레이어는 예약 폴드");
                 PlayerBetSelected("Die");
                 return;
             }
@@ -142,13 +153,17 @@ public class HoldemBetManager
 
     bool IsBetEnd()
     {
-        if(HoldemGameControl.Players.NowPlayerNum - HoldemGameControl.Players.GetDeadPlayerNum() == 1)
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemBetManager.cs 파일의 IsBetEnd 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
+
+        // 베팅 종료라고 판단되는 경우들
+
+        if (HoldemGameControl.Players.NowPlayerNum - HoldemGameControl.Players.GetDeadPlayerNum() == 1)
         {
             SyncSystem.Sync.SyncHoldemIsOneLeft(true);
             return true;
         }
 
-        if(HoldemGameControl.Players.GetPlayerIsBet(CurBetPlayer) && 
+        if (HoldemGameControl.Players.GetPlayerIsBet(CurBetPlayer) &&
             User.NowGamePlayer.BetMoney == HoldemGameControl.Players.FindHighestBet())
         {
             Debug.Log($"highest bet money : {HoldemGameControl.Players.FindHighestBet()}");
@@ -160,7 +175,7 @@ public class HoldemBetManager
 
     void BetButtonDisable()
     {
-        for(int i = 0; i < BetType.Length; i++)
+        for (int i = 0; i < BetType.Length; i++)
         {
             _holdemUI.BetButtonInteractiveSwitch(BetType[i], false);
         }
@@ -171,7 +186,7 @@ public class HoldemBetManager
 
     public IEnumerator AutoDieTimer(float duration)
     {
-        while (duration > 0) 
+        while (duration > 0)
         {
             duration -= Time.deltaTime;
             _holdemUI.SetTimerText(duration);
@@ -190,6 +205,8 @@ public class HoldemBetManager
 
     public void BetProcess(int curPlayer, string betType, int betAmount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemBetManager.cs 파일의 BetProcess 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
+
         HoldemGameControl.Players.UpdatePlayerTurn(curPlayer, false);
 
         if (betType != "Die")
@@ -207,6 +224,8 @@ public class HoldemBetManager
 
     public void CurrentStageBetEnd()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemBetManager.cs 파일의 CurrentStageBetEnd 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         _isBetting = false;
         HoldemGameControl.Players.ClearBetSetting();
         BetButtonDisable();
@@ -217,6 +236,8 @@ public class HoldemBetManager
 
     public void PlayerBetSelected(string betType)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemBetManager.cs 파일의 PlayerBetSelected 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         int highestBetMoney = HoldemGameControl.Players.FindHighestBet();
         int curPlayerBetMoney = HoldemGameControl.Players.GetPlayerBet(CurBetPlayer);
         int curBetAmount = highestBetMoney - curPlayerBetMoney;
@@ -260,7 +281,7 @@ public class HoldemBetManager
 
             case "Half":
                 // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 팟머니 * 0.5 만큼 더 레이즈
-               // Debug.Log($"Player {curPlayer} Half");
+                // Debug.Log($"Player {curPlayer} Half");
 
                 curBetAmount = curBetAmount + (HoldemGameControl.Control.PotMoney + curBetAmount) / 2;
                 break;
@@ -280,7 +301,7 @@ public class HoldemBetManager
                 break;
         }
 
-        if(betType != "Die")
+        if (betType != "Die")
         {
             User.NowUser.HoldemBettingMoney(User.NowUser.GetUid(), curBetAmount);
         }

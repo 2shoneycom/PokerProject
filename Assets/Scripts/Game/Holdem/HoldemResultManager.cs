@@ -10,6 +10,8 @@ public class HoldemResultManager
 {
     public List<String> GetWinner()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemResultManager.cs 파일의 GetWinner 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         List<String> winners = new List<String>();  // 승자 리스트
 
         if (HoldemGameControl.Players.IsOneLeft)

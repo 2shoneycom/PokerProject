@@ -163,6 +163,8 @@ public class HoldemCardManager
 
     public void ShuffleCard()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemCardManager.cs 파일의 ShuffleCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         cardBuffer.Clear();
 
         for (int i = 0; i < FULL_CARD_LEN; i++)
@@ -188,6 +190,8 @@ public class HoldemCardManager
 
     public IEnumerator DealingCard(int state, int toPlayer = -1)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemCardManager.cs 파일의 DealingCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         yield return cardMoveDelay;
 
         if (state == 0)      // 플레이어에게 카드 배분                         로직 수정 필요//////////////////////////////////
@@ -204,11 +208,15 @@ public class HoldemCardManager
 
     public void AddCardToPlayerStarter(string playerUID = "")
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemCardManager.cs 파일의 AddCardToPlayerStarter 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         OnAddCard?.Invoke(playerUID);
     }
 
     public void AddCardToDealerStarter()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemCardManager.cs 파일의 AddCardToDealerStarter 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         OnAddCardToDealer?.Invoke();
     }
 
@@ -299,6 +307,8 @@ public class HoldemCardManager
 
     public void SetCardDeck(int[] cardDeck)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemCardManager.cs 파일의 SetCardDeck 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         cardBuffer.Clear();
 
         for (int i = 0; i < FULL_CARD_LEN; i++)
@@ -331,6 +341,8 @@ public class HoldemCardManager
 
     public void ClearDealerCard()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemCardManager.cs 파일의 ClearDealerCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
+
         for (int i = 0; i < DEALER_CARD_NUM; i++)
         {
             if (PhotonNetwork.IsMasterClient)

@@ -250,6 +250,8 @@ public class UI_Holdem : UI_Scene
 
     void GameStartButtonClicked(PointerEventData data)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} UI_Holdem.cs 파일의 GameStartButtonClicked 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
 
         // 게임 시작
@@ -279,6 +281,8 @@ public class UI_Holdem : UI_Scene
 
     public void UpdateBetMoney()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} UI_Holdem.cs 파일의 UpdateBetMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
+
         for (int i = 1; i <= 7; i++)
         {
             int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);

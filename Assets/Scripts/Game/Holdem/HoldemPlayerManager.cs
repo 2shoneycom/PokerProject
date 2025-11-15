@@ -126,17 +126,23 @@ public class HoldemPlayerManager
 
     public void UpdatePlayerSeedMoney(int index, int seedMoney)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 UpdatePlayerSeedMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         playerSeedMoney[index] = seedMoney;
         HoldemGameControl.Control.UpdatePlayerSeedMoneyUI();
     }
 
     public int GetPlayerBet(int index)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 GetPlayerBet 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         return playerBettingMoney[index];
     }
 
     public void UpdatePlayerBetting(int index, int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 UpdatePlayerBetting 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         playerBettingMoney[index] += amount;
         playerIsBet[index] = true;
         HoldemGameControl.Control.UpdatePlayerBetMoneyUI();
@@ -169,6 +175,8 @@ public class HoldemPlayerManager
 
     public void UpdatePlayerTurn(int index, bool val)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 UpdatePlayerTurn 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
+
         playerIsTurn[index] = val;
     }
 
@@ -189,6 +197,8 @@ public class HoldemPlayerManager
 
     public void SetDeadPlayerNum(int num)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 SetDeadPlayerNum 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
+
         deadPlayerNum = num;
     }
 
@@ -217,6 +227,8 @@ public class HoldemPlayerManager
 
     public void SetWinnerList(string[] wList)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayaerManager.cs 파일의 SetWinnerList 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         for (int i = 0; i < wList.Length; i++)
         {
             winnerList.Add(wList[i]);
@@ -239,6 +251,8 @@ public class HoldemPlayerManager
 
     public int FindHighestBet()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 FindHighestBet 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         int max_bet = 0;
         for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
@@ -267,6 +281,8 @@ public class HoldemPlayerManager
 
     public void ClearGameSetting()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 ClearGameSetting 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
+
         for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
             (GameObject, GameObject) cards = playerCardGO[i];

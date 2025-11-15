@@ -85,6 +85,8 @@ public class User
 
     public void IncreaseMoney(string targetUID, int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} User.cs 파일의 IncreaseMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+    
         if (targetUID != uid)
             return;
 
@@ -110,6 +112,8 @@ public class User
 
     public void HoldemBettingMoney(string targetUID, int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} User.cs 파일의 HoldemBettingMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         if (targetUID != uid)
             return;
 
@@ -122,6 +126,8 @@ public class User
 
     public void HoldemSyncSeedMoney()      // seedmoney 수정시 항상 호출
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} User.cs 파일의 HoldemSyncSeedMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         if (HoldemGameControl.Control.IsPlaying)
             SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
     }

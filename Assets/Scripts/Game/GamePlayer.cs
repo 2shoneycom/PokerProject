@@ -46,11 +46,15 @@ public class GamePlayer
 
     public void SetBetMoney(int amount)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} GamePlayer.cs 파일의 SetBetMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         betMoney = amount;
     }
 
     public void ClearSetting()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} GamePlayer.cs 파일의 ClearSetting 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         betMoney = 0;
         blackJackBaseBetAmount = 0;
     }

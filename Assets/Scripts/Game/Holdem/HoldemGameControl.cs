@@ -95,6 +95,8 @@ public class HoldemGameControl : MonoBehaviour
 
     public void StartGame()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 StartGame 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         if (isPlaying)
             return;
 
@@ -120,6 +122,8 @@ public class HoldemGameControl : MonoBehaviour
 
     public void NextStage(int state = 0)        // 1은 스테이지 세부 사항 카운트 증가
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 NextStage 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         _holdemUI.ResetOnTurnPlayer();
 
         if (state == 0)
@@ -138,6 +142,8 @@ public class HoldemGameControl : MonoBehaviour
 
     public void ProcessStage()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 ProcessStage 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         switch (StageCount)
         {
             // 자리 Setting
@@ -298,6 +304,8 @@ public class HoldemGameControl : MonoBehaviour
 
     int GetNextPlayerIndex(int index)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 GetNextPlayerIndex 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         do
         {
             index = (index + 1) % MAX_PLAYER_NUM;
@@ -307,6 +315,8 @@ public class HoldemGameControl : MonoBehaviour
 
     void DecideDealer()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 DecideDealer 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         if (isFirst)
         {
             int ranNum = -1;
@@ -325,6 +335,8 @@ public class HoldemGameControl : MonoBehaviour
 
     public void SetDealer(int index)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 SetDealer 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         _playerD = index;
 
         if (Players.NowPlayerNum == 2)
@@ -365,6 +377,8 @@ public class HoldemGameControl : MonoBehaviour
 
     public void AutoDieTimerSwitch(bool isOn)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 AutoDieTimerSwitch 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         if (!IsPlaying)
             return;
 
@@ -392,6 +406,8 @@ public class HoldemGameControl : MonoBehaviour
 
     IEnumerator EndGame()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 EndGame 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         // 우승자 리스트 가져오기
         List<string> winnerList = Result.GetWinner();
         for (int i = 0; i < winnerList.Count; i++)
@@ -412,6 +428,8 @@ public class HoldemGameControl : MonoBehaviour
 
     public void ShowResult()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 ShowResult 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         // 플레이어 카드 보이기
         Players.ShowPlayerCard();
         // 팟머니 0으로
@@ -421,6 +439,8 @@ public class HoldemGameControl : MonoBehaviour
 
     public void ClearGame()
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 ClearGame 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         isPlaying = false;
 
         // 자신 게임 관련 초기화 (사실 베팅금만 초기화)
