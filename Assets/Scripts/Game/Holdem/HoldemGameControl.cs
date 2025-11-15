@@ -442,10 +442,17 @@ public class HoldemGameControl : MonoBehaviour
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} HoldemGameControl.cs 파일의 ClearGame 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
+        StartCoroutine(loadingForGameEnd());
+    }
+
+    IEnumerator loadingForGameEnd()
+    {
         isPlaying = false;
 
         // 자신 게임 관련 초기화 (사실 베팅금만 초기화)
         User.NowGamePlayer.ClearSetting();
+
+        yield return new WaitForSeconds(0.3f);
 
         // 딜러 카드 삭제 및 관련 초기화
         Card.ClearDealerCard();
