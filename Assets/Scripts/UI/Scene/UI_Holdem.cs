@@ -54,6 +54,11 @@ public class UI_Holdem : UI_Scene
         UI_Player6_SeedMoneyText,
         UI_Player7_SeedMoneyText,
         UI_TimerText,
+        UI_Buttons_CallMoney_Text,
+        UI_Buttons_DoubleMoney_Text,
+        UI_Buttons_HalfMoney_Text,
+        UI_Buttons_QuaterMoney_Text,
+        UI_Buttons_AllInMoney_Text,
     }
 
     enum Images
@@ -97,6 +102,16 @@ public class UI_Holdem : UI_Scene
         UI_Player7_Bet,
         UI_Block,
     }
+
+    string[] BetType =
+{
+        "Die",
+        "Call",
+        "Double",
+        "Quater",
+        "Half",
+        "AllIn"
+    };
 
     Image onTurnPlayer = null;
 
@@ -211,6 +226,8 @@ public class UI_Holdem : UI_Scene
             GetButton(idx).interactable = false;
             GetButton(idx).gameObject.SetActive(isOn);
         }
+        if (isOn)
+            BetMoneyTextUpdate("", 0, false, true);
         GetImage((int)Images.UI_PotMoney_Icon).gameObject.SetActive(isOn);
     }
 
@@ -354,6 +371,27 @@ public class UI_Holdem : UI_Scene
         BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
     }
 
+    public void BetMoneyTextUpdate(string betType, int betMoney, bool isOn, bool isFirst = false)
+    {
+        if(isFirst == true)
+        {
+            foreach(string bet in BetType)
+            {
+                if (betType == "Die") continue;
+                GetText((int)Enum.Parse(typeof(Texts), $"UI_Buttons_{betType}Money_Text")).gameObject.SetActive(false);
+            }
+            return;
+        }
+
+        if (betType == "Die") return;
+
+        TextMeshProUGUI text = GetText((int)Enum.Parse(typeof(Texts), $"UI_Buttons_{betType}Money_Text"));
+
+        text.text = betMoney.ToString("N0");
+        text.gameObject.SetActive(isOn);
+    }
+
+
     void IconFriendClicked(PointerEventData data)
     {
         Managers.UI.ShowPopupUI<UI_InviteFriendPopup>();
@@ -440,7 +478,7 @@ public class UI_Holdem : UI_Scene
         {
             panelText.text += HoldemGameControl.Players.GetPlayerNickNameByUID(wList[i]);
 
-            if (wList[i] == User.NowUser.GetUid()) 
+            if (wList[i] == User.NowUser.GetUid())
                 amIWin = true;
 
             winnerIndex.Add(HoldemGameControl.Players.GetPlayerGameIndexByUID(wList[i]));
@@ -489,6 +527,11 @@ public class UI_Holdem : UI_Scene
     }
 
     private void LeaveRoomClicked(PointerEventData data)
+    {
+        RoomLeave();
+    }
+
+    public void RoomLeave()
     {
         HoldemScene holdemScene = (HoldemScene)Managers.Scene.CurrentScene;
         holdemScene.RequestLeaveRoom();

@@ -1,9 +1,11 @@
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using WebSocketSharp.Server;
+using static Define;
 
 public class Managers : MonoBehaviour
 {
@@ -47,6 +49,8 @@ public class Managers : MonoBehaviour
         get { return m_instance.difficulty; }
         set { m_instance.difficulty = value; }
     }
+
+    public static Dictionary<Tuple<Define.GameType, Define.Difficulty>, int> GameBaseBet;
 
     public static bool IsNowPlayingGame
     {
@@ -119,7 +123,65 @@ public class Managers : MonoBehaviour
             DB.Init();
             Scene.Init();
             Audio.Init();
+
+            GameBaseBet = new Dictionary<Tuple<Define.GameType, Define.Difficulty>, int>();
+            InitGameBaseBet();
         }
+    }
+
+    static void InitGameBaseBet()
+    {
+        foreach (GameType type in Enum.GetValues(typeof(GameType)))
+        {
+            if(type == GameType.None) continue;
+
+            foreach (Difficulty diff in Enum.GetValues(typeof(Difficulty)))
+            {
+                if (diff == Difficulty.None) continue;
+
+                switch (type)
+                {
+                    case Define.GameType.Holdem:
+                    case Define.GameType.Poker:
+                        {
+                            switch (diff)
+                            {
+                                case Define.Difficulty.Beginner:
+                                    GameBaseBet[Tuple.Create(type, diff)] = 1000;
+                                    break;
+                                case Define.Difficulty.Amateur:
+                                    GameBaseBet[Tuple.Create(type, diff)] = 10000;
+                                    break;
+                                case Define.Difficulty.Pro:
+                                    GameBaseBet[Tuple.Create(type, diff)] = 100000;
+                                    break;
+                            }
+                            break;
+                        }
+                    case Define.GameType.BlackJack:
+                        {
+                            switch (diff)
+                            {
+                                case Define.Difficulty.Beginner:
+                                    GameBaseBet[Tuple.Create(type, diff)] = 500;
+                                    break;
+                                case Define.Difficulty.Amateur:
+                                    GameBaseBet[Tuple.Create(type, diff)] = 5000;
+                                    break;
+                                case Define.Difficulty.Pro:
+                                    GameBaseBet[Tuple.Create(type, diff)] = 50000;
+                                    break;
+                            }
+                            break;
+                        }
+                }
+            }
+        }
+    }
+
+    public static int GetCurGameBaseBet()
+    {
+        return GameBaseBet[Tuple.Create(CurrentGameType, CurrentDifficulty)];
     }
 
     static public void Clear()

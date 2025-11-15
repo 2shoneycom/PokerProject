@@ -47,7 +47,7 @@ public class GamePlayer
     public void SetBetMoney(int amount)
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} GamePlayer.cs 파일의 SetBetMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
-
+        
         betMoney = amount;
     }
 
@@ -57,6 +57,28 @@ public class GamePlayer
 
         betMoney = 0;
         blackJackBaseBetAmount = 0;
+
+        switch (curGameType)
+        {
+            case Define.GameType.Holdem:
+                if(User.NowUser.GetSeedMoney() < Managers.GetCurGameBaseBet())
+                {
+                    User.NowUser.SetIsNotEnough(true);
+                    UI_Holdem scene = (UI_Holdem)Managers.UI.SceneUI;
+                    scene.RoomLeave();
+                }
+                break;
+
+            case Define.GameType.Poker:
+
+
+            case Define.GameType.BlackJack:
+
+
+            default:
+                break;
+
+        }
     }
 
     public void SetBlackJackBaseBet()

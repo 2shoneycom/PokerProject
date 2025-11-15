@@ -14,6 +14,12 @@ public class LobbyScene : BaseScene
 
         if (User.NowUser.GetisDailyClaimed() == false)
             Managers.UI.ShowPopupUI<UI_DailyCheck>();
+
+        if (User.NowUser.GetIsNotEnough())
+        {
+            User.NowUser.SetIsNotEnough(false);
+            Managers.UI.ShowPopupUI<UI_NotEnoughMoneyPopup>();
+        }
     }
 
     void Start()

@@ -21,6 +21,7 @@ public class User
     private long seedMoney;
     private bool isDailyClaimed;
     private int streak;
+    private bool isNotEnoughMoney;
 
     public void SetUid(string value) => uid = value;
     public void SetNickName(string value) => nickName = value;
@@ -38,6 +39,16 @@ public class User
     public void UpdateMoney(long value)
     {
         seedMoney += value;
+    }
+
+    public void SetIsNotEnough(bool value)
+    {
+        isNotEnoughMoney = value;
+    }
+
+    public bool GetIsNotEnough()
+    {
+        return isNotEnoughMoney;
     }
 
     public void SetHoldemPlay()
@@ -120,7 +131,7 @@ public class User
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
         Managers.DB.DBUpdateMoney(uid, -amount, "holdem");
-        NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
+        NowGamePlayer.SetBetMoney(amount);
         HoldemSyncSeedMoney();
     }
 
