@@ -7,48 +7,26 @@ using UnityEngine;
 
 public class PokerGameControl : MonoBehaviour
 {
-    private static PokerGameControl instance;
-    public static PokerGameControl Control
-    {
-        get
-        {
-            return instance;
-        }
-    }
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            _betManager = new PokerBetManager();
-            _playerManager = new PokerPlayerManager();
-            _cardManager = new PokerCardManager();
-            _resultManager = new PokerResultManager();
-        }
-        else
-        {
-            Destroy(gameObject); // 씬 안에서 중복 생성 방지
-        }
-    }
-
     public const int MAX_PLAYER_NUM = 5;
     public const float RESULT_SHOW_TIME = 5.0f;
 
     PokerPlayerManager _playerManager;
-    public static PokerPlayerManager Players { get { return Control._playerManager; } }
+    public PokerPlayerManager Players { get { return _playerManager; } }
 
     PokerBetManager _betManager;
-    public static PokerBetManager Bet { get { return Control._betManager; } }
+    public PokerBetManager Bet { get { return _betManager; } }
 
     PokerCardManager _cardManager;
-    public static PokerCardManager Card { get { return Control._cardManager; } }
+    public PokerCardManager Card { get { return _cardManager; } }
 
     PokerResultManager _resultManager;
-    public static PokerResultManager Result { get { return Control._resultManager; } }
+    public PokerResultManager Result { get { return _resultManager; } }
 
     UI_Poker _pokerUI;
     UI_PokerCardPopup _cardPopup;
+
+    SyncSystem _syncSystem;
+    public SyncSystem Sync {  get { return _syncSystem; } }
 
     bool isPlaying = false;
     public bool IsPlaying { get { return isPlaying; } }
@@ -106,6 +84,10 @@ public class PokerGameControl : MonoBehaviour
     void Start()
     {
         Debug.Log("Start2");
+        _betManager = new PokerBetManager(this);
+        _playerManager = new PokerPlayerManager(this);
+        _cardManager = new PokerCardManager(this);
+        _resultManager = new PokerResultManager(this);
 
         _pokerUI = (UI_Poker)Managers.UI.SceneUI;
     }
@@ -165,21 +147,21 @@ public class PokerGameControl : MonoBehaviour
         {
             // 자리 Setting
             case 0:
-                StartCoroutine(SyncSystem.Sync.SyncPokerPlayerUID());
+                StartCoroutine(Sync.SyncPokerPlayerUID());
                 break;
 
             // 카드 Shuffle
             case 1:
                 Card.ShuffleCard();
 
-                StartCoroutine(SyncSystem.Sync.SyncPokerDeck());
+                StartCoroutine(Sync.SyncPokerDeck());
                 break;
 
             // 첫번째 시작 플레이어 랜덤 선택
             case 2:
                 DecideFirstPlayer();
 
-                StartCoroutine(SyncSystem.Sync.SyncPokerFirstPlayerIndex(_curPlayer));
+                StartCoroutine(Sync.SyncPokerFirstPlayerIndex(_curPlayer));
                 break;
 
             // 선택된 플레이어부터 기본금 배팅
@@ -187,7 +169,7 @@ public class PokerGameControl : MonoBehaviour
                 {
                     if (StageDetail >= MAX_PLAYER_NUM)
                     {
-                        StartCoroutine(SyncSystem.Sync.PokerNextStage());
+                        StartCoroutine(Sync.PokerNextStage());
                         break;
                     }
 
@@ -195,14 +177,14 @@ public class PokerGameControl : MonoBehaviour
                     string pUID = Players.GetPlayerUID(toPlayer);
                     if (pUID == "")
                     {
-                        StartCoroutine(SyncSystem.Sync.PokerNextStage(1));
+                        StartCoroutine(Sync.PokerNextStage(1));
                         break;
                     }
 
                     Bet.BaseBetting(toPlayer);
                     int baseBetAmount = Bet.GetBaseBetAmount(Managers.CurrentDifficulty);
 
-                    StartCoroutine(SyncSystem.Sync.SyncPokerPotMoney(PotMoney + baseBetAmount, 1));
+                    StartCoroutine(Sync.SyncPokerPotMoney(PotMoney + baseBetAmount, 1));
                     break;
                 }
 
@@ -211,7 +193,7 @@ public class PokerGameControl : MonoBehaviour
                 {
                     if (StageDetail >= MAX_PLAYER_NUM)
                     {
-                        StartCoroutine(SyncSystem.Sync.PokerNextStage());
+                        StartCoroutine(Sync.PokerNextStage());
                         break;
                     }
 
@@ -219,12 +201,12 @@ public class PokerGameControl : MonoBehaviour
                     string pUID = Players.GetPlayerUID(toPlayer);
                     if (pUID == "")
                     {
-                        StartCoroutine(SyncSystem.Sync.PokerNextStage(1));
+                        StartCoroutine(Sync.PokerNextStage(1));
                         break;
                     }
                     if (CardLen >= 4)
                     {
-                        StartCoroutine(SyncSystem.Sync.PokerNextStage(1));
+                        StartCoroutine(Sync.PokerNextStage(1));
                         break;
                     }
 
@@ -239,12 +221,12 @@ public class PokerGameControl : MonoBehaviour
 
             // 필요없는 1장, 공개할 카드 1장 선택
             case 6:
-                StartCoroutine(SyncSystem.Sync.PokerMakeCardSelPopup());
+                StartCoroutine(Sync.PokerMakeCardSelPopup());
                 break;
 
             // 전달받은 선택을 토대로 카드 정리
             case 7:
-                StartCoroutine(SyncSystem.Sync.PokerArrangeSelectedCard());
+                StartCoroutine(Sync.PokerArrangeSelectedCard());
                 break;
 
             //공개된 카드 중 가장 패가 낮은 플레이어 선택
@@ -254,7 +236,7 @@ public class PokerGameControl : MonoBehaviour
                     string curPlayer = Result.GetWinner(3, true);
                     _curPlayer = Players.GetPlayerGameIndexByUID(curPlayer);
                     Debug.Log(Players.GetPlayerNickNameByUID(curPlayer));
-                    StartCoroutine(SyncSystem.Sync.SyncPokerCurrentPlayer(_curPlayer));
+                    StartCoroutine(Sync.SyncPokerCurrentPlayer(_curPlayer));
                 }
                 break;
 
@@ -266,11 +248,11 @@ public class PokerGameControl : MonoBehaviour
             case 18:
                 {
                     // 타이머 끄기 (타이머는 monobehaviour 필요)
-                    StartCoroutine(SyncSystem.Sync.PokerAutoDieTimerSwitch(false));
+                    StartCoroutine(Sync.PokerAutoDieTimerSwitch(false));
 
                     if (StageDetail >= MAX_PLAYER_NUM)
                     {
-                        StartCoroutine(SyncSystem.Sync.PokerNextStage());
+                        StartCoroutine(Sync.PokerNextStage());
                         break;
                     }
 
@@ -278,7 +260,7 @@ public class PokerGameControl : MonoBehaviour
                     string pUID = Players.GetPlayerUID(toPlayer);
                     if (pUID == "")
                     {
-                        StartCoroutine(SyncSystem.Sync.PokerNextStage(1));
+                        StartCoroutine(Sync.PokerNextStage(1));
                         break;
                     }
 
@@ -295,7 +277,7 @@ public class PokerGameControl : MonoBehaviour
             //선택된 플레이어부터 마지막 베팅 시작 (7th 스트리트)
             case 19:
                 // 타이머 끄기 (타이머는 monobehaviour 필요)
-                StartCoroutine(SyncSystem.Sync.PokerAutoDieTimerSwitch(false));
+                StartCoroutine(Sync.PokerAutoDieTimerSwitch(false));
 
                 // 배팅 시작 인원 정하기
                 if (Bet.IsBetting == false)
@@ -304,9 +286,9 @@ public class PokerGameControl : MonoBehaviour
                 Bet.CurBetPlayer = GetNextPlayerIndex(Bet.CurBetPlayer);
 
                 // 타이머 키기
-                StartCoroutine(SyncSystem.Sync.PokerAutoDieTimerSwitch(true));
+                StartCoroutine(Sync.PokerAutoDieTimerSwitch(true));
 
-                StartCoroutine(SyncSystem.Sync.PokerBetStart(Bet.CurBetPlayer));
+                StartCoroutine(Sync.PokerBetStart(Bet.CurBetPlayer));
                 break;
 
             //공개된 카드 중 가장 패가 높은 플레이어 선택
@@ -325,14 +307,14 @@ public class PokerGameControl : MonoBehaviour
 
                     string curPlayer = Result.GetWinner(cardLen);
                     _curPlayer = Players.GetPlayerGameIndexByUID(curPlayer);
-                    StartCoroutine(SyncSystem.Sync.SyncPokerCurrentPlayer(_curPlayer));
+                    StartCoroutine(Sync.SyncPokerCurrentPlayer(_curPlayer));
                 }
                 break;
 
             // 결과 발표
             case 20:
                 // 타이머 끄기 (타이머는 monobehaviour 필요)
-                StartCoroutine(SyncSystem.Sync.PokerAutoDieTimerSwitch(false));
+                StartCoroutine(Sync.PokerAutoDieTimerSwitch(false));
 
                 StartCoroutine(EndGame());
 
@@ -340,13 +322,13 @@ public class PokerGameControl : MonoBehaviour
 
             case 21:
                 // UI 보여주기 & 플레이어 카드 공개
-                StartCoroutine(SyncSystem.Sync.SyncPokerResultUI());
+                StartCoroutine(Sync.SyncPokerResultUI());
 
                 break;
 
             // 새로운 게임 준비
             case 22:
-                StartCoroutine(SyncSystem.Sync.PokerClearGame());
+                StartCoroutine(Sync.PokerClearGame());
                 break;
         }
     }
@@ -408,7 +390,7 @@ public class PokerGameControl : MonoBehaviour
     IEnumerator AnimLoadingTime(float time)
     {
         yield return new WaitForSeconds(time);
-        StartCoroutine(SyncSystem.Sync.PokerNextStage());
+        StartCoroutine(Sync.PokerNextStage());
     }
 
     public void CardSelPopupOn()
@@ -417,11 +399,12 @@ public class PokerGameControl : MonoBehaviour
             return;
 
         _cardPopup = Managers.UI.ShowPopupUI<UI_PokerCardPopup>();
+        _cardPopup.SetControl(this);
     }
 
     public void SelectedCardIndex(int delCardIndex, int openCardIndex)
     {
-        SyncSystem.Sync.SyncPokerPlayerCardSel(User.NowGamePlayer.GameIndex, delCardIndex, openCardIndex);
+        Sync.SyncPokerPlayerCardSel(User.NowGamePlayer.GameIndex, delCardIndex, openCardIndex);
         StartCoroutine(RPCLoadingTime(0.2f));
     }
 
@@ -469,14 +452,14 @@ public class PokerGameControl : MonoBehaviour
             foreach (string winnerUID in winnerList)
             {
                 // 우승자에게 돈주기
-                SyncSystem.Sync.IncreaseMoneyToTarget(winnerUID, PotMoney / winnerList.Count);
+                Sync.IncreaseMoneyToTarget(winnerUID, PotMoney / winnerList.Count);
 
                 Debug.Log("우승자: " + winnerUID);
             }
         }
-        SyncSystem.Sync.SyncPokerWinnerList(winnerList.ToArray());
+        Sync.SyncPokerWinnerList(winnerList.ToArray());
         yield return new WaitForSeconds(0.2f);
-        StartCoroutine(SyncSystem.Sync.PokerNextStage(0));
+        StartCoroutine(Sync.PokerNextStage(0));
     }
 
     public void ShowResult()
@@ -503,7 +486,7 @@ public class PokerGameControl : MonoBehaviour
         // 인원수 체크를 하고 2 이상이면 바로 시작
         if (Managers.Seat.GetOccupiedCount() >= 2 && PhotonNetwork.IsMasterClient)
         {
-            SyncSystem.Sync.PokerStartSync();
+            Sync.PokerStartSync();
         }
         else
         {
@@ -521,6 +504,17 @@ public class PokerGameControl : MonoBehaviour
     {
         _pokerUI.UpdateBetMoney();
     }
+
+    public void SetSyncSystem(SyncSystem syncSystem)
+    {
+        _syncSystem = syncSystem;
+    }
+
+    public SyncSystem GetSyncSystem()
+    {
+        return _syncSystem;
+    }
+
 
     //public IEnumerator PlayerEnterHoldemRoom(float time, Player newPlayer)
     //{

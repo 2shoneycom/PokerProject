@@ -10,6 +10,8 @@ using Photon.Realtime;
 
 public class PokerCardManager
 {
+    PokerGameControl _control;
+
     const int FULL_CARD_LEN = 52;
 
     const float CARD_ANIMATION_TIME = 0.4f;
@@ -36,6 +38,12 @@ public class PokerCardManager
     public static Action<string> OnAddCard;
 
     bool isInited = false;
+
+    public PokerCardManager(PokerGameControl control)
+    {
+        _control = control;
+    }
+
     public void Init()
     {
         if (isInited)
@@ -118,7 +126,7 @@ public class PokerCardManager
     {
         for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
-            int seatedIndex = PokerGameControl.Control.ConvertGameToUI(i);
+            int seatedIndex = _control.ConvertGameToUI(i);
             GameObject destGO = _pokerUI.GetPlayerGameObjcet(seatedIndex);
             RectTransform reference = destGO.GetComponent<RectTransform>();
             // 기준 RectTransform의 가로 길이
@@ -200,9 +208,9 @@ public class PokerCardManager
     public IEnumerator DealingCard(int toPlayer = -1)
     {
         yield return cardMoveDelay;
-        string pUID = PokerGameControl.Players.GetPlayerUID(toPlayer);
+        string pUID = _control.Players.GetPlayerUID(toPlayer);
 
-        SyncSystem.Sync.PokerAddCard(pUID);
+        _control.Sync.PokerAddCard(pUID);
     }
 
     public void AddCardToPlayerStarter(string playerUID = "")
@@ -218,10 +226,10 @@ public class PokerCardManager
             return;
 
         AddCardToPlayer(popedCard, playerUID);
-        if (4 <= PokerGameControl.Control.CardLen)
-            SyncSystem.Sync.PokerNextStage_V2(1);
+        if (4 <= _control.CardLen)
+            _control.Sync.PokerNextStage_V2(1);
         else
-            SyncSystem.Sync.PokerNextStage_V2(2);
+            _control.Sync.PokerNextStage_V2(2);
     }
 
     private void AddCardToPlayer(int popedCard, string pUID)
@@ -232,17 +240,17 @@ public class PokerCardManager
         GameObject cardGO = Managers.Resource.PhotonInstantiate("Game/Card", cardDeckPos);
         cardGO.GetComponent<PhotonView>().OwnershipTransfer = OwnershipOption.Takeover;
 
-        bool isOpenCard = 4 <= PokerGameControl.Control.CardLen && PokerGameControl.Control.CardLen < 7;
+        bool isOpenCard = 4 <= _control.CardLen && _control.CardLen < 7;
 
-        SyncSystem.Sync.SyncPokerPlayerCard(pUID, cardGO, popedCard, isOpenCard);
+        _control.Sync.SyncPokerPlayerCard(pUID, cardGO, popedCard, isOpenCard);
 
         CardMoveToPosPlayer(cardGO, pUID);
     }
 
     void CardMoveToPosPlayer(GameObject cardGO, string pUID)
     {
-        int playerIndex = PokerGameControl.Players.GetPlayerGameIndexByUID(pUID);
-        Vector3 destPos = playerCardPos[playerIndex, PokerGameControl.Control.CardLen];
+        int playerIndex = _control.Players.GetPlayerGameIndexByUID(pUID);
+        Vector3 destPos = playerCardPos[playerIndex, _control.CardLen];
 
         cardGO.transform.DOMove(destPos, CARD_ANIMATION_TIME);
         cardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);
@@ -269,7 +277,7 @@ public class PokerCardManager
             cardBuffer.Add(cardDeck[i]);
         }
 
-        PokerGameControl.Control.NextStage();
+        _control.NextStage();
     }
 
     public int GetCardNum(int index)

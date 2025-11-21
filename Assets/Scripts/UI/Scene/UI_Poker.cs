@@ -83,6 +83,7 @@ public class UI_Poker : UI_Scene
     }
 
     Image onTurnPlayer = null;
+    PokerGameControl _control;
 
     public override void Init()
     {
@@ -95,6 +96,9 @@ public class UI_Poker : UI_Scene
         Bind<Image>(typeof(Images));
         Bind<GameObject>(typeof(GameObjects));
         winnerIndex = new List<int>();
+
+        PokerScene scene = (PokerScene)Managers.Scene.CurrentScene;
+        _control = scene.GetControl();
 
         SettingUIIconPos();
 
@@ -214,8 +218,8 @@ public class UI_Poker : UI_Scene
         {
             for (int i = 1; i <= PokerGameControl.MAX_PLAYER_NUM; i++)
             {
-                int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
-                if (PokerGameControl.Players.GetPlayerUID(gameIndex) == "")
+                int gameIndex = _control.ConvertUItoGame(i - 1);
+                if (_control.Players.GetPlayerUID(gameIndex) == "")
                     continue;
 
                 GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
@@ -236,7 +240,7 @@ public class UI_Poker : UI_Scene
     {
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
         // 게임 시작
-        SyncSystem.Sync.PokerStartSync();
+        _control.Sync.PokerStartSync();
     }
 
     public void BetButtonInteractiveSwitch(string betType, bool isOn)
@@ -257,15 +261,15 @@ public class UI_Poker : UI_Scene
 
     public void UpdatePotMoney()
     {
-        GetText((int)Texts.UI_PotMoney_Text).text = $"{PokerGameControl.Control.PotMoney}";
+        GetText((int)Texts.UI_PotMoney_Text).text = $"{_control.PotMoney}";
     }
 
     public void UpdateBetMoney()
     {
         for (int i = 1; i <= PokerGameControl.MAX_PLAYER_NUM; i++)
         {
-            int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
-            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = PokerGameControl.Players.GetPlayerBet(gameIndex).ToString();
+            int gameIndex = _control.ConvertUItoGame(i - 1);
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = _control.Players.GetPlayerBet(gameIndex).ToString();
         }
     }
 
@@ -273,8 +277,8 @@ public class UI_Poker : UI_Scene
     {
         for (int i = 1; i <= PokerGameControl.MAX_PLAYER_NUM; i++)
         {
-            int gameIndex = PokerGameControl.Control.ConvertUItoGame(i - 1);
-            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = PokerGameControl.Players.GetPlayerSeedMoney(gameIndex).ToString();
+            int gameIndex = _control.ConvertUItoGame(i - 1);
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = _control.Players.GetPlayerSeedMoney(gameIndex).ToString();
         }
     }
 
@@ -363,22 +367,22 @@ public class UI_Poker : UI_Scene
 
     void RequestBet(string betType)
     {
-        if (!PokerGameControl.Control.IsPlaying)
+        if (!_control.IsPlaying)
             return;
 
-        if (PokerGameControl.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
+        if (_control.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
         {
             if (betType == "Die")       // 자신의 턴이 아니면 die만 켜져있어서 die만 누를테지만 혹시 모르니
             {
-                if (PokerGameControl.Players.GetPlayerDieReserve(User.NowGamePlayer.GameIndex) == false)
-                    SyncSystem.Sync.SyncPokerDieReserve(User.NowGamePlayer.GameIndex, true);
+                if (_control.Players.GetPlayerDieReserve(User.NowGamePlayer.GameIndex) == false)
+                    _control.Sync.SyncPokerDieReserve(User.NowGamePlayer.GameIndex, true);
                 else
-                    SyncSystem.Sync.SyncPokerDieReserve(User.NowGamePlayer.GameIndex, false);
+                    _control.Sync.SyncPokerDieReserve(User.NowGamePlayer.GameIndex, false);
             }
             return;     // 자신의 턴이 아닐때 die가 아니면 모두 리턴
         }
 
-        PokerGameControl.Bet.PlayerBetSelected(betType);
+        _control.Bet.PlayerBetSelected(betType);
     }
 
     void OpenRoomClicked(PointerEventData data)
@@ -414,19 +418,19 @@ public class UI_Poker : UI_Scene
 
         panelText.text = "Winner!!\n\n";
 
-        List<string> wList = PokerGameControl.Players.GetWinnerList();
+        List<string> wList = _control.Players.GetWinnerList();
         int len = wList.Count;
         winnerIndex.Clear();
 
         bool amIWin = false;
         for (int i = 0; i < len; i++)
         {
-            panelText.text += PokerGameControl.Players.GetPlayerNickNameByUID(wList[i]);
+            panelText.text += _control.Players.GetPlayerNickNameByUID(wList[i]);
 
             if (wList[i] == User.NowUser.GetUid())
                 amIWin = true;
 
-            winnerIndex.Add(PokerGameControl.Players.GetPlayerGameIndexByUID(wList[i]));
+            winnerIndex.Add(_control.Players.GetPlayerGameIndexByUID(wList[i]));
 
             if (i != len - 1)
             {
@@ -446,7 +450,7 @@ public class UI_Poker : UI_Scene
     {
         for (int i = 0; i < winnerIndex.Count; i++)
         {
-            int uiI = PokerGameControl.Control.ConvertGameToUI(winnerIndex[i]);
+            int uiI = _control.ConvertGameToUI(winnerIndex[i]);
             GameObject go = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{uiI + 1}")).gameObject;
             go.transform.DOScale(Vector3.one * biggerIconSize, 1.0f).SetEase(Ease.InOutQuad);
         }
@@ -456,7 +460,7 @@ public class UI_Poker : UI_Scene
     {
         for (int i = 0; i < winnerIndex.Count; i++)
         {
-            int uiI = PokerGameControl.Control.ConvertGameToUI(winnerIndex[i]);
+            int uiI = _control.ConvertGameToUI(winnerIndex[i]);
             GameObject go = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{uiI + 1}")).gameObject;
             go.transform.DOScale(Vector3.one * originIconSize, 0.3f);
         }
@@ -471,7 +475,7 @@ public class UI_Poker : UI_Scene
         Debug.Log("Winner Timer End");
         WinnerIconOrigin();
         SetWinnerPanel(false);
-        PokerGameControl.Control.NextStage();
+        _control.NextStage();
     }
 
     private void LeaveRoomClicked(PointerEventData data)

@@ -8,6 +8,8 @@ using UnityEngine;
 
 public class PokerPlayerManager
 {
+    PokerGameControl _control;
+
     Dictionary<string, string> playerNickName;
     string[] pokerPlayerUID;
     int _nowPlayerNum;
@@ -35,8 +37,10 @@ public class PokerPlayerManager
 
     List<string> winnerList;    // UI 용도
 
-    public PokerPlayerManager()
+    public PokerPlayerManager(PokerGameControl control)
     {
+        _control = control;
+
         playerNickName = new Dictionary<string, string>();
         pokerPlayerUID = new string[PokerGameControl.MAX_PLAYER_NUM];
         playerSeedMoney = new int[PokerGameControl.MAX_PLAYER_NUM];
@@ -110,7 +114,7 @@ public class PokerPlayerManager
             playerNickName.Add(UID, Managers.Seat.GetPlayerNickNameByUID(UID));
         }
 
-        int gameIndex = PokerGameControl.Control.ConvertUItoGame(seatIdx);
+        int gameIndex = _control.ConvertUItoGame(seatIdx);
         pokerPlayerUID[gameIndex] = UID;
     }
 
@@ -142,7 +146,7 @@ public class PokerPlayerManager
     public void UpdatePlayerSeedMoney(int index, int seedMoney)
     {
         playerSeedMoney[index] = seedMoney;
-        PokerGameControl.Control.UpdatePlayerSeedMoneyUI();
+        _control.UpdatePlayerSeedMoneyUI();
     }
 
     public int GetPlayerBet(int index)
@@ -155,7 +159,7 @@ public class PokerPlayerManager
         playerBettingMoney[index] += amount;
         playerIsBet[index] = true;
         playerIsCall[index] = isCall;
-        PokerGameControl.Control.UpdatePlayerBetMoneyUI();
+        _control.UpdatePlayerBetMoneyUI();
     }
 
     public bool GetPlayerIsBet(int index)
@@ -221,14 +225,14 @@ public class PokerPlayerManager
     public void SetPlayerCard(string pUID, int cardViewID, int cardDetail, bool isOpenCard)
     {
         int playerIndex = GetPlayerGameIndexByUID(pUID);
-        int cardIndex = PokerGameControl.Control.CardLen;
+        int cardIndex = _control.CardLen;
         GameObject cardGO = PhotonView.Find(cardViewID).gameObject;
 
         playerCardGO[playerIndex][cardIndex] = cardGO;
         playerCardDetails[playerIndex, cardIndex] = cardDetail;
         Debug.Log($"PlayerIndex : {playerIndex}, Player CardIndex : {cardIndex}");
         if (User.NowUser.GetUid() == pUID || isOpenCard)
-            cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(cardDetail);
+            cardGO.GetComponent<SpriteRenderer>().sprite = _control.Card.GetRightCardImage(cardDetail);
     }
 
     public void PlayerDelCardSel(int playerIndex, int cardIndex)
@@ -243,7 +247,7 @@ public class PokerPlayerManager
 
     public void ArrangeSelectedCard()
     {
-        if (!PokerGameControl.Control.IsPlaying) return;
+        if (!_control.IsPlaying) return;
 
         for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
@@ -275,21 +279,21 @@ public class PokerPlayerManager
             playerCardGO[i][0] = copyGO[privateCardIndex[0]];
             playerCardDetails[i, 0] = copyDetail[privateCardIndex[0]];
             if (PhotonNetwork.IsMasterClient)
-                PokerGameControl.Card.CardMoveToPos(playerCardGO[i][0], i, 0);
+                _control.Card.CardMoveToPos(playerCardGO[i][0], i, 0);
 
             playerCardGO[i][1] = copyGO[privateCardIndex[1]];
             playerCardDetails[i, 1] = copyDetail[privateCardIndex[1]];
             if (PhotonNetwork.IsMasterClient)
-                PokerGameControl.Card.CardMoveToPos(playerCardGO[i][1], i, 1);
+                _control.Card.CardMoveToPos(playerCardGO[i][1], i, 1);
 
             playerCardGO[i][2] = copyGO[openCardIndex];
             playerCardDetails[i, 2] = copyDetail[openCardIndex];
             if (PhotonNetwork.IsMasterClient)
-                PokerGameControl.Card.CardMoveToPos(playerCardGO[i][2], i, 2);
+                _control.Card.CardMoveToPos(playerCardGO[i][2], i, 2);
             SetCardOpen(i, 2);
         }
 
-        PokerGameControl.Control.NextStage();
+        _control.NextStage();
     }
 
     void SetCardOpen(int playerIndex, int cardIndex)
@@ -297,7 +301,7 @@ public class PokerPlayerManager
         GameObject cardGO = playerCardGO[playerIndex][cardIndex];
         int cardDetail = playerCardDetails[playerIndex, cardIndex];
 
-        cardGO.GetComponent<SpriteRenderer>().sprite = PokerGameControl.Card.GetRightCardImage(cardDetail);
+        cardGO.GetComponent<SpriteRenderer>().sprite = _control.Card.GetRightCardImage(cardDetail);
     }
 
     public bool FindBetEndTerm()

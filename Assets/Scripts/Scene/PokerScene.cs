@@ -8,16 +8,21 @@ public class PokerScene : GameScene
     const int MAX_PLAYER = 5;
 
     UI_Poker _pokerUI = null;
+    PokerGameControl _control;
+    SyncSystem _syncSystem;
 
     protected override void Init()
     {
         base.Init();
 
         SceneType = Define.Scene.Poker;
-        _pokerUI = Managers.UI.ShowSceneUI<UI_Poker>();
-        this.GetOrAddComponent<PokerGameControl>();
-        this.GetOrAddComponent<SyncSystem>();
+        _syncSystem = this.GetOrAddComponent<SyncSystem>();
+        _control = this.GetOrAddComponent<PokerGameControl>();
 
+        _syncSystem.SetPokerControl(_control);
+        _control.SetSyncSystem(_syncSystem);
+
+        _pokerUI = Managers.UI.ShowSceneUI<UI_Poker>();
         User.NowUser.SetPokerPlay();
 
         StartCoroutine(Loading(0.01f));
@@ -31,7 +36,12 @@ public class PokerScene : GameScene
 
     void SeatInit()
     {
-        Managers.Seat.Init(MAX_PLAYER);
+        Managers.Seat.Init(MAX_PLAYER, _syncSystem);
+    }
+
+    public PokerGameControl GetControl()
+    {
+        return _control;
     }
 
     public override void UpdateSeatUI(int index, string nickname)

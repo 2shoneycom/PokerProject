@@ -8,49 +8,24 @@ using Photon.Realtime;
 
 public class HoldemGameControl : MonoBehaviour
 {
-    private static HoldemGameControl instance;
-    public static HoldemGameControl Control
-    {
-        get
-        {
-            return instance;
-        }
-    }
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            _betManager = new HoldemBetManager();
-            _playerManager = new HoldemPlayerManager();
-            _cardManager = new HoldemCardManager();
-            _resultManager = new HoldemResultManager();
-        }
-        else
-        {
-            Destroy(gameObject); // 씬 안에서 중복 생성 방지
-        }
-    }
-
     public const int MAX_PLAYER_NUM = 7;
     public const float RESULT_SHOW_TIME = 5.0f;
 
     HoldemPlayerManager _playerManager;
-    public static HoldemPlayerManager Players { get { return Control._playerManager; } }
+    public HoldemPlayerManager Players { get { return _playerManager; } }
 
     HoldemBetManager _betManager;
-    public static HoldemBetManager Bet { get { return Control._betManager; } }
+    public HoldemBetManager Bet { get { return _betManager; } }
 
     HoldemCardManager _cardManager;
-    public static HoldemCardManager Card { get { return Control._cardManager; } }
+    public HoldemCardManager Card { get { return _cardManager; } }
 
     HoldemResultManager _resultManager;
-    public static HoldemResultManager Result { get { return Control._resultManager; } }
-
+    public HoldemResultManager Result { get { return _resultManager; } }
 
     UI_Holdem _holdemUI;
-
+    SyncSystem _syncSystem;
+    public SyncSystem Sync {  get { return _syncSystem; } }
 
     bool isPlaying = false;
     public bool IsPlaying { get { return isPlaying; } }
@@ -90,6 +65,11 @@ public class HoldemGameControl : MonoBehaviour
 
     void Start()
     {
+        _betManager = new HoldemBetManager(this);
+        _playerManager = new HoldemPlayerManager(this);
+        _cardManager = new HoldemCardManager(this);
+        _resultManager = new HoldemResultManager(this);
+
         _holdemUI = (UI_Holdem)Managers.UI.SceneUI;
     }
 
@@ -149,21 +129,21 @@ public class HoldemGameControl : MonoBehaviour
         {
             // 자리 Setting
             case 0:
-                StartCoroutine(SyncSystem.Sync.SyncHoldemPlayerUID());
+                StartCoroutine(_syncSystem.SyncHoldemPlayerUID());
                 break;
 
             // 카드 Shuffle
             case 1:
                 Card.ShuffleCard();
 
-                StartCoroutine(SyncSystem.Sync.SyncHoldemDeck());
+                StartCoroutine(_syncSystem.SyncHoldemDeck());
                 break;
 
             // 딜러 선택
             case 2:
                 DecideDealer();
 
-                StartCoroutine(SyncSystem.Sync.SyncHoldemDealerIndex(_playerD));
+                StartCoroutine(_syncSystem.SyncHoldemDealerIndex(_playerD));
                 break;
 
             // 기본 베팅    sb
@@ -172,7 +152,7 @@ public class HoldemGameControl : MonoBehaviour
                     Bet.BaseBetting(_playerSB, true);
                     int baseBetAmount = Bet.GetBaseBetAmount(Managers.CurrentDifficulty, true);
 
-                    StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(PotMoney + baseBetAmount, true));
+                    StartCoroutine(_syncSystem.SyncHoldemPotMoney(PotMoney + baseBetAmount, true));
                 }
                 break;
 
@@ -182,7 +162,7 @@ public class HoldemGameControl : MonoBehaviour
                     Bet.BaseBetting(_playerBB, false);
                     int baseBetAmount = Bet.GetBaseBetAmount(Managers.CurrentDifficulty, false);
 
-                    StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(PotMoney + baseBetAmount, true));
+                    StartCoroutine(_syncSystem.SyncHoldemPotMoney(PotMoney + baseBetAmount, true));
                 }
                 break;
 
@@ -192,7 +172,7 @@ public class HoldemGameControl : MonoBehaviour
             case 6:
                 if (StageDetail >= MAX_PLAYER_NUM)
                 {
-                    StartCoroutine(SyncSystem.Sync.HoldemNextStage());
+                    StartCoroutine(_syncSystem.HoldemNextStage());
                     break;
                 }
 
@@ -200,7 +180,7 @@ public class HoldemGameControl : MonoBehaviour
                 string pUID = Players.GetPlayerUID(toPlayer);
                 if(pUID == "")
                 {
-                    StartCoroutine(SyncSystem.Sync.HoldemNextStage(1));
+                    StartCoroutine(_syncSystem.HoldemNextStage(1));
                     break;
                 }
 
@@ -210,7 +190,7 @@ public class HoldemGameControl : MonoBehaviour
             // 배팅 1     프리플랍 -> bb의 다음사람(언더더건)부터 시작 / 2인일 경우엔 딜러부터  // 2인일때 무조건 bb다음이 딜러여서 따로 처리 필요 x
             case 7:
                 // 타이머 끄기 (타이머는 monobehaviour 필요)
-                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(_syncSystem.HoldemAutoDieTimerSwitch(false));
 
                 // 어차피 베팅 끝날때 까지 계속 뺑글뺑글 돌텐데 저렇게 1씩 증가시키는게 의미 있나 해서 바꿔봄
                 if (Bet.IsBetting == false)
@@ -219,19 +199,19 @@ public class HoldemGameControl : MonoBehaviour
                 Bet.CurBetPlayer = GetNextPlayerIndex(Bet.CurBetPlayer);
 
                 // 타이머 키기
-                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(true));
+                StartCoroutine(_syncSystem.HoldemAutoDieTimerSwitch(true));
 
-                StartCoroutine(SyncSystem.Sync.HoldemBetStart(Bet.CurBetPlayer));
+                StartCoroutine(_syncSystem.HoldemBetStart(Bet.CurBetPlayer));
                 break;
 
             // 오픈 카드 3
             case 8:
                 // 타이머 끄기
-                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(_syncSystem.HoldemAutoDieTimerSwitch(false));
 
                 if (StageDetail >= 3)
                 {
-                    StartCoroutine(SyncSystem.Sync.HoldemNextStage());
+                    StartCoroutine(_syncSystem.HoldemNextStage());
                     break;
                 }
 
@@ -245,7 +225,7 @@ public class HoldemGameControl : MonoBehaviour
             // 배팅 4     리버 -> sb 부터 배팅 / 2인일 경우엔 bb부터
             case 13:
                 // 타이머 끄기 (타이머는 monobehaviour 필요)
-                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(_syncSystem.HoldemAutoDieTimerSwitch(false));
 
                 if (Bet.IsBetting == false)
                 {
@@ -260,20 +240,20 @@ public class HoldemGameControl : MonoBehaviour
                 }
 
                 // 타이머 키기
-                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(true));
+                StartCoroutine(_syncSystem.HoldemAutoDieTimerSwitch(true));
 
-                StartCoroutine(SyncSystem.Sync.HoldemBetStart(Bet.CurBetPlayer));
+                StartCoroutine(_syncSystem.HoldemBetStart(Bet.CurBetPlayer));
                 break;
 
             // 오픈 카드 1
             case 10:
             case 12:
                 // 타이머 끄기
-                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(_syncSystem.HoldemAutoDieTimerSwitch(false));
 
                 if (StageDetail >= 1)
                 {
-                    StartCoroutine(SyncSystem.Sync.HoldemNextStage());
+                    StartCoroutine(_syncSystem.HoldemNextStage());
                     break;
                 }
 
@@ -283,7 +263,7 @@ public class HoldemGameControl : MonoBehaviour
             // 결과 발표
             case 14:
                 // 타이머 끄기
-                StartCoroutine(SyncSystem.Sync.HoldemAutoDieTimerSwitch(false));
+                StartCoroutine(_syncSystem.HoldemAutoDieTimerSwitch(false));
 
                 StartCoroutine(EndGame());
 
@@ -291,13 +271,13 @@ public class HoldemGameControl : MonoBehaviour
 
             case 15:
                 // UI 보여주기 & 플레이어 카드 공개
-                StartCoroutine(SyncSystem.Sync.SyncHoldemResultUI());
+                StartCoroutine(_syncSystem.SyncHoldemResultUI());
 
                 break;
 
             // 새로운 게임 준비
             case 16:
-                StartCoroutine(SyncSystem.Sync.HoldemClearGame());
+                StartCoroutine(_syncSystem.HoldemClearGame());
 
                 break;
         }
@@ -416,15 +396,15 @@ public class HoldemGameControl : MonoBehaviour
             foreach (string winnerUID in winnerList)
             {
                 // 우승자에게 돈주기
-                SyncSystem.Sync.IncreaseMoneyToTarget(winnerUID, PotMoney / winnerList.Count);
+                _syncSystem.IncreaseMoneyToTarget(winnerUID, PotMoney / winnerList.Count);
 
                 Debug.Log("우승자: " + winnerUID);
             }
         }
         //StartCoroutine(SyncSystem.Sync.SyncHoldemPotMoney(0));
-        SyncSystem.Sync.SyncHoldemWinnerList(winnerList.ToArray());
+        _syncSystem.SyncHoldemWinnerList(winnerList.ToArray());
         yield return new WaitForSeconds(0.2f);
-        StartCoroutine(SyncSystem.Sync.HoldemNextStage(0));
+        StartCoroutine(_syncSystem.HoldemNextStage(0));
     }
 
     public void ShowResult()
@@ -465,7 +445,7 @@ public class HoldemGameControl : MonoBehaviour
         // 인원수 체크를 하고 2 이상이면 바로 시작
         if (Managers.Seat.GetOccupiedCount() >= 2 && PhotonNetwork.IsMasterClient)
         {
-            SyncSystem.Sync.HoldemStartSync();
+            _syncSystem.HoldemStartSync();
         }
         else
         {
@@ -495,6 +475,11 @@ public class HoldemGameControl : MonoBehaviour
             Players.GiveHoldemPlayerManagerSyncData(newPlayer);
             Card.GiveHoldemCardManagerSyncData(newPlayer);
         }
+    }
+
+    public void SetSyncSystem(SyncSystem syncSystem)
+    {
+        _syncSystem = syncSystem;
     }
 
     void GiveHoldemGameControlSyncData(Player newPlayer)

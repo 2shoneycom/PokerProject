@@ -5,6 +5,7 @@ using UnityEngine;
 public class JackBetManager
 {
     UI_BlackJack _jackUI;
+    JackGameControl _control;
 
     bool _isBetting = false;
     public bool IsBetting { get { return _isBetting; } }
@@ -23,8 +24,9 @@ public class JackBetManager
     int curBetPlayer = -1;
     public int CurBetPlayer {  get { return curBetPlayer; } }
 
-    public JackBetManager()
+    public JackBetManager(JackGameControl control)
     {
+        _control = control;
         _isBetting = false;
     }
 
@@ -36,10 +38,10 @@ public class JackBetManager
 
     public void JackBetting(int playerIndex, int splitNum, int amount)
     {
-        string pUID = JackGameControl.Players.GetPlayerUID(playerIndex);
-        SyncSystem.Sync.JackBetMoneyToTarget(pUID, amount);
+        string pUID = _control.Players.GetPlayerUID(playerIndex);
+        _control.Sync.JackBetMoneyToTarget(pUID, amount);
 
-        SyncSystem.Sync.SyncJackMyBetting(playerIndex, splitNum, amount);
+        _control.Sync.SyncJackMyBetting(playerIndex, splitNum, amount);
     }
 
     public void JackBettingReset(int playerIndex)
@@ -48,7 +50,7 @@ public class JackBetManager
             return;
 
         User.NowUser.JackResetBetting();
-        SyncSystem.Sync.SyncJackMyBettingReset(playerIndex, 0);
+        _control.Sync.SyncJackMyBettingReset(playerIndex, 0);
     }
 
     public void JackBettingConfirm(int playerIndex)
@@ -57,7 +59,7 @@ public class JackBetManager
             return;
 
         _jackUI.FirstBetEarlyEnd();
-        SyncSystem.Sync.SyncJackIsBet(playerIndex, true);
+        _control.Sync.SyncJackIsBet(playerIndex, true);
     }
 
     public void UpdateCurBetPlayer(int playerIndex)

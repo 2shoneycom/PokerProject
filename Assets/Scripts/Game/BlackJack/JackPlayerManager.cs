@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class JackPlayerManager
 {
+    JackGameControl _control;
     Dictionary<string, string> playerNickName;
     string[] jackPlayerUID;
     int _nowPlayerNum;
@@ -22,8 +23,10 @@ public class JackPlayerManager
 
     Tuple<int, int>[,] playerCardScore;
 
-    public JackPlayerManager()
+    public JackPlayerManager(JackGameControl contorl)
     {
+        _control = contorl;
+
         playerNickName = new Dictionary<string, string>();
         jackPlayerUID = new string[JackGameControl.MAX_PLAYER_NUM];
         playerSeedMoney = new int[JackGameControl.MAX_PLAYER_NUM];
@@ -145,7 +148,7 @@ public class JackPlayerManager
     public void UpdatePlayerSeedMoney(int index, int seedMoney)
     {
         playerSeedMoney[index] = seedMoney;
-        JackGameControl.Control.UpdatePlayerSeedMoneyUI();
+        _control.UpdatePlayerSeedMoneyUI();
     }
 
     public int GetPlayerBet(int playerIndex, int splitNum)
@@ -173,8 +176,8 @@ public class JackPlayerManager
         Debug.Log("UpdatePlayerIsGameEnd multi call?");
         if (PhotonNetwork.IsMasterClient)
         {
-            if (JackGameControl.Control.DetectGameEndAllPass())
-                SyncSystem.Sync.JackGameEnd();
+            if (_control.DetectGameEndAllPass())
+                _control.Sync.JackGameEnd();
         }
     }
 
@@ -186,13 +189,13 @@ public class JackPlayerManager
     public void UpdatePlayerBetting(int playerIndex, int splitNum, int amount)
     {
         playerBettingMoney[playerIndex, splitNum] += amount;
-        JackGameControl.Control.UpdatePlayerBetMoneyUI();
+        _control.UpdatePlayerBetMoneyUI();
     }
 
     public void UpdatePlayerBetReset(int playerIndex, int splitNum)
     {
         playerBettingMoney[playerIndex, splitNum] = 0;
-        JackGameControl.Control.UpdatePlayerBetMoneyUI();
+        _control.UpdatePlayerBetMoneyUI();
     }
 
     public void UpdatePlayerIsBet(int index, bool val)
@@ -218,19 +221,19 @@ public class JackPlayerManager
 
         playerCardGO[playerIndex, splitNum].Add(cardGO);
         playerCardDetails[playerIndex, splitNum].Add(cardDetail);
-        if (playerIndex == JackGameControl.Bet.CurBetPlayer)
+        if (playerIndex == _control.Bet.CurBetPlayer)
         {
             if (splitNum == 0 || playerCardGO[playerIndex, splitNum].Count != 2)
-                JackGameControl.Card.CurTurnPlayerCardBigger(cardGO);
+                _control.Card.CurTurnPlayerCardBigger(cardGO);
         }
 
         UI_Card cardUI = cardGO.GetOrAddComponent<UI_Card>();
-        cardUI.SetCardImage(cardDetail);
+        cardUI.SetCardImage(cardDetail, _control);
 
-        JackGameControl.Control.UpdatePlayerBetScoreUI(playerIndex, splitNum);
+        _control.UpdatePlayerBetScoreUI(playerIndex, splitNum);
 
-        if (JackGameControl.Control.StageCount <= 10)
-            JackGameControl.Control.NextStage(1);
+        if (_control.StageCount <= 10)
+            _control.NextStage(1);
     }
 
     public Tuple<int, int> CalculatePlayerBetScore(int playerIndex, int splitNum)
@@ -250,7 +253,7 @@ public class JackPlayerManager
 
         int i = GetPlayerCardLen(playerIndex, splitNum) - 1;
 
-        int cardscore = JackGameControl.Card.GetCardNum(playerCardDetails[playerIndex, splitNum][i]);
+        int cardscore = _control.Card.GetCardNum(playerCardDetails[playerIndex, splitNum][i]);
         if (cardscore >= 10)
             cardscore = 10;
 
@@ -300,7 +303,7 @@ public class JackPlayerManager
 
     public void FindPlayerBlackJack()
     {
-        if (!JackGameControl.Control.IsPlaying) return;
+        if (!_control.IsPlaying) return;
 
         for (int i = 0; i < JackGameControl.MAX_PLAYER_NUM; i++)
         {
@@ -308,10 +311,10 @@ public class JackPlayerManager
                 continue;
 
             if (playerCardScore[i, 0].Item1 == 21 || playerCardScore[i, 0].Item2 == 21)
-                JackGameControl.Control.UpdatePlayerBetStatusUI(i, "BlackJack!!!");
+                _control.UpdatePlayerBetStatusUI(i, "BlackJack!!!");
         }
 
-        JackGameControl.Control.NextStage();
+        _control.NextStage();
     }
 
     public Tuple<int, int> GetPlayerCardScore(int playerIndex, int splitNum)
@@ -340,12 +343,12 @@ public class JackPlayerManager
             {
                 UI_Card card = cardGO.GetOrAddComponent<UI_Card>();
                 int isWinOrLose = playerIsGameEnd[playerIndex, splitNum];
-                JackGameControl.Card.CurTurnPlayerCardOrigin(cardGO);
+                _control.Card.CurTurnPlayerCardOrigin(cardGO);
 
                 if (isBlackJack)
                 {
                     // 블랙잭이라면 일반 색에 커짐
-                    JackGameControl.Card.CardScaleBigger(cardGO);
+                    _control.Card.CardScaleBigger(cardGO);
                 }
                 else if(isWinOrLose == 2)
                 {
@@ -367,18 +370,18 @@ public class JackPlayerManager
 
     public bool IsPlayerCanSplit(int playerIndex)
     {
-        if (GetPlayerCardLen(playerIndex, JackGameControl.Control.PlayerSplit) != 2) 
+        if (GetPlayerCardLen(playerIndex, _control.PlayerSplit) != 2) 
             return false;
 
         int lastSplitCardSpaceLen = playerCardGO[playerIndex, JackGameControl.MAX_SPLIT_NUM - 1].Count;
         if (lastSplitCardSpaceLen > 0)
             return false;
 
-        int card1 = playerCardDetails[playerIndex, JackGameControl.Control.PlayerSplit][0];
-        int card2 = playerCardDetails[playerIndex, JackGameControl.Control.PlayerSplit][1];
+        int card1 = playerCardDetails[playerIndex, _control.PlayerSplit][0];
+        int card2 = playerCardDetails[playerIndex, _control.PlayerSplit][1];
 
-        int cardNum1 = JackGameControl.Card.GetCardNum(card1);
-        int cardNum2 = JackGameControl.Card.GetCardNum(card2);
+        int cardNum1 = _control.Card.GetCardNum(card1);
+        int cardNum2 = _control.Card.GetCardNum(card2);
 
         if (cardNum1 >= 10)
             cardNum1 = 10;
@@ -404,7 +407,7 @@ public class JackPlayerManager
         GameObject cardGO = playerCardGO[playerIndex, nowSplitNum][1];
         playerCardGO[playerIndex, nowSplitNum].RemoveAt(1);
         playerCardGO[playerIndex, gotoSplitNum].Add(cardGO);
-        JackGameControl.Card.CurTurnPlayerCardOrigin(cardGO);
+        _control.Card.CurTurnPlayerCardOrigin(cardGO);
 
         int cardDetail = playerCardDetails[playerIndex, nowSplitNum][1];
         playerCardDetails[playerIndex, nowSplitNum].RemoveAt(1);
@@ -414,10 +417,10 @@ public class JackPlayerManager
         {
             // 돈도 초기 배팅 금액만큼 검
             int baseBet = User.NowGamePlayer.GetBlackJackBaseBet();
-            JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, gotoSplitNum, baseBet);
+            _control.Bet.JackBetting(User.NowGamePlayer.GameIndex, gotoSplitNum, baseBet);
         }
 
-        int cardNum = JackGameControl.Card.GetCardNum(cardDetail);
+        int cardNum = _control.Card.GetCardNum(cardDetail);
         if (cardNum >= 10) 
             cardNum = 10;
 
@@ -434,7 +437,7 @@ public class JackPlayerManager
 
         if (cardGO.GetComponent<PhotonView>().IsMine)
         {
-            JackGameControl.Card.SplittedCardMove(playerIndex, gotoSplitNum, cardGO);
+            _control.Card.SplittedCardMove(playerIndex, gotoSplitNum, cardGO);
         }
 
         playerIsGameEnd[playerIndex, gotoSplitNum] = -1;

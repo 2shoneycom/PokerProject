@@ -8,18 +8,24 @@ using System;
 
 public class HoldemResultManager
 {
+    HoldemGameControl _control;
+    public HoldemResultManager(HoldemGameControl control)
+    {
+        _control = control;
+    }
+
     public List<String> GetWinner()
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} HoldemResultManager.cs 파일의 GetWinner 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
         List<String> winners = new List<String>();  // 승자 리스트
 
-        if (HoldemGameControl.Players.IsOneLeft)
+        if (_control.Players.IsOneLeft)
         {
             for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
             {
-                string pUID = HoldemGameControl.Players.GetPlayerUID(i);
-                if (pUID == "" || HoldemGameControl.Players.GetPlayerState(i) == false)
+                string pUID = _control.Players.GetPlayerUID(i);
+                if (pUID == "" || _control.Players.GetPlayerState(i) == false)
                     continue;
 
                 Debug.Log("one player left");
@@ -28,16 +34,16 @@ public class HoldemResultManager
             return winners;
         }
 
-        HoldemHandEvaluator evaluator = new HoldemHandEvaluator();
+        HoldemHandEvaluator evaluator = new HoldemHandEvaluator(_control.Card);
         int maxRank = -1;
         int maxScore = -1;
 
-        List<int> dealerCardIdx = HoldemGameControl.Card.GetDealerCardDetail().ToList();  // 딜러 카드 5장의 인덱스
+        List<int> dealerCardIdx = _control.Card.GetDealerCardDetail().ToList();  // 딜러 카드 5장의 인덱스
     
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
         for(int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
-            string pUID = HoldemGameControl.Players.GetPlayerUID(i);
+            string pUID = _control.Players.GetPlayerUID(i);
             if (pUID == "")
                 continue;
 
@@ -45,12 +51,12 @@ public class HoldemResultManager
             int myRank = -1;
             int myScore = -1;
 
-            if (HoldemGameControl.Players.GetPlayerState(i) == true)
+            if (_control.Players.GetPlayerState(i) == true)
             {
                 // 해당 플레이어의 카드는 딜러 카드 5장 + 본인 카드 2장, 총 7장
                 List<int> cardIdx = new List<int>(dealerCardIdx);
-                cardIdx.Add(HoldemGameControl.Players.PlayerCards[i, 0]);
-                cardIdx.Add(HoldemGameControl.Players.PlayerCards[i, 1]);
+                cardIdx.Add(_control.Players.PlayerCards[i, 0]);
+                cardIdx.Add(_control.Players.PlayerCards[i, 1]);
 
                 // 7C5의 조합을 얻어내기
                 var combinations = GetCombinations(cardIdx, 5);

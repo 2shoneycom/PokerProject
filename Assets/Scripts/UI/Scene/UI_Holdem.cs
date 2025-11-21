@@ -114,6 +114,7 @@ public class UI_Holdem : UI_Scene
     };
 
     Image onTurnPlayer = null;
+    HoldemGameControl _control;
 
     public override void Init()
     {
@@ -126,6 +127,9 @@ public class UI_Holdem : UI_Scene
         Bind<Image>(typeof(Images));
         Bind<GameObject>(typeof(GameObjects));
         winnerIndex = new List<int>();
+
+        HoldemScene holdemScene = (HoldemScene)Managers.Scene.CurrentScene;
+        _control = holdemScene.GetControl();
 
         SettingUIIconPos();
 
@@ -247,8 +251,8 @@ public class UI_Holdem : UI_Scene
         {
             for (int i = 1; i <= 7; i++)
             {
-                int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
-                if (HoldemGameControl.Players.GetPlayerUID(gameIndex) == "")
+                int gameIndex = _control.ConvertUItoGame(i - 1);
+                if (_control.Players.GetPlayerUID(gameIndex) == "")
                     continue;
 
                 GetGameObject((int)Enum.Parse(typeof(GameObjects), $"UI_Player{i}_Bet")).SetActive(isOn);
@@ -272,7 +276,7 @@ public class UI_Holdem : UI_Scene
         GetButton((int)Buttons.UI_GameStartButton).gameObject.SetActive(false);
 
         // 게임 시작
-        SyncSystem.Sync.HoldemStartSync();
+        _control.Sync.HoldemStartSync();
     }
 
     public void BetButtonInteractiveSwitch(string betType, bool isOn)
@@ -293,7 +297,7 @@ public class UI_Holdem : UI_Scene
 
     public void UpdatePotMoney()
     {
-        GetText((int)Texts.UI_PotMoney_Text).text = $"{HoldemGameControl.Control.PotMoney}";
+        GetText((int)Texts.UI_PotMoney_Text).text = $"{_control.PotMoney}";
     }
 
     public void UpdateBetMoney()
@@ -302,8 +306,8 @@ public class UI_Holdem : UI_Scene
 
         for (int i = 1; i <= 7; i++)
         {
-            int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
-            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = HoldemGameControl.Players.GetPlayerBet(gameIndex).ToString();
+            int gameIndex = _control.ConvertUItoGame(i - 1);
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_BetText")).text = _control.Players.GetPlayerBet(gameIndex).ToString();
         }
     }
 
@@ -311,8 +315,8 @@ public class UI_Holdem : UI_Scene
     {
         for (int i = 1; i <= 7; i++)
         {
-            int gameIndex = HoldemGameControl.Control.ConvertUItoGame(i - 1);
-            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = HoldemGameControl.Players.GetPlayerSeedMoney(gameIndex).ToString();
+            int gameIndex = _control.ConvertUItoGame(i - 1);
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = _control.Players.GetPlayerSeedMoney(gameIndex).ToString();
         }
     }
 
@@ -422,19 +426,19 @@ public class UI_Holdem : UI_Scene
 
     void RequestBet(string betType)
     {
-        if (HoldemGameControl.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
+        if (_control.Players.GetPlayerTurn(User.NowGamePlayer.GameIndex) == false)
         {
             if (betType == "Die")       // 자신의 턴이 아니면 die만 켜져있어서 die만 누를테지만 혹시 모르니
             {
-                if (HoldemGameControl.Players.GetPlayerDieReserve(User.NowGamePlayer.GameIndex) == false)
-                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, true);
+                if (_control.Players.GetPlayerDieReserve(User.NowGamePlayer.GameIndex) == false)
+                    _control.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, true);
                 else
-                    SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, false);
+                    _control.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, false);
             }
             return;     // 자신의 턴이 아닐때 die가 아니면 모두 리턴
         }
 
-        HoldemGameControl.Bet.PlayerBetSelected(betType);
+        _control.Bet.PlayerBetSelected(betType);
     }
 
     void OpenRoomClicked(PointerEventData data)
@@ -470,18 +474,18 @@ public class UI_Holdem : UI_Scene
 
         panelText.text = "Winner!!\n\n";
 
-        List<string> wList = HoldemGameControl.Players.GetWinnerList();
+        List<string> wList = _control.Players.GetWinnerList();
         winnerIndex.Clear();
 
         bool amIWin = false;
         for (int i = 0; i < wList.Count; i++)
         {
-            panelText.text += HoldemGameControl.Players.GetPlayerNickNameByUID(wList[i]);
+            panelText.text += _control.Players.GetPlayerNickNameByUID(wList[i]);
 
             if (wList[i] == User.NowUser.GetUid())
                 amIWin = true;
 
-            winnerIndex.Add(HoldemGameControl.Players.GetPlayerGameIndexByUID(wList[i]));
+            winnerIndex.Add(_control.Players.GetPlayerGameIndexByUID(wList[i]));
 
             if (i != wList.Count - 1)
             {
@@ -501,7 +505,7 @@ public class UI_Holdem : UI_Scene
     {
         for (int i = 0; i < winnerIndex.Count; i++)
         {
-            int uiI = HoldemGameControl.Control.ConvertGameToUI(winnerIndex[i]);
+            int uiI = _control.ConvertGameToUI(winnerIndex[i]);
             GameObject go = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{uiI + 1}")).gameObject;
             go.transform.DOScale(Vector3.one * biggerIconSize, 1.0f).SetEase(Ease.InOutQuad);
         }
@@ -511,7 +515,7 @@ public class UI_Holdem : UI_Scene
     {
         for (int i = 0; i < winnerIndex.Count; i++)
         {
-            int uiI = HoldemGameControl.Control.ConvertGameToUI(winnerIndex[i]);
+            int uiI = _control.ConvertGameToUI(winnerIndex[i]);
             GameObject go = GetImage((int)Enum.Parse(typeof(Images), $"UI_Player{uiI + 1}")).gameObject;
             go.transform.DOScale(Vector3.one * originIconSize, 0.3f);
         }
@@ -523,7 +527,7 @@ public class UI_Holdem : UI_Scene
 
         WinnerIconOrigin();
         SetWinnerPanel(false);
-        HoldemGameControl.Control.NextStage();
+        _control.NextStage();
     }
 
     private void LeaveRoomClicked(PointerEventData data)

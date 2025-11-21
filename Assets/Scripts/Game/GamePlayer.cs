@@ -7,6 +7,10 @@ public class GamePlayer
     int seatedIndex = -1;
     Define.GameType curGameType = Define.GameType.None;
 
+    HoldemGameControl holdemControl;
+    PokerGameControl pokerControl;
+    JackGameControl jackControl;
+
     public int SeatIndex { get { return seatedIndex; } }
 
     public int GameIndex { 
@@ -14,11 +18,20 @@ public class GamePlayer
             switch (curGameType)
             {
                 case Define.GameType.Holdem:
-                    return HoldemGameControl.Control.ConvertUItoGame(seatedIndex);
+                    if (holdemControl == null)
+                        return 0;
+                    return holdemControl.ConvertUItoGame(seatedIndex);
+
                 case Define.GameType.Poker:
-                    return PokerGameControl.Control.ConvertUItoGame(seatedIndex);
+                    if (pokerControl == null)
+                        return 0;
+                    return pokerControl.ConvertUItoGame(seatedIndex);
+
                 case Define.GameType.BlackJack:
+                    if (jackControl == null)
+                        return 0;
                     return seatedIndex;
+
                 default:
                     return 0;
             }
@@ -33,6 +46,25 @@ public class GamePlayer
     {
         Init();
     }
+
+    public GamePlayer(HoldemGameControl control)
+    {
+        Init();
+        holdemControl = control;
+    }
+
+    public GamePlayer(PokerGameControl control)
+    {
+        Init();
+        pokerControl = control;
+    }
+
+    public GamePlayer(JackGameControl control)
+    {
+        Init();
+        jackControl = control;
+    }
+
 
     void Init()
     {

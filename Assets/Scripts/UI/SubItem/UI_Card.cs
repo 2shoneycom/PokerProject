@@ -33,7 +33,7 @@ public class UI_Card : UI_Base
         }
     }
 
-    public void SetCardImage(int cardDetail)
+    public void SetCardImage(int cardDetail, JackGameControl jackControl)
     {
         Debug.Log("a");
 
@@ -43,7 +43,7 @@ public class UI_Card : UI_Base
         }
         Image target = GetImage((int)Images.UI_Card_Image);
         Debug.Log(cardDetail);
-        target.sprite = JackGameControl.Card.GetRightCardImage(cardDetail);
+        target.sprite = jackControl.Card.GetRightCardImage(cardDetail);
         Debug.Log("b");
     }
 

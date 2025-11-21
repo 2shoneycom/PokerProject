@@ -103,6 +103,7 @@ public class UI_BlackJack : UI_Scene
     }
 
     TextMeshProUGUI onTurnPlayer = null;
+    JackGameControl _control;
 
     public override void Init()
     {
@@ -112,6 +113,9 @@ public class UI_BlackJack : UI_Scene
         Bind<TextMeshProUGUI>(typeof(Texts));
         Bind<Image>(typeof(Images));
         Bind<GameObject>(typeof(GameObjects));
+
+        BlackJackScene scene = (BlackJackScene)Managers.Scene.CurrentScene;
+        _control = scene.GetControl();
 
         StartCoroutine(LoadingScreenSwitch(false, 2f));
 
@@ -199,27 +203,27 @@ public class UI_BlackJack : UI_Scene
 
         GameObject chipGO = GetGameObject((int)GameObjects.UI_ChipButtonLL);
         SetRightText(GetText((int)Texts.UI_ChipButtonLL_Text), baseBet);
-        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
+        chipGO.BindEvent(PointerEventData => { _control.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, baseBet); });
 
         int a = baseBet * 2;
         chipGO = GetGameObject((int)GameObjects.UI_ChipButtonLM);
         SetRightText(GetText((int)Texts.UI_ChipButtonLM_Text), a);
-        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, a); });
+        chipGO.BindEvent(PointerEventData => { _control.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, a); });
 
         int b = a * 2;
         chipGO = GetGameObject((int)GameObjects.UI_ChipButtonMM);
         SetRightText(GetText((int)Texts.UI_ChipButtonMM_Text), b);
-        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, b); });
+        chipGO.BindEvent(PointerEventData => { _control.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, b); });
 
         int c = b * 2;
         chipGO = GetGameObject((int)GameObjects.UI_ChipButtonRM);
         SetRightText(GetText((int)Texts.UI_ChipButtonRM_Text), c);
-        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, c); });
+        chipGO.BindEvent(PointerEventData => { _control.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, c); });
 
         int d = c * 2;
         chipGO = GetGameObject((int)GameObjects.UI_ChipButtonRR);
         SetRightText(GetText((int)Texts.UI_ChipButtonRR_Text), d);
-        chipGO.BindEvent(PointerEventData => { JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, d); });
+        chipGO.BindEvent(PointerEventData => { _control.Bet.JackBetting(User.NowGamePlayer.GameIndex, 0, d); });
     }
 
     void SetRightText(TextMeshProUGUI target, int money)
@@ -265,7 +269,7 @@ public class UI_BlackJack : UI_Scene
         Button bt = GetButton((int)Buttons.UI_ButtonLL);
 
         bt.onClick.RemoveAllListeners();
-        bt.onClick.AddListener(() => JackGameControl.Bet.JackBettingReset(User.NowGamePlayer.GameIndex));
+        bt.onClick.AddListener(() => _control.Bet.JackBettingReset(User.NowGamePlayer.GameIndex));
         bt.interactable = true;
 
         GetText((int)Texts.UI_ButtonLL_Text).text = "리셋";
@@ -278,7 +282,7 @@ public class UI_BlackJack : UI_Scene
         Button bt = GetButton((int)Buttons.UI_ButtonRR);
 
         bt.onClick.RemoveAllListeners();
-        bt.onClick.AddListener(() => JackGameControl.Bet.JackBettingConfirm(User.NowGamePlayer.GameIndex));
+        bt.onClick.AddListener(() => _control.Bet.JackBettingConfirm(User.NowGamePlayer.GameIndex));
         bt.interactable = true;
 
         GetText((int)Texts.UI_ButtonRR_Text).text = "게임시작";
@@ -315,7 +319,7 @@ public class UI_BlackJack : UI_Scene
                 GetButton((int)Buttons.UI_ButtonLL).interactable = true;
             }
 
-            if (JackGameControl.Players.IsPlayerCanSplit(User.NowGamePlayer.GameIndex))
+            if (_control.Players.IsPlayerCanSplit(User.NowGamePlayer.GameIndex))
                 GetButton((int)Buttons.UI_ButtonLM).interactable = true;
             else
                 GetButton((int)Buttons.UI_ButtonLM).interactable = false;
@@ -342,11 +346,11 @@ public class UI_BlackJack : UI_Scene
         // 1장만 더 받는 조건으로 돈을 2배로 검
         // 돈 2배로 베팅
         int baseBet = User.NowGamePlayer.GetBlackJackBaseBet();
-        JackGameControl.Bet.JackBetting(User.NowGamePlayer.GameIndex, JackGameControl.Control.PlayerSplit, baseBet);
+        _control.Bet.JackBetting(User.NowGamePlayer.GameIndex, _control.PlayerSplit, baseBet);
         // 1장 받기
-        StartCoroutine(JackGameControl.Card.DealingCard(User.NowGamePlayer.GameIndex, JackGameControl.Control.PlayerSplit));
+        StartCoroutine(_control.Card.DealingCard(User.NowGamePlayer.GameIndex, _control.PlayerSplit));
         // 베팅 종료
-        SyncSystem.Sync.JackNormalBetEnd();
+        _control.Sync.JackNormalBetEnd();
     }
 
     void SplitButtonSetting()
@@ -367,7 +371,7 @@ public class UI_BlackJack : UI_Scene
         // 1. 카드 나눠짐
         // 2. 새로운 카드 1장 받음
         // 3. 새롭게 배팅 시작
-        SyncSystem.Sync.JackPlayerSplitSetting(User.NowGamePlayer.GameIndex, JackGameControl.Control.PlayerSplit);
+        _control.Sync.JackPlayerSplitSetting(User.NowGamePlayer.GameIndex, _control.PlayerSplit);
     }
 
     void StandButtonSetting()
@@ -386,7 +390,7 @@ public class UI_BlackJack : UI_Scene
     public void StandClicked()
     {
         // 카드 그만 받기
-        SyncSystem.Sync.JackNormalBetEnd();
+        _control.Sync.JackNormalBetEnd();
     }
 
     bool isHit = false;
@@ -409,9 +413,9 @@ public class UI_BlackJack : UI_Scene
     {
         isHit = true;
         curPlayerIndex = User.NowGamePlayer.GameIndex;
-        curPlayerSplit = JackGameControl.Control.PlayerSplit;
+        curPlayerSplit = _control.PlayerSplit;
 
-        SyncSystem.Sync.JackStopBetTimer();
+        _control.Sync.JackStopBetTimer();
 
         StartCoroutine(GiveCardWaitRestart());
     }
@@ -421,17 +425,17 @@ public class UI_BlackJack : UI_Scene
     IEnumerator GiveCardWaitRestart()
     {
         // 카드 1장 더 받기
-        StartCoroutine(JackGameControl.Card.DealingCard(curPlayerIndex, curPlayerSplit));
+        StartCoroutine(_control.Card.DealingCard(curPlayerIndex, curPlayerSplit));
         yield return new WaitForSeconds(1f);
 
-        if (JackGameControl.Players.GetPlayerIsGameEnd(curPlayerIndex, curPlayerSplit) == -1)
+        if (_control.Players.GetPlayerIsGameEnd(curPlayerIndex, curPlayerSplit) == -1)
         {
-            var score = JackGameControl.Players.GetPlayerCardScore(curPlayerIndex, curPlayerSplit);
+            var score = _control.Players.GetPlayerCardScore(curPlayerIndex, curPlayerSplit);
             if (score.Item1 == 21 || score.Item2 == 21)
                 yield break;
 
             // 타이머 초기화
-            SyncSystem.Sync.JackRestartBetTimer();
+            _control.Sync.JackRestartBetTimer();
         }
     }
 
@@ -453,7 +457,7 @@ public class UI_BlackJack : UI_Scene
             if (isOn == true)
             {
                 int gameIndex = i - 1;
-                if (JackGameControl.Players.GetPlayerUID(gameIndex) == "")
+                if (_control.Players.GetPlayerUID(gameIndex) == "")
                     continue;
             }
 
@@ -507,7 +511,7 @@ public class UI_BlackJack : UI_Scene
     {
         GetButton((int)Buttons.UI_ButtonRR).interactable = false;
         // 게임 시작
-        SyncSystem.Sync.JackStartSync();
+        _control.Sync.JackStartSync();
         Debug.Log("1");
     }
 
@@ -601,7 +605,7 @@ public class UI_BlackJack : UI_Scene
 
             for(int j = 0; j < JackGameControl.MAX_SPLIT_NUM; j++)
             {
-                int bet = JackGameControl.Players.GetPlayerBet(gameIndex, j);
+                int bet = _control.Players.GetPlayerBet(gameIndex, j);
 
                 if (j == 0)
                     text += bet.ToString();
@@ -618,7 +622,7 @@ public class UI_BlackJack : UI_Scene
         for (int i = 1; i <= JackGameControl.MAX_PLAYER_NUM; i++)
         {
             int gameIndex = i - 1;
-            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = JackGameControl.Players.GetPlayerSeedMoney(gameIndex).ToString();
+            GetText((int)Enum.Parse(typeof(Texts), $"UI_Player{i}_SeedMoneyText")).text = _control.Players.GetPlayerSeedMoney(gameIndex).ToString();
         }
     }
 

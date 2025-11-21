@@ -8,16 +8,21 @@ public class BlackJackScene : GameScene
     const int MAX_PLAYER = 5;
 
     UI_BlackJack _jackUI = null;
+    JackGameControl _control;
+    SyncSystem _syncSystem;
 
     protected override void Init()
     {
         base.Init();
 
         SceneType = Define.Scene.BlackJack;
-        _jackUI = Managers.UI.ShowSceneUI<UI_BlackJack>();
-        this.GetOrAddComponent<JackGameControl>();
-        this.GetOrAddComponent<SyncSystem>();
+        _syncSystem = this.GetOrAddComponent<SyncSystem>();
+        _control = this.GetOrAddComponent<JackGameControl>();
 
+        _syncSystem.SetJackControl(_control);
+        _control.SetSyncSystem(_syncSystem);
+
+        _jackUI = Managers.UI.ShowSceneUI<UI_BlackJack>();
         User.NowUser.SetJackPlay();
 
         StartCoroutine(Loading(0.01f));
@@ -31,7 +36,12 @@ public class BlackJackScene : GameScene
 
     void SeatInit()
     {
-        Managers.Seat.Init(MAX_PLAYER);
+        Managers.Seat.Init(MAX_PLAYER, _syncSystem);
+    }
+
+    public JackGameControl GetControl()
+    {
+        return _control;
     }
 
     public override void UpdateSeatUI(int index, string nickname)

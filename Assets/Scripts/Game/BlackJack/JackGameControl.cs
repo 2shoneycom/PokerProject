@@ -6,30 +6,6 @@ using UnityEngine;
 
 public class JackGameControl : MonoBehaviour
 {
-    private static JackGameControl instance;
-    public static JackGameControl Control
-    {
-        get
-        {
-            return instance;
-        }
-    }
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            _betManager = new JackBetManager();
-            _playerManager = new JackPlayerManager();
-            _cardManager = new JackCardManager();
-        }
-        else
-        {
-            Destroy(gameObject); // 씬 안에서 중복 생성 방지
-        }
-    }
-
     public const int MAX_PLAYER_NUM = 5;
     public const int MAX_SPLIT_NUM = 4;
     public const float RESULT_SHOW_TIME = 5.0f;
@@ -38,15 +14,18 @@ public class JackGameControl : MonoBehaviour
     public const float INSURANCE_SEL_TIME = 10.2f;
 
     JackPlayerManager _playerManager;
-    public static JackPlayerManager Players { get { return Control._playerManager; } }
+    public JackPlayerManager Players { get { return _playerManager; } }
 
     JackBetManager _betManager;
-    public static JackBetManager Bet { get { return Control._betManager; } }
+    public JackBetManager Bet { get { return _betManager; } }
 
     JackCardManager _cardManager;
-    public static JackCardManager Card { get { return Control._cardManager; } }
+    public JackCardManager Card { get { return _cardManager; } }
 
     UI_BlackJack _jackUI;
+
+    SyncSystem _syncSystem;
+    public SyncSystem Sync { get { return _syncSystem; } }
 
     bool isPlaying = false;
     public bool IsPlaying { get { return isPlaying; } }
@@ -80,6 +59,10 @@ public class JackGameControl : MonoBehaviour
 
     void Start()
     {
+        _betManager = new JackBetManager(this);
+        _playerManager = new JackPlayerManager(this);
+        _cardManager = new JackCardManager(this);
+
         _jackUI = (UI_BlackJack)Managers.UI.SceneUI;
     }
 
@@ -138,26 +121,26 @@ public class JackGameControl : MonoBehaviour
         {
             // 자리 Setting
             case 0:
-                StartCoroutine(SyncSystem.Sync.SyncJackPlayerUID());
+                StartCoroutine(Sync.SyncJackPlayerUID());
                 break;
 
             // 카드 Shuffle
             case 1:
                 Card.ShuffleCard();
 
-                StartCoroutine(SyncSystem.Sync.SyncJackDeck());
+                StartCoroutine(Sync.SyncJackDeck());
                 break;
 
             // 첫번째 시작 플레이어는 항상 오른쪽 끝
             case 2:
                 DecideFirstPlayer();
 
-                StartCoroutine(SyncSystem.Sync.SyncJackFirstPlayerIndex(_curPlayer));
+                StartCoroutine(Sync.SyncJackFirstPlayerIndex(_curPlayer));
                 break;
 
             // 모두 다같이 한번에 기본 베팅
             case 3:
-                StartCoroutine(SyncSystem.Sync.StartFirstBetting());
+                StartCoroutine(Sync.StartFirstBetting());
                 break;
 
             // 가장 오른쪽 사람부터 카드 1장씩
@@ -165,13 +148,13 @@ public class JackGameControl : MonoBehaviour
             case 6:
                 if (StageDetail >= MAX_PLAYER_NUM)
                 {
-                    StartCoroutine(SyncSystem.Sync.JackNextStage());
+                    StartCoroutine(Sync.JackNextStage());
                     break;
                 }
 
                 if (IsNowPlayerOK() == false)
                 {
-                    StartCoroutine(SyncSystem.Sync.JackNextStage(1));
+                    StartCoroutine(Sync.JackNextStage(1));
                     break;
                 }
 
@@ -186,12 +169,12 @@ public class JackGameControl : MonoBehaviour
 
             // 플레이어 블랙잭 판별
             case 8:
-                StartCoroutine(SyncSystem.Sync.JackNoticeBlackJack());
+                StartCoroutine(Sync.JackNoticeBlackJack());
                 break;
 
             // 딜러 카드 판별 -> 첫장 A / 첫장 10 / 그외
             case 9:
-                StartCoroutine(SyncSystem.Sync.JackIsDealerIsA());
+                StartCoroutine(Sync.JackIsDealerIsA());
                 break;
 
             // 블랙잭인 플레이어 승리
@@ -199,13 +182,13 @@ public class JackGameControl : MonoBehaviour
                 {
                     if (StageDetail >= MAX_PLAYER_NUM)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage());
+                        StartCoroutine(Sync.JackNextStage());
                         break;
                     }
 
                     if (IsNowPlayerOK() == false)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage(1));
+                        StartCoroutine(Sync.JackNextStage(1));
                         break;
                     }
 
@@ -214,9 +197,9 @@ public class JackGameControl : MonoBehaviour
 
                     if (score.Item1 == 21 || score.Item2 == 21)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackBlackJackPlayerWin(nowPlayer));
+                        StartCoroutine(Sync.JackBlackJackPlayerWin(nowPlayer));
                     }
-                    StartCoroutine(SyncSystem.Sync.JackNextStage(1));
+                    StartCoroutine(Sync.JackNextStage(1));
                     break;
                 }
 
@@ -225,19 +208,19 @@ public class JackGameControl : MonoBehaviour
                 {
                     if (StageDetail >= MAX_PLAYER_NUM)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage());
+                        StartCoroutine(Sync.JackNextStage());
                         break;
                     }
 
                     if (IsNowPlayerOK() == false)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage(1));
+                        StartCoroutine(Sync.JackNextStage(1));
                         break;
                     }
 
                     if (PlayerSplit >= MAX_SPLIT_NUM)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage(1));
+                        StartCoroutine(Sync.JackNextStage(1));
                         break;
                     }
 
@@ -245,20 +228,20 @@ public class JackGameControl : MonoBehaviour
 
                     if (!Players.IsPlayerSplit(nowPlayer, PlayerSplit))
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage(1));
+                        StartCoroutine(Sync.JackNextStage(1));
                         break;
                     }
 
                     if (Players.GetPlayerIsGameEnd(nowPlayer, PlayerSplit) != -1)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage(2));
+                        StartCoroutine(Sync.JackNextStage(2));
                         break;
                     }
 
-                    StartCoroutine(SyncSystem.Sync.SyncJacksplitAnd21());
+                    StartCoroutine(Sync.SyncJacksplitAnd21());
 
                     if (PlayerSplit == 0)
-                        StartCoroutine(SyncSystem.Sync.JackNormalBetting(nowPlayer));
+                        StartCoroutine(Sync.JackNormalBetting(nowPlayer));
                     else
                         StartCoroutine(SplitedPlayerSet(nowPlayer));                   
 
@@ -267,7 +250,7 @@ public class JackGameControl : MonoBehaviour
 
             // 알맞게 진행되는지
             case 12:
-                StartCoroutine(SyncSystem.Sync.JackBeforeProcess());
+                StartCoroutine(Sync.JackBeforeProcess());
                 break;
 
             // 모든 사람의 베팅이 끝나고 딜러의 패 "오픈" 차례
@@ -285,13 +268,13 @@ public class JackGameControl : MonoBehaviour
 
                     if (IsNowPlayerOK() == false)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage(1));
+                        StartCoroutine(Sync.JackNextStage(1));
                         break;
                     }
 
                     if (PlayerSplit >= MAX_SPLIT_NUM)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage(1));
+                        StartCoroutine(Sync.JackNextStage(1));
                         break;
                     }
 
@@ -299,17 +282,17 @@ public class JackGameControl : MonoBehaviour
 
                     if (!Players.IsPlayerSplit(nowPlayer, PlayerSplit))
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage(1));
+                        StartCoroutine(Sync.JackNextStage(1));
                         break;
                     }
 
                     if (Players.GetPlayerIsGameEnd(nowPlayer, PlayerSplit) != -1)
                     {
-                        StartCoroutine(SyncSystem.Sync.JackNextStage(2));
+                        StartCoroutine(Sync.JackNextStage(2));
                         break;
                     }
 
-                    StartCoroutine(SyncSystem.Sync.SyncJackDecideWinner(nowPlayer, PlayerSplit));
+                    StartCoroutine(Sync.SyncJackDecideWinner(nowPlayer, PlayerSplit));
 
                     break;
                 }
@@ -349,7 +332,7 @@ public class JackGameControl : MonoBehaviour
 
     public void RequestDeckShuffle()
     {
-        StartCoroutine(SyncSystem.Sync.SyncJackDeck());
+        StartCoroutine(Sync.SyncJackDeck());
     }
 
     public void StartFirstBet()
@@ -371,7 +354,7 @@ public class JackGameControl : MonoBehaviour
             if (PhotonNetwork.IsMasterClient)
             {
                 if (DetectBettingAllPass())
-                    SyncSystem.Sync.FirstBettingAllPass();
+                    Sync.FirstBettingAllPass();
             }
 
             yield return null;
@@ -496,6 +479,7 @@ public class JackGameControl : MonoBehaviour
     void SetInsurance()
     {
         UI_JackInsurancePopup _popup = Managers.UI.ShowPopupUI<UI_JackInsurancePopup>();
+        _popup.SetControl(this);
 
         var score = Players.GetPlayerCardScore(User.NowGamePlayer.GameIndex, 0);
         if (score.Item1 == 21 || score.Item2 == 21)
@@ -518,7 +502,7 @@ public class JackGameControl : MonoBehaviour
             if (PhotonNetwork.IsMasterClient)
             {
                 if (DetectInsuranceAllPass())
-                    SyncSystem.Sync.JackInsuranceAllPass();
+                    Sync.JackInsuranceAllPass();
             }
             yield return null;
         }
@@ -527,7 +511,7 @@ public class JackGameControl : MonoBehaviour
 
         // 현재 플레이어가 n초 동안 카드를 누르지 않았을 경우 'No' 선택
         if (Players.GetPlayerIsInsurance(User.NowGamePlayer.GameIndex) == 0)
-            SyncSystem.Sync.SyncJackIsInsurance(User.NowGamePlayer.GameIndex, -1);
+            Sync.SyncJackIsInsurance(User.NowGamePlayer.GameIndex, -1);
 
         Debug.Log("Timer End");
         yield return new WaitForSeconds(time);
@@ -599,14 +583,14 @@ public class JackGameControl : MonoBehaviour
 
         if (Card.GetDealerIsBurst() == true)
         {
-            StartCoroutine(SyncSystem.Sync.JackNextStage());
+            StartCoroutine(Sync.JackNextStage());
             yield break;
         }
 
         yield return new WaitForSeconds(1f);
         if (score.Item1 > 16 || score.Item2 > 16)
         {
-            StartCoroutine(SyncSystem.Sync.JackNextStage());
+            StartCoroutine(Sync.JackNextStage());
         }
         else
         {
@@ -679,7 +663,7 @@ public class JackGameControl : MonoBehaviour
             else
                 PlayerWin(playerIndex, splitNum);
         }
-        SyncSystem.Sync.JackNextStage_V2(2);
+        Sync.JackNextStage_V2(2);
     }
 
     void PlayerBlackJack(int playerIndex, int splitNum)
@@ -731,7 +715,7 @@ public class JackGameControl : MonoBehaviour
     void MoneySetting(int playerIndex, int splitNum, int amount)
     {
         User.NowUser.IncreaseMoney(User.NowUser.GetUid(), amount);
-        SyncSystem.Sync.SyncJackMyBettingReset(playerIndex, splitNum);
+        Sync.SyncJackMyBettingReset(playerIndex, splitNum);
 
         /////////
         /// UI 처리
@@ -750,7 +734,7 @@ public class JackGameControl : MonoBehaviour
             Managers.Audio.PlaySFX(Define.SFX.Win);
         }
 
-        SyncSystem.Sync.SyncJackIsGameEnd(playerIndex, splitNum, isWinOrLose);
+        Sync.SyncJackIsGameEnd(playerIndex, splitNum, isWinOrLose);
     }
 
     public bool DetectGameEndAllPass()
@@ -853,7 +837,7 @@ public class JackGameControl : MonoBehaviour
     {
         if (Players.GetPlayerCardLen(nowPlayer, PlayerSplit) >= 2)
         {
-            StartCoroutine(SyncSystem.Sync.JackNormalBetting(nowPlayer));
+            StartCoroutine(Sync.JackNormalBetting(nowPlayer));
         }
         else
         {
@@ -894,8 +878,8 @@ public class JackGameControl : MonoBehaviour
             ProcessStage();
         else if (splitAnd21 == true)
         {
-            SyncSystem.Sync.JackPlayerCardOrigin(nowPlayer, nowSplitNum);
-            SyncSystem.Sync.JackNextStage_V2(2);
+            Sync.JackPlayerCardOrigin(nowPlayer, nowSplitNum);
+            Sync.JackNextStage_V2(2);
         }
     }
 
@@ -939,5 +923,10 @@ public class JackGameControl : MonoBehaviour
             _jackUI.UpdatePlayerBetStatusText(i + 1, "");
             _jackUI.UpdatePlayerBetScoreText(i + 1, "");
         }
+    }
+
+    public void SetSyncSystem(SyncSystem syncSystem)
+    {
+        _syncSystem = syncSystem;
     }
 }

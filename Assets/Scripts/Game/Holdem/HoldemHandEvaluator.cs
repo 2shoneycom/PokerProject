@@ -13,13 +13,19 @@ public class HoldemHandEvaluator
     private bool is_flush;
     private bool is_straight;
 
+    HoldemCardManager _card;
+    public HoldemHandEvaluator(HoldemCardManager card)
+    {
+        _card = card;
+    }
+
     public Tuple<int, int> EvaluateHand()
     {
         // Start에서 Card System 쪽에 있는 숫자를 보고 무늬, 숫자 판단하는 거 가져오는 코드
         for (int i = 0; i < 5; i++)
         {
-            nums[i] = HoldemGameControl.Card.GetCardNum(idxs[i]);
-            shapes[i] = HoldemGameControl.Card.GetCardShape(idxs[i]);
+            nums[i] = _card.GetCardNum(idxs[i]);
+            shapes[i] = _card.GetCardShape(idxs[i]);
         }
 
         handRank = -1;

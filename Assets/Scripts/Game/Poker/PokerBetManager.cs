@@ -6,6 +6,7 @@ using UnityEngine;
 public class PokerBetManager
 {
     UI_Poker _pokerUI;
+    PokerGameControl _control;
 
     bool _isBetting = false;
     public bool IsBetting {  get { return _isBetting; }}
@@ -28,9 +29,10 @@ public class PokerBetManager
     }
     public const float AUTO_DIE_TIMER = 10.0f;
 
-    public PokerBetManager()
+    public PokerBetManager(PokerGameControl control)
     {
         _isBetting = false;
+        _control = control;
     }
 
     public void Init(UI_Poker ui)
@@ -42,11 +44,11 @@ public class PokerBetManager
 
     public void BaseBetting(int playerIndex)
     {
-        string pUID = PokerGameControl.Players.GetPlayerUID(playerIndex);
+        string pUID = _control.Players.GetPlayerUID(playerIndex);
         int dAmount = GetBaseBetAmount(Managers.CurrentDifficulty);
-        SyncSystem.Sync.PokerBetMoneyToTarget(pUID, dAmount);
+        _control.Sync.PokerBetMoneyToTarget(pUID, dAmount);
 
-        SyncSystem.Sync.SyncPokerMyBetting(playerIndex, dAmount);
+        _control.Sync.SyncPokerMyBetting(playerIndex, dAmount);
     }
 
     //임의로 정한 값
@@ -75,7 +77,7 @@ public class PokerBetManager
     public void HandleBet(int curPlayer)
     {
         // 관전자는 리턴
-        if (!PokerGameControl.Control.IsPlaying)
+        if (!_control.IsPlaying)
             return;
 
         CurBetPlayer = curPlayer;
@@ -89,41 +91,41 @@ public class PokerBetManager
             _isBetting = true;
         }
 
-        _pokerUI.SetOnTurnPlayer(PokerGameControl.Control.ConvertGameToUI(curPlayer) + 1);
+        _pokerUI.SetOnTurnPlayer(_control.ConvertGameToUI(curPlayer) + 1);
 
-        if (PokerGameControl.Players.GetPlayerUID(curPlayer) != User.NowUser.GetUid())
+        if (_control.Players.GetPlayerUID(curPlayer) != User.NowUser.GetUid())
             return;
 
-        if (PokerGameControl.Players.IsOneLeft || IsBetEnd())
+        if (_control.Players.IsOneLeft || IsBetEnd())
         {
             // 1명 남앗거나 정상 배팅 종료의 경우
             Debug.Log("bet end in IsBetEnd");
-            SyncSystem.Sync.PokerBetEnd();
+            _control.Sync.PokerBetEnd();
             return;
         }
 
         // 내가 이미 죽엇다면 처리
-        if (PokerGameControl.Players.GetPlayerState(CurBetPlayer) == false)
+        if (_control.Players.GetPlayerState(CurBetPlayer) == false)
         {
-            SyncSystem.Sync.PokerNextStage_V2(1);
+            _control.Sync.PokerNextStage_V2(1);
             return;
         }
 
         // 내가 예약 죽음햇다면 처리
-        if (PokerGameControl.Players.GetPlayerDieReserve(CurBetPlayer) == true)
+        if (_control.Players.GetPlayerDieReserve(CurBetPlayer) == true)
         {
             PlayerBetSelected("Die");
             return;
         }
 
-        SyncSystem.Sync.SyncPokerIsTurn(CurBetPlayer, true);
+        _control.Sync.SyncPokerIsTurn(CurBetPlayer, true);
         // 알맞은 버튼 키기
         CalBetAndButtonSwitch();
     }
 
     void CalBetAndButtonSwitch()
     {
-        if(PokerGameControl.Players.GetPlayerIsCall(CurBetPlayer) == false)
+        if(_control.Players.GetPlayerIsCall(CurBetPlayer) == false)
         {
             for (int i = 0; i < BetType.Length; i++)
             {
@@ -139,14 +141,14 @@ public class PokerBetManager
 
     bool IsBetEnd()
     {
-        if (PokerGameControl.Players.NowPlayerNum - PokerGameControl.Players.GetDeadPlayerNum() == 1)
+        if (_control.Players.NowPlayerNum - _control.Players.GetDeadPlayerNum() == 1)
         {
-            SyncSystem.Sync.SyncPokerIsOneLeft(true);
+            _control.Sync.SyncPokerIsOneLeft(true);
             return true;
         }
 
-        if (PokerGameControl.Players.FindBetEndTerm() == true &&
-            User.NowGamePlayer.BetMoney == PokerGameControl.Players.FindHighestBet())
+        if (_control.Players.FindBetEndTerm() == true &&
+            User.NowGamePlayer.BetMoney == _control.Players.FindHighestBet())
         {
             return true;
         }
@@ -161,7 +163,7 @@ public class PokerBetManager
             _pokerUI.BetButtonInteractiveSwitch(BetType[i], false);
         }
 
-        if (PokerGameControl.Players.GetPlayerState(User.NowGamePlayer.GameIndex))      // Die예약을 위해 죽지 않앗다면 die는 항상 활성화
+        if (_control.Players.GetPlayerState(User.NowGamePlayer.GameIndex))      // Die예약을 위해 죽지 않앗다면 die는 항상 활성화
             _pokerUI.BetButtonInteractiveSwitch("Die", true);
     }
 
@@ -186,35 +188,35 @@ public class PokerBetManager
 
     public void BetProcess(int curPlayer, string betType, int betAmount)
     {
-        PokerGameControl.Players.UpdatePlayerTurn(curPlayer, false);
+        _control.Players.UpdatePlayerTurn(curPlayer, false);
 
         if (betType != "Die")
         {
-            PokerGameControl.Players.UpdatePlayerBetting(curPlayer, betAmount, true);
-            PokerGameControl.Control.PotMoney = PokerGameControl.Control.PotMoney + betAmount;
+            _control.Players.UpdatePlayerBetting(curPlayer, betAmount, true);
+            _control.PotMoney = _control.PotMoney + betAmount;
         }
         else
         {
-            PokerGameControl.Players.SetDeadPlayerNum(PokerGameControl.Players.GetDeadPlayerNum() + 1);
-            PokerGameControl.Players.UpdatePlayerState(curPlayer, false);
+            _control.Players.SetDeadPlayerNum(_control.Players.GetDeadPlayerNum() + 1);
+            _control.Players.UpdatePlayerState(curPlayer, false);
         }
-        PokerGameControl.Control.NextStage(1);
+        _control.NextStage(1);
     }
 
     public void CurrentStageBetEnd()
     {
         _isBetting = false;
-        PokerGameControl.Players.ClearBetSetting();
+        _control.Players.ClearBetSetting();
         BetButtonDisable();
 
         // 어차피 이 함수는 모두가 호출하니
-        PokerGameControl.Control.NextStage();
+        _control.NextStage();
     }
 
     public void PlayerBetSelected(string betType)
     {
-        int highestBetMoney = PokerGameControl.Players.FindHighestBet();
-        int curPlayerBetMoney = PokerGameControl.Players.GetPlayerBet(CurBetPlayer);
+        int highestBetMoney = _control.Players.FindHighestBet();
+        int curPlayerBetMoney = _control.Players.GetPlayerBet(CurBetPlayer);
         int curBetAmount = highestBetMoney - curPlayerBetMoney;
 
         switch (betType)
@@ -258,21 +260,21 @@ public class PokerBetManager
                 // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 팟머니 * 0.5 만큼 더 레이즈
                 // Debug.Log($"Player {curPlayer} Half");
 
-                curBetAmount = curBetAmount + (PokerGameControl.Control.PotMoney + curBetAmount) / 2;
+                curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 2;
                 break;
 
             case "Quater":
                 // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 팟머니 * 0.25 만큼 더 레이즈
                 //Debug.Log($"Player {curPlayer} Quater");
 
-                curBetAmount = curBetAmount + (PokerGameControl.Control.PotMoney + curBetAmount) / 4;
+                curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 4;
                 break;
 
             case "AllIn":
                 // 올인 / 현재 플레이어 중 최소 금액 찾고, 내 시드 머니가 그거보다 많으면 그거만큼 배팅
                 //Debug.Log($"Player {curPlayer} AllIn");
 
-                curBetAmount = PokerGameControl.Players.GetLowestPlayerSeedMoney();
+                curBetAmount = _control.Players.GetLowestPlayerSeedMoney();
                 break;
         }
 
@@ -280,6 +282,6 @@ public class PokerBetManager
         {
             User.NowUser.PokerBettingMoney(User.NowUser.GetUid(), curBetAmount);
         }
-        SyncSystem.Sync.PokerBetProcess(CurBetPlayer, betType, curBetAmount);
+        _control.Sync.PokerBetProcess(CurBetPlayer, betType, curBetAmount);
     }
 }

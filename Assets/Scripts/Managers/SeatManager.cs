@@ -13,17 +13,18 @@ public class SeatManager
     public const string DEFAULT_NULL_SEAT = "자리 선택";
 
     GameScene curGameScene = null;
+    SyncSystem _syncSystem;
 
-
-    public void Init(int seatSize)      // GameScene에서 init해줌
+    public void Init(int seatSize, SyncSystem sync)      // GameScene에서 init해줌
     {
         curGameScene = (GameScene)Managers.Scene.CurrentScene;
+        _syncSystem = sync;
 
         occupiedCount = 0;
-        SyncSystem.Sync.OnSeatsSynced -= ApplySeatsData;
-        SyncSystem.Sync.OnSeatsSynced += ApplySeatsData;
-        SyncSystem.Sync.OnHaveSeat -= TakeSeat;
-        SyncSystem.Sync.OnHaveSeat += TakeSeat;
+        _syncSystem.OnSeatsSynced -= ApplySeatsData;
+        _syncSystem.OnSeatsSynced += ApplySeatsData;
+        _syncSystem.OnHaveSeat -= TakeSeat;
+        _syncSystem.OnHaveSeat += TakeSeat;
 
         SetSeats(seatSize);
 
@@ -60,7 +61,7 @@ public class SeatManager
             return;
         }
 
-        SyncSystem.Sync.SyncHaveSeat(playerUID, playerNickName, seatIndex);
+        _syncSystem.SyncHaveSeat(playerUID, playerNickName, seatIndex);
     }
 
     private void TakeSeat(string playerUID, string playerNickName, int seatIndex)
@@ -133,7 +134,7 @@ public class SeatManager
 
     public void RequestSyncSeats()
     {
-        SyncSystem.Sync.SyncSeatsToMaster();
+        _syncSystem.SyncSeatsToMaster();
     }
 
     public string[] SendSeatsData()
@@ -162,36 +163,50 @@ public class SeatManager
     {
         Debug.Log("SyncSystem.cs 파일의 RPC_SyncHoldemPlayerUID 함수로부터"); // 디버깅 추적용 (25.11.12 승헌)
         Debug.Log($"#{++Define.DEBUG_INDEX} SeatManager.cs 파일의 HoldemConvertToPlayers 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+        HoldemScene holdemScene = (HoldemScene)Managers.Scene.CurrentScene;
+        if (holdemScene == null) return;
+
+        HoldemGameControl holdemControl = holdemScene.GetControl();
 
         for (int i = 0; i < Managers.GetCurGameMaxPlayer; i++)
         {
-            HoldemGameControl.Players.UpdatePlayerUID(i, seats[i * 2]);
+            holdemControl?.Players.UpdatePlayerUID(i, seats[i * 2]);
         }
         User.NowUser.HoldemSyncSeedMoney();
         curGameScene.UpdateBetUI(true);
-        HoldemGameControl.Control.NextStage();
+        holdemControl?.NextStage();
     }
 
     public void PokerConvertToPlayers()
     {
+        PokerScene pokerScene = (PokerScene)Managers.Scene.CurrentScene;
+        if (pokerScene == null) return;
+
+        PokerGameControl pokerControl = pokerScene.GetControl();
+
         for (int i = 0; i < Managers.GetCurGameMaxPlayer; i++)
         {
-            PokerGameControl.Players.UpdatePlayerUID(i, seats[i * 2]);
+            pokerControl?.Players.UpdatePlayerUID(i, seats[i * 2]);
         }
         User.NowUser.PokerSyncSeedMoney();
         curGameScene.UpdateBetUI(true);
-        PokerGameControl.Control.NextStage();
+        pokerControl.NextStage();
     }
 
     public void JackConvertToPlayers()
     {
+        BlackJackScene jackScene = (BlackJackScene)Managers.Scene.CurrentScene;
+        if (jackScene == null) return;
+
+        JackGameControl jackControl = jackScene.GetControl();
+
         for (int i = 0; i < Managers.GetCurGameMaxPlayer; i++)
         {
-            JackGameControl.Players.UpdatePlayerUID(i, seats[i * 2]);
+            jackControl?.Players.UpdatePlayerUID(i, seats[i * 2]);
         }
         User.NowUser.JackSyncSeedMoney();
         curGameScene.UpdateBetUI(true);
-        JackGameControl.Control.NextStage();
+        jackControl.NextStage();
     }
 
 

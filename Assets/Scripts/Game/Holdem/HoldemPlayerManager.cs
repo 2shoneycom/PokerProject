@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class HoldemPlayerManager
 {
+    HoldemGameControl _control;
     Dictionary<string, string> playerNickName;
     string[] holdemPlayerUID;
     int _nowPlayerNum;
@@ -32,8 +33,10 @@ public class HoldemPlayerManager
 
     List<string> winnerList;    // UI 용도
 
-    public HoldemPlayerManager()
+    public HoldemPlayerManager(HoldemGameControl control)
     {
+        _control = control;
+
         playerNickName = new Dictionary<string, string>();
         holdemPlayerUID = new string[HoldemGameControl.MAX_PLAYER_NUM];
         playerSeedMoney = new int[HoldemGameControl.MAX_PLAYER_NUM];
@@ -86,6 +89,8 @@ public class HoldemPlayerManager
 
     public void UpdatePlayerUID(int seatIdx, string UID)
     {
+        Debug.Log($"현재 seatIdex {seatIdx} / UID : {UID}");
+
         _nowPlayerNum++;
 
         if (UID == SeatManager.DEFAULT_NULL_SEAT)
@@ -98,7 +103,7 @@ public class HoldemPlayerManager
             playerNickName.Add(UID, Managers.Seat.GetPlayerNickNameByUID(UID));
         }
 
-        int gameIndex = HoldemGameControl.Control.ConvertUItoGame(seatIdx);
+        int gameIndex = _control.ConvertUItoGame(seatIdx);
         holdemPlayerUID[gameIndex] = UID;
     }
 
@@ -132,7 +137,7 @@ public class HoldemPlayerManager
         Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 UpdatePlayerSeedMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
         playerSeedMoney[index] = seedMoney;
-        HoldemGameControl.Control.UpdatePlayerSeedMoneyUI();
+        _control.UpdatePlayerSeedMoneyUI();
     }
 
     public int GetPlayerBet(int index)
@@ -148,7 +153,7 @@ public class HoldemPlayerManager
 
         playerBettingMoney[index] += amount;
         playerIsBet[index] = true;
-        HoldemGameControl.Control.UpdatePlayerBetMoneyUI();
+        _control.UpdatePlayerBetMoneyUI();
     }
 
     public bool GetPlayerIsBet(int index)
@@ -207,20 +212,24 @@ public class HoldemPlayerManager
 
     public void SetPlayerCard(string pUID, int cardViewID, int cardDetail)
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 SetPlayerCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         int playerIndex = GetPlayerGameIndexByUID(pUID);
 
         GameObject cardGO = PhotonView.Find(cardViewID).gameObject;
 
         var ex = playerCardGO[playerIndex];
-        if (HoldemGameControl.Card.CardLen == 0)
+        if (_control.Card.CardLen == 0)
             playerCardGO[playerIndex] = (cardGO, ex.Item2);
         else
             playerCardGO[playerIndex] = (ex.Item1, cardGO);
 
-        playerCardDetails[playerIndex, HoldemGameControl.Card.CardLen] = cardDetail;
+        playerCardDetails[playerIndex, _control.Card.CardLen] = cardDetail;
 
         if (User.NowUser.GetUid() == pUID)
-            cardGO.GetComponent<SpriteRenderer>().sprite = HoldemGameControl.Card.GetRightCardImage(cardDetail);
+            cardGO.GetComponent<SpriteRenderer>().sprite = _control.Card.GetRightCardImage(cardDetail);
+
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemPlayerManager.cs 파일의 SetPlayerCard 함수 종료"); // 디버깅 추적용 (25.11.12 승헌)
     }
 
     public List<string> GetWinnerList()
@@ -281,8 +290,8 @@ public class HoldemPlayerManager
 
             if (GetPlayerUID(i) != "" && playerIsAlive[i])
             {
-                cards.Item1.GetComponent<SpriteRenderer>().sprite = HoldemGameControl.Card.GetRightCardImage(playerCardDetails[i, 0]);
-                cards.Item2.GetComponent<SpriteRenderer>().sprite = HoldemGameControl.Card.GetRightCardImage(playerCardDetails[i, 1]);
+                cards.Item1.GetComponent<SpriteRenderer>().sprite = _control.Card.GetRightCardImage(playerCardDetails[i, 0]);
+                cards.Item2.GetComponent<SpriteRenderer>().sprite = _control.Card.GetRightCardImage(playerCardDetails[i, 1]);
             }
         }
     }

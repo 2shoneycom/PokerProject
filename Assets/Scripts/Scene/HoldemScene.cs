@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
 
 public class HoldemScene : GameScene
@@ -11,14 +12,21 @@ public class HoldemScene : GameScene
 
     UI_Holdem _holdemUI = null;
 
+    HoldemGameControl _control;
+    SyncSystem _syncSystem;
+
     protected override void Init()
     {
         base.Init();
 
         SceneType = Define.Scene.Holdem;
+        _syncSystem = this.GetOrAddComponent<SyncSystem>();
+        _control = this.GetOrAddComponent<HoldemGameControl>();
+
+        _syncSystem.SetHoldemControl(_control);
+        _control.SetSyncSystem(_syncSystem);
+
         _holdemUI = Managers.UI.ShowSceneUI<UI_Holdem>();
-        this.GetOrAddComponent<HoldemGameControl>();
-        this.GetOrAddComponent<SyncSystem>();
 
         User.NowUser.SetHoldemPlay();
 
@@ -33,7 +41,7 @@ public class HoldemScene : GameScene
 
     void SeatInit()
     {
-        Managers.Seat.Init(MAX_PLAYER);
+        Managers.Seat.Init(MAX_PLAYER, _syncSystem);
     }
 
     public override void UpdateSeatUI(int index, string nickname)
@@ -56,9 +64,9 @@ public class HoldemScene : GameScene
         _holdemUI.GameStartButtonOn(isOn);
     }
 
-    void Update()
+    public HoldemGameControl GetControl()
     {
-
+        return _control;
     }
 
     public override void Clear()
@@ -84,13 +92,13 @@ public class HoldemScene : GameScene
         // 1. 카드 받기도 전에 나간 경우 -> 그냥 카드까지 받게 하고 die 처리
         // 2. 내 차례가 아닌 딜링 하는 경우 -> die 처리
         // 3. 내 차례 였던 경우 -> die 처리
-        if (HoldemGameControl.Control.IsPlaying == false) return;
+        if (_control.IsPlaying == false) return;
         if (PhotonNetwork.IsMasterClient == false) return;
 
-        int gameIndex = HoldemGameControl.Players.GetPlayerGameIndexByUID(uid);
-        if (HoldemGameControl.Bet.CurBetPlayer == gameIndex)
-            HoldemGameControl.Bet.PlayerBetSelected("Die");
+        int gameIndex = _control.Players.GetPlayerGameIndexByUID(uid);
+        if (_control.Bet.CurBetPlayer == gameIndex)
+            _control.Bet.PlayerBetSelected("Die");
         else
-            SyncSystem.Sync.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, true);
+            _syncSystem.SyncHoldemDieReserve(User.NowGamePlayer.GameIndex, true);
     }
 }

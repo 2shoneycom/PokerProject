@@ -8,16 +8,23 @@ using System;
 
 public class PokerResultManager
 {
+    PokerGameControl _control;
+
+    public PokerResultManager(PokerGameControl control)
+    {
+        _control = control;
+    }
+
     public string GetWinner(int cardLen, bool isReversed = false)
     {
         List<String> winners = new List<String>();  // 승자 리스트
 
-        if (PokerGameControl.Players.IsOneLeft)
+        if (_control.Players.IsOneLeft)
         {
             for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
             {
-                string pUID = PokerGameControl.Players.GetPlayerUID(i);
-                if (pUID == "" || PokerGameControl.Players.GetPlayerState(i) == false)
+                string pUID = _control.Players.GetPlayerUID(i);
+                if (pUID == "" || _control.Players.GetPlayerState(i) == false)
                     continue;
 
                 Debug.Log("one player left");
@@ -26,15 +33,15 @@ public class PokerResultManager
             return winners[0];
         }
 
-        PokerHandEvaluator evaluator = new PokerHandEvaluator();
+        PokerHandEvaluator evaluator = new PokerHandEvaluator(_control);
         int maxRank = isReversed ? Int32.MaxValue : -1;
         float maxScore = isReversed ? Int32.MaxValue : -1;
         Debug.Log("log 1 ");
         // 게임에 참가 중인(폴드하지 않은) 플레이어들을 파악하고
         for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
-            string pUID = PokerGameControl.Players.GetPlayerUID(i);
-            if (pUID == "" || PokerGameControl.Players.GetPlayerState(i) == false)
+            string pUID = _control.Players.GetPlayerUID(i);
+            if (pUID == "" || _control.Players.GetPlayerState(i) == false)
                 continue;
 
             // 족보 판단 디버그용!!!!!!
@@ -50,7 +57,7 @@ public class PokerResultManager
                 {
                     if (j == 3) continue;
 
-                    cardIdx.Add(PokerGameControl.Players.GetPlayerCardDetail(i, j));
+                    cardIdx.Add(_control.Players.GetPlayerCardDetail(i, j));
                 }
             }
             else
@@ -59,7 +66,7 @@ public class PokerResultManager
                 {
                     if (j == 0 || j == 1 || j == 3) continue;
 
-                    cardIdx.Add(PokerGameControl.Players.GetPlayerCardDetail(i, j));
+                    cardIdx.Add(_control.Players.GetPlayerCardDetail(i, j));
                 }
             }
             Debug.Log("log 3 ");

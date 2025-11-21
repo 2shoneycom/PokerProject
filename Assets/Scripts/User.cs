@@ -16,6 +16,10 @@ public class User
     GamePlayer gamemPlayer;
     public static GamePlayer NowGamePlayer { get { return NowUser.gamemPlayer; } }
 
+    HoldemGameControl holdemControl;
+    PokerGameControl pokerControl;
+    JackGameControl jackControl;
+
     private string uid;
     private string nickName;
     private long seedMoney;
@@ -58,19 +62,28 @@ public class User
 
     public void SetHoldemPlay()
     {
-        gamemPlayer = new GamePlayer();
+        HoldemScene holdemScene = (HoldemScene)Managers.Scene.CurrentScene;
+        holdemControl = holdemScene.GetControl();
+
+        gamemPlayer = new GamePlayer(holdemControl);
         Managers.CurrentGameType = Define.GameType.Holdem;
     }
 
     public void SetPokerPlay()
     {
-        gamemPlayer = new GamePlayer();
+        PokerScene pokerScene = (PokerScene)Managers.Scene.CurrentScene;
+        pokerControl = pokerScene.GetControl();
+
+        gamemPlayer = new GamePlayer(pokerControl);
         Managers.CurrentGameType = Define.GameType.Poker;
     }
 
     public void SetJackPlay()
     {
-        gamemPlayer = new GamePlayer();
+        BlackJackScene jackScene = (BlackJackScene)Managers.Scene.CurrentScene;
+        jackControl = jackScene.GetControl();
+         
+        gamemPlayer = new GamePlayer(jackControl);
         Managers.CurrentGameType = Define.GameType.BlackJack;
     }
 
@@ -144,8 +157,11 @@ public class User
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} User.cs 파일의 HoldemSyncSeedMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        if (HoldemGameControl.Control.IsPlaying)
-            SyncSystem.Sync.SyncHoldemPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
+        if (holdemControl == null)
+            return;
+
+        if (holdemControl.IsPlaying)
+            holdemControl.Sync.SyncHoldemPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
     }
 
     public void PokerBettingMoney(string targetUID, int amount)
@@ -162,8 +178,8 @@ public class User
 
     public void PokerSyncSeedMoney()
     {
-        if (PokerGameControl.Control.IsPlaying)
-            SyncSystem.Sync.SyncPokerPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
+        if (pokerControl.IsPlaying)
+            pokerControl.Sync.SyncPokerPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
     }
 
     public void JackBettingMoney(string targetUID, int amount)
@@ -190,8 +206,7 @@ public class User
 
     public void JackSyncSeedMoney()
     {
-        if (JackGameControl.Control.IsPlaying)
-            SyncSystem.Sync.SyncJackPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
+        if (jackControl.IsPlaying)
+            jackControl.Sync.SyncJackPlayerSeedMoney(NowGamePlayer.GameIndex, (int)seedMoney);
     }
-
 }

@@ -28,6 +28,8 @@ public class UI_PokerCardPopup : UI_Popup
     int firstSelCardIndex = -1;
     int secondSelCardIndex = -1;
 
+    PokerGameControl _control;
+
     public override void Init()
     {
         base.Init();
@@ -40,13 +42,18 @@ public class UI_PokerCardPopup : UI_Popup
         cardSelTimer = StartCoroutine(CardSelTimer(CARD_SEL_TIME));
     }
 
+    public void SetControl(PokerGameControl control)
+    {
+        _control = control;
+    }
+
     void CardImageInit()
     {
         for (int i = 0; i < 4; i++)
         {
-            int cardDetail = PokerGameControl.Players.PlayerCards[User.NowGamePlayer.GameIndex, i];
+            int cardDetail = _control.Players.PlayerCards[User.NowGamePlayer.GameIndex, i];
             Image target = GetImage((int)Enum.Parse(typeof(Images), $"UI_Card{i + 1}"));
-            target.sprite = PokerGameControl.Card.GetRightCardImage(cardDetail);
+            target.sprite = _control.Card.GetRightCardImage(cardDetail);
         }
     }
 
@@ -139,6 +146,6 @@ public class UI_PokerCardPopup : UI_Popup
             TimerRunOutAutoSel();
         Debug.Log("Timer End");
         yield return new WaitForSeconds(time);
-        PokerGameControl.Control.SelectedCardIndex(firstSelCardIndex, secondSelCardIndex);
+        _control.SelectedCardIndex(firstSelCardIndex, secondSelCardIndex);
     }
 }

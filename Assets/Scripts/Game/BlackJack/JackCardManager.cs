@@ -37,6 +37,7 @@ public class JackCardManager
     Tuple<int, int> dealerCardScore;
 
     UI_BlackJack _jackUI;
+    JackGameControl _control;
 
     public static Action<string> OnAddCard;
     public static Action OnAddCardToDealer;
@@ -45,6 +46,11 @@ public class JackCardManager
     bool isShuffled = false;
     bool isBurst = false;
     int curPlayerSplitNum = -1;
+
+    public JackCardManager(JackGameControl control)
+    {
+        _control = control;
+    }
 
     public void Init()
     {
@@ -173,7 +179,7 @@ public class JackCardManager
         if (cardBuffer.Count == 0)
         {
             ShuffleCard();
-            JackGameControl.Control.RequestDeckShuffle();
+            _control.RequestDeckShuffle();
         }
 
         return nowCard;
@@ -193,7 +199,7 @@ public class JackCardManager
             cardBuffer.Add(cardDeck[i]);
         }
 
-        JackGameControl.Control.NextStage();
+        _control.NextStage();
     }
 
     public IEnumerator DealingCard(int toPlayer = -1, int splitNum = -1)
@@ -203,14 +209,14 @@ public class JackCardManager
 
         if (toPlayer == -1)
         {
-            SyncSystem.Sync.JackDealerCard();
+            _control.Sync.JackDealerCard();
         }
         else
         {
             Debug.Log("2");
 
-            string pUID = JackGameControl.Players.GetPlayerUID(toPlayer);
-            SyncSystem.Sync.JackAddCard(pUID, splitNum);
+            string pUID = _control.Players.GetPlayerUID(toPlayer);
+            _control.Sync.JackAddCard(pUID, splitNum);
         }
     }
 
@@ -263,20 +269,20 @@ public class JackCardManager
         dealerCardDetail[index] = cardDetail;
 
         if(index != 1)
-            card.SetCardImage(cardDetail);
+            card.SetCardImage(cardDetail, _control);
         CalculateDealerCardScore(cardDetail);
 
-        if (JackGameControl.Control.StageCount < 10)
-            JackGameControl.Control.NextStage();
+        if (_control.StageCount < 10)
+            _control.NextStage();
         else
-            JackGameControl.Control.NextStage(1);
+            _control.NextStage(1);
     }
 
     public void SetDealerCardOpen()
     {
         UI_Card card = dealerCardList[1].GetOrAddComponent<UI_Card>();
         int cardDetail = dealerCardDetail[1];
-        card.SetCardImage(cardDetail);
+        card.SetCardImage(cardDetail, _control);
     }
 
     void CalculateDealerCardScore(int cardDetail)
@@ -335,7 +341,7 @@ public class JackCardManager
 
         dealerCardScore = Tuple.Create(a, b);
 
-        if(JackGameControl.Control.StageCount > 10)
+        if(_control.StageCount > 10)
         {
             if (dealerCardScore.Item1 == -1 && dealerCardScore.Item2 == -1)
             {
@@ -399,11 +405,11 @@ public class JackCardManager
         if (pUID == MAKE_DEALER_CARD)
         {
             int cardIndex = GetDealerCardLen();
-            SyncSystem.Sync.SyncJackDealerCard(cardGO, cardIndex, popedCard);
+            _control.Sync.SyncJackDealerCard(cardGO, cardIndex, popedCard);
         }
         else
         {
-            SyncSystem.Sync.SyncJackPlayerCard(pUID, cardGO, popedCard);
+            _control.Sync.SyncJackPlayerCard(pUID, cardGO, popedCard);
         }
     }
 
@@ -420,13 +426,13 @@ public class JackCardManager
             CardMoveToPosPlayer(cardGO, pUID);
         }
 
-        JackGameControl.Players.SetPlayerCard(pUID, curPlayerSplitNum, cardViewID, cardDetail);
+        _control.Players.SetPlayerCard(pUID, curPlayerSplitNum, cardViewID, cardDetail);
     }
 
     void CardMoveToPosPlayer(GameObject cardGO, string pUID)
     {
-        int playerIndex = JackGameControl.Players.GetPlayerGameIndexByUID(pUID);
-        int cardIndex = JackGameControl.Players.GetPlayerCardLen(playerIndex, curPlayerSplitNum);
+        int playerIndex = _control.Players.GetPlayerGameIndexByUID(pUID);
+        int cardIndex = _control.Players.GetPlayerCardLen(playerIndex, curPlayerSplitNum);
         Vector3 destPos = GetPlayerCardPos(playerIndex, curPlayerSplitNum, cardIndex);
 
         cardGO.transform.DOMove(destPos, CARD_ANIMATION_TIME);
@@ -444,14 +450,14 @@ public class JackCardManager
     {
         if (cardIndex != -1)
         {
-            GameObject cardGO = JackGameControl.Players.GetPlayerCardGO(playerIndex, splitNum, cardIndex);
+            GameObject cardGO = _control.Players.GetPlayerCardGO(playerIndex, splitNum, cardIndex);
             cardGO.transform.DOScale(Vector3.one * 1.3f, CARD_ANIMATION_TIME);
             return;
         }
 
-        for (int i = 0; i < JackGameControl.Players.GetPlayerCardLen(playerIndex, splitNum); i++)
+        for (int i = 0; i < _control.Players.GetPlayerCardLen(playerIndex, splitNum); i++)
         {
-            GameObject cardGO = JackGameControl.Players.GetPlayerCardGO(playerIndex, splitNum, i);
+            GameObject cardGO = _control.Players.GetPlayerCardGO(playerIndex, splitNum, i);
             cardGO.transform.DOScale(Vector3.one * 1.3f, CARD_ANIMATION_TIME);
         }
     }
@@ -465,14 +471,14 @@ public class JackCardManager
     {
         if (cardIndex != -1)
         {
-            GameObject cardGO = JackGameControl.Players.GetPlayerCardGO(playerIndex, splitNum, cardIndex);
+            GameObject cardGO = _control.Players.GetPlayerCardGO(playerIndex, splitNum, cardIndex);
             cardGO.transform.DOScale(Vector3.one, CARD_ANIMATION_TIME);
             return;
         }
 
-        for (int i = 0; i < JackGameControl.Players.GetPlayerCardLen(playerIndex, splitNum); i++)
+        for (int i = 0; i < _control.Players.GetPlayerCardLen(playerIndex, splitNum); i++)
         {
-            GameObject cardGO = JackGameControl.Players.GetPlayerCardGO(playerIndex, splitNum, i);
+            GameObject cardGO = _control.Players.GetPlayerCardGO(playerIndex, splitNum, i);
             cardGO.transform.DOScale(Vector3.one, CARD_ANIMATION_TIME);
         }
     }

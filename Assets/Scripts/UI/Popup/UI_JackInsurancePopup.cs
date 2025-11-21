@@ -25,6 +25,8 @@ public class UI_JackInsurancePopup : UI_Popup
 
     bool isEvenMoney = false;
 
+    JackGameControl _control;
+
     public override void Init()
     {
         base.Init();
@@ -42,6 +44,11 @@ public class UI_JackInsurancePopup : UI_Popup
         isEvenMoney = value;
     }
 
+    public void SetControl(JackGameControl control)
+    {
+        _control = control;
+    }
+
     void SetText()
     {
         if (isEvenMoney)
@@ -56,14 +63,14 @@ public class UI_JackInsurancePopup : UI_Popup
 
     void BindButtonYes(PointerEventData data)
     {
-        SyncSystem.Sync.SyncJackIsInsurance(User.NowGamePlayer.GameIndex, 1);
+        _control.Sync.SyncJackIsInsurance(User.NowGamePlayer.GameIndex, 1);
 
         ClosePopupUI();
     }
 
     void BindButtonNo(PointerEventData data)
     {
-        SyncSystem.Sync.SyncJackIsInsurance(User.NowGamePlayer.GameIndex, -1);
+        _control.Sync.SyncJackIsInsurance(User.NowGamePlayer.GameIndex, -1);
 
         ClosePopupUI();
     }

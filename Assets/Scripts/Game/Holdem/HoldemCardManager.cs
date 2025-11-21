@@ -39,14 +39,21 @@ public class HoldemCardManager
     int[] dealerCardDetail;
 
     Vector3[,] playerCardPos;
-    public int CardLen { get { return HoldemGameControl.Control.StageCount == 5 ? 0 : 1; } }
+    public int CardLen { get { return _control.StageCount == 5 ? 0 : 1; } }
 
     UI_Holdem _holdemUI;
+
+    HoldemGameControl _control;
 
     public static Action<string> OnAddCard;
     public static Action OnAddCardToDealer;
 
     bool isInited = false;
+
+    public HoldemCardManager(HoldemGameControl control)
+    {
+        _control = control;
+    }
 
     public void Init()
     {
@@ -128,7 +135,7 @@ public class HoldemCardManager
     {
         for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
         {
-            int seatedIndex = HoldemGameControl.Control.ConvertGameToUI(i);
+            int seatedIndex = _control.ConvertGameToUI(i);
             GameObject destGO = _holdemUI.GetPlayerGameObjcet(seatedIndex);
             RectTransform reference = destGO.GetComponent<RectTransform>();
             // 기준 RectTransform의 가로 길이
@@ -196,13 +203,13 @@ public class HoldemCardManager
 
         if (state == 0)      // 플레이어에게 카드 배분                         로직 수정 필요//////////////////////////////////
         {
-            string pUID = HoldemGameControl.Players.GetPlayerUID(toPlayer);
+            string pUID = _control.Players.GetPlayerUID(toPlayer);
 
-            SyncSystem.Sync.HoldemAddCard(pUID);
+            _control.Sync.HoldemAddCard(pUID);
         }
         else                // 딜러에게 카드 배분
         {
-            SyncSystem.Sync.HoldemDealerCard();
+            _control.Sync.HoldemDealerCard();
         }
     }
 
@@ -228,7 +235,7 @@ public class HoldemCardManager
             return;
 
         AddCardToPlayer(popedCard, playerUID);
-        SyncSystem.Sync.HoldemNextStage_V2(1);
+        _control.Sync.HoldemNextStage_V2(1);
     }
 
     private void AddCardToDealer()
@@ -239,11 +246,13 @@ public class HoldemCardManager
             return;
 
         AddCardToPlayer(popedCard);
-        SyncSystem.Sync.HoldemNextStage_V2(1);
+        _control.Sync.HoldemNextStage_V2(1);
     }
 
     private void AddCardToPlayer(int popedCard, string pUID = MAKE_DEALER_CARD)         // 카드 살짝 버벅임 있음
     {
+        Debug.Log($"#{++Define.DEBUG_INDEX} HoldemCardManager.cs 파일의 AddCardToPlayer 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
         if (cardDeckPos == null)                                     // 버그있음     왜 인진 모르겟지만 자꾸 null이 되네
             cardDeckPos = GameObject.FindGameObjectWithTag("Deck").transform;
 
@@ -258,7 +267,7 @@ public class HoldemCardManager
             {
                 if (dealerCardList[i] == null)
                 {
-                    SyncSystem.Sync.SyncHoldemDealerCard(cardGO, i, popedCard);
+                    _control.Sync.SyncHoldemDealerCard(cardGO, i, popedCard);
                     break;
                 }
             }
@@ -266,7 +275,7 @@ public class HoldemCardManager
         }
         else                                // 플레이어인 경우
         {
-            SyncSystem.Sync.SyncHoldemPlayerCard(pUID, cardGO, popedCard);
+            _control.Sync.SyncHoldemPlayerCard(pUID, cardGO.GetComponent<PhotonView>().ViewID, popedCard);
 
             CardMoveToPosPlayer(cardGO, pUID);
         }
@@ -293,7 +302,7 @@ public class HoldemCardManager
 
     void CardMoveToPosPlayer(GameObject cardGO, string pUID)
     {
-        Vector3 destPos = playerCardPos[HoldemGameControl.Players.GetPlayerGameIndexByUID(pUID), CardLen];
+        Vector3 destPos = playerCardPos[_control.Players.GetPlayerGameIndexByUID(pUID), CardLen];
 
         cardGO.transform.DOMove(destPos, CARD_ANIMATION_TIME);
         cardGO.transform.DORotateQuaternion(Quaternion.identity, CARD_ANIMATION_TIME);
@@ -316,7 +325,7 @@ public class HoldemCardManager
             cardBuffer.Add(cardDeck[i]);
         }
 
-        HoldemGameControl.Control.NextStage();
+        _control.NextStage();
     }
 
     public int[] GetDealerCardDetail()

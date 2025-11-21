@@ -9,32 +9,29 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
-class SyncSystem : MonoBehaviourPun
+public class SyncSystem : MonoBehaviourPun
 {
-    /* 싱글톤 */
-    private static SyncSystem instance;
-    public static SyncSystem Sync
+    public void SetHoldemControl(HoldemGameControl holdemControl)
     {
-        get
-        {
-            return instance;
-        }
+        _holdemControl = holdemControl;
     }
+
+    public void SetPokerControl(PokerGameControl pokerControl)
+    {
+        _pokerControl = pokerControl;
+    }
+
+    public void SetJackControl(JackGameControl jackControl)
+    {
+        _jackControl = jackControl;
+    }
+
+    HoldemGameControl _holdemControl;
+    PokerGameControl _pokerControl;
+    JackGameControl _jackControl;
 
     public Action<string[]> OnSeatsSynced;
     public Action<string, string, int> OnHaveSeat;
-
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject); // 씬 안에서 중복 생성 방지
-        }
-    }
 
     #region UserData
     public void DecreaseMoneyToTarget(string uid, int amount)
@@ -119,7 +116,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemMyBetting 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Players.UpdatePlayerBetting(index, amount);
+        _holdemControl.Players.UpdatePlayerBetting(index, amount);
     }
 
     public void SyncHoldemPlayerIsBet(int index, bool isOn)
@@ -130,7 +127,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemPlayerIsBet(int index, bool isOn)
     {
-        HoldemGameControl.Players.UpdatePlayerIsBet(index, isOn);
+        _holdemControl.Players.UpdatePlayerIsBet(index, isOn);
     }
 
     public void SyncHoldemPlayerIsAlive(int index, bool isOn)
@@ -141,7 +138,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemPlayerIsAlive(int index, bool isOn)
     {
-        HoldemGameControl.Players.UpdatePlayerState(index, isOn);
+        _holdemControl.Players.UpdatePlayerState(index, isOn);
     }
 
     public void SyncHoldemIsTurn(int index, bool isOn)
@@ -156,7 +153,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemIsTurn 함수 실행"); // 디버깅 추적용 (25.11.12 승헌
 
-        HoldemGameControl.Players.UpdatePlayerTurn(index, isOn);
+        _holdemControl.Players.UpdatePlayerTurn(index, isOn);
     }
 
     public void SyncHoldemPlayerSeedMoney(int index, int amount)
@@ -171,7 +168,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemPlayerSeedMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Players.UpdatePlayerSeedMoney(index, amount);
+        _holdemControl.Players.UpdatePlayerSeedMoney(index, amount);
     }
 
     public void SyncHoldemDieReserve(int index, bool isOn)
@@ -182,7 +179,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemDieReserve(int index, bool isOn)
     {
-        HoldemGameControl.Players.UpdatePlayerDieReserve(index, isOn);
+        _holdemControl.Players.UpdatePlayerDieReserve(index, isOn);
     }
 
     public void SyncHoldemDeadPlayerNum(int num)
@@ -193,7 +190,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemDeadPlayerNum(int num)
     {
-        HoldemGameControl.Players.SetDeadPlayerNum(num);
+        _holdemControl.Players.SetDeadPlayerNum(num);
     }
 
     public void SyncHoldemIsOneLeft(bool isOn)
@@ -204,7 +201,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemIsOneLeft(bool isOn)
     {
-        HoldemGameControl.Players.IsOneLeft = isOn;
+        _holdemControl.Players.IsOneLeft = isOn;
     }
 
     public void SyncHoldemWinnerList(string[] wList)
@@ -222,19 +219,22 @@ class SyncSystem : MonoBehaviourPun
 
         List<object> wListRaw = Json.Deserialize(json) as List<object>;
         string[] wList = wListRaw.ConvertAll(obj => obj.ToString()).ToArray();
-        HoldemGameControl.Players.SetWinnerList(wList);
+        _holdemControl.Players.SetWinnerList(wList);
     }
 
-    public void SyncHoldemPlayerCard(string pUID, GameObject cardGO, int cardDetail)
+    public void SyncHoldemPlayerCard(string pUID, int cardViewID, int cardDetail)
     {
-        int cardViewID = cardGO.GetComponent<PhotonView>().ViewID;
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemPlayerCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+        
         photonView.RPC("RPC_SyncHoldemPlayerCard", RpcTarget.All, pUID, cardViewID, cardDetail);
     }
 
     [PunRPC]
     private void RPC_SyncHoldemPlayerCard(string pUID, int cardViewID, int cardDetail)
     {
-        HoldemGameControl.Players.SetPlayerCard(pUID, cardViewID, cardDetail);
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemPlayerCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
+        _holdemControl.Players.SetPlayerCard(pUID, cardViewID, cardDetail);
     }
 
     #endregion
@@ -253,7 +253,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemStartSyncing 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Control.StartGame();
+        _holdemControl.StartGame();
     }
 
     public IEnumerator SyncHoldemPlayerUID()
@@ -287,7 +287,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemDealerIndex 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Control.SetDealer(index);
+        _holdemControl.SetDealer(index);
     }
 
     public IEnumerator SyncHoldemPotMoney(int money, bool isNextStage = false)
@@ -303,12 +303,12 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemPotMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Control.PotMoney = money;
+        _holdemControl.PotMoney = money;
 
         if (isNextStage)
         {
             // Debug.Log($"case {HoldemGameControl.Control.StageCount} 종료, nextStage");
-            HoldemGameControl.Control.NextStage();
+            _holdemControl.NextStage();
         }
     }
 
@@ -325,7 +325,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemNextStage 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Control.NextStage(state);
+        _holdemControl.NextStage(state);
     }
 
     public void HoldemNextStage_V2(int state = 0)
@@ -348,7 +348,23 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemAutoDieTimerSwitch 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Control.AutoDieTimerSwitch(isOn);
+        _holdemControl.AutoDieTimerSwitch(isOn);
+    }
+
+    public IEnumerator SyncHoldemResultUI()
+    {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemResultUI 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
+        yield return null;
+        photonView.RPC("RPC_SyncHoldemResultUI", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_SyncHoldemResultUI()
+    {
+        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemResultUI 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
+
+        _holdemControl.ShowResult();
     }
 
     public IEnumerator HoldemClearGame()
@@ -364,7 +380,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemClearGame 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Control.ClearGame();
+        _holdemControl.ClearGame();
     }
 
     #endregion
@@ -384,7 +400,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemBetStart 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Bet.HandleBet(curplayer);
+        _holdemControl.Bet.HandleBet(curplayer);
     }
 
     public void HoldemBetProcess(int curPlayer, string betType, int betAmount = 0)
@@ -399,7 +415,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemBetProcess 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Bet.BetProcess(curPlayer, betType, betAmount);
+        _holdemControl.Bet.BetProcess(curPlayer, betType, betAmount);
     }
 
     public void HoldemBetEnd()
@@ -414,7 +430,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemBetEnd 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Bet.CurrentStageBetEnd();
+        _holdemControl.Bet.CurrentStageBetEnd();
     }
 
     #endregion
@@ -426,7 +442,7 @@ class SyncSystem : MonoBehaviourPun
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemDeck 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
         yield return null;
-        photonView.RPC("RPC_SyncHoldemDeck", RpcTarget.All, HoldemGameControl.Card.GetCardDeck());
+        photonView.RPC("RPC_SyncHoldemDeck", RpcTarget.All, _holdemControl.Card.GetCardDeck());
     }
 
     [PunRPC]
@@ -434,7 +450,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemDeck 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Card.SetCardDeck(cardDeck);
+        _holdemControl.Card.SetCardDeck(cardDeck);
     }
 
     public void HoldemAddCard(string toPlayer)
@@ -449,7 +465,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemAddCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Card.AddCardToPlayerStarter(toPlayer);
+        _holdemControl.Card.AddCardToPlayerStarter(toPlayer);
     }
 
     public void HoldemDealerCard()
@@ -464,7 +480,7 @@ class SyncSystem : MonoBehaviourPun
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_HoldemDealerCard 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
 
-        HoldemGameControl.Card.AddCardToDealerStarter();
+        _holdemControl.Card.AddCardToDealerStarter();
     }
 
     public void SyncHoldemDealerCard(GameObject go, int index, int cardDetail)
@@ -475,7 +491,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncHoldemDealerCard(int viewID, int index, int cardDetail)
     {
-        HoldemGameControl.Card.DealerCardSetting(viewID, index, cardDetail);
+        _holdemControl.Card.DealerCardSetting(viewID, index, cardDetail);
     }
 
     #endregion
@@ -492,7 +508,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_PokerStartSyncing()
     {
-        PokerGameControl.Control.StartGame();
+        _pokerControl.StartGame();
     }
 
     public IEnumerator SyncPokerPlayerUID()
@@ -516,7 +532,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncPokerFirstPlayerIndex(int index)
     {
-        PokerGameControl.Control.SetFirstPlayer(index);
+        _pokerControl.SetFirstPlayer(index);
     }
 
     public IEnumerator SyncPokerCurrentPlayer(int index)
@@ -529,7 +545,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncPokerCurrentPlayer(int index)
     {
-        PokerGameControl.Control.SetCurrentPlayer(index);
+        _pokerControl.SetCurrentPlayer(index);
     }
 
     public IEnumerator PokerNextStage(int state = 0)      // 1은 스테이지 세부 사항 카운트 증가
@@ -546,7 +562,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_PokerNextStage(int state = 0)
     {
-        PokerGameControl.Control.NextStage(state);
+        _pokerControl.NextStage(state);
     }
 
     public IEnumerator PokerMakeCardSelPopup()
@@ -558,7 +574,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_PokerMakeCardSelPopup()
     {
-        PokerGameControl.Control.CardSelPopupOn();
+        _pokerControl.CardSelPopupOn();
     }
 
     public IEnumerator SyncPokerPotMoney(int money, int isNextStage = 0)
@@ -570,9 +586,9 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncPokerPotMoney(int money, int isNextStage = 0)
     {
-        PokerGameControl.Control.PotMoney = money;
-        Debug.Log($"case {PokerGameControl.Control.StageCount} 종료, nextStage");
-        PokerGameControl.Control.NextStage(isNextStage);
+        _pokerControl.PotMoney = money;
+        Debug.Log($"case {_pokerControl.StageCount} 종료, nextStage");
+        _pokerControl.NextStage(isNextStage);
     }
 
     public IEnumerator PokerAutoDieTimerSwitch(bool isOn)
@@ -584,7 +600,19 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_PokerAutoDieTimerSwitch(bool isOn)
     {
-        PokerGameControl.Control.AutoDieTimerSwitch(isOn);
+        _pokerControl.AutoDieTimerSwitch(isOn);
+    }
+
+    public IEnumerator SyncPokerResultUI()
+    {
+        yield return null;
+        photonView.RPC("RPC_SyncPokerResultUI", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_SyncPokerResultUI()
+    {
+        _pokerControl.ShowResult();
     }
 
     public IEnumerator PokerClearGame()
@@ -596,7 +624,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_PokerClearGame()
     {
-        PokerGameControl.Control.ClearGame();
+        _pokerControl.ClearGame();
     }
 
     #endregion
@@ -606,13 +634,13 @@ class SyncSystem : MonoBehaviourPun
     public IEnumerator SyncPokerDeck()
     {
         yield return null;
-        photonView.RPC("RPC_SyncPokerDeck", RpcTarget.All, PokerGameControl.Card.GetCardDeck());
+        photonView.RPC("RPC_SyncPokerDeck", RpcTarget.All, _pokerControl.Card.GetCardDeck());
     }
 
     [PunRPC]
     private void RPC_SyncPokerDeck(int[] cardDeck)
     {
-        PokerGameControl.Card.SetCardDeck(cardDeck);
+        _pokerControl.Card.SetCardDeck(cardDeck);
     }
 
     public void PokerAddCard(string toPlayer)
@@ -623,7 +651,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_PokerAddCard(string toPlayer)
     {
-        PokerGameControl.Card.AddCardToPlayerStarter(toPlayer);
+        _pokerControl.Card.AddCardToPlayerStarter(toPlayer);
     }
 
 
@@ -639,7 +667,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncPokerMyBetting(int index, int amount)
     {
-        PokerGameControl.Players.UpdatePlayerBetting(index, amount);
+        _pokerControl.Players.UpdatePlayerBetting(index, amount);
     }
 
     public void SyncPokerPlayerCard(string pUID, GameObject cardGO, int cardDetail, bool isOpenCard)
@@ -651,7 +679,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncPokerPlayerCard(string pUID, int cardViewID, int cardDetail, bool isOpenCard)
     {
-        PokerGameControl.Players.SetPlayerCard(pUID, cardViewID, cardDetail, isOpenCard);
+        _pokerControl.Players.SetPlayerCard(pUID, cardViewID, cardDetail, isOpenCard);
     }
 
     public void SyncPokerPlayerCardSel(int playerIndex, int delcardIndex, int opencardIndex)
@@ -663,8 +691,8 @@ class SyncSystem : MonoBehaviourPun
     private void RPC_SyncPokerPlayerCardSel(int playerIndex, int delcardIndex, int opencardIndex)
     {
         Debug.Log($"Player {playerIndex}, del : {delcardIndex}, open : {opencardIndex}");
-        PokerGameControl.Players.PlayerDelCardSel(playerIndex, delcardIndex);
-        PokerGameControl.Players.PlayerOpenCardSel(playerIndex, opencardIndex);
+        _pokerControl.Players.PlayerDelCardSel(playerIndex, delcardIndex);
+        _pokerControl.Players.PlayerOpenCardSel(playerIndex, opencardIndex);
     }
 
     public IEnumerator PokerArrangeSelectedCard()
@@ -676,7 +704,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_PokerArrangeSelectedCard()
     {
-        PokerGameControl.Players.ArrangeSelectedCard();
+        _pokerControl.Players.ArrangeSelectedCard();
     }
 
     public void SyncPokerIsTurn(int index, bool isOn)
@@ -687,7 +715,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncPokerIsTurn(int index, bool isOn)
     {
-        PokerGameControl.Players.UpdatePlayerTurn(index, isOn);
+        _pokerControl.Players.UpdatePlayerTurn(index, isOn);
     }
 
     public void SyncPokerDieReserve(int index, bool isOn)
@@ -698,7 +726,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncPokerDieReserve(int index, bool isOn)
     {
-        PokerGameControl.Players.UpdatePlayerDieReserve(index, isOn);
+        _pokerControl.Players.UpdatePlayerDieReserve(index, isOn);
     }
 
     public void SyncPokerIsOneLeft(bool isOn)
@@ -709,7 +737,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncPokerIsOneLeft(bool isOn)
     {
-        PokerGameControl.Players.IsOneLeft = isOn;
+        _pokerControl.Players.IsOneLeft = isOn;
     }
 
     public void SyncPokerPlayerSeedMoney(int index, int amount)
@@ -720,7 +748,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncPokerPlayerSeedMoney(int index, int amount)
     {
-        PokerGameControl.Players.UpdatePlayerSeedMoney(index, amount);
+        _pokerControl.Players.UpdatePlayerSeedMoney(index, amount);
     }
 
     public void SyncPokerWinnerList(string[] wList)
@@ -734,7 +762,7 @@ class SyncSystem : MonoBehaviourPun
     {
         List<object> wListRaw = Json.Deserialize(json) as List<object>;
         string[] wList = wListRaw.ConvertAll(obj => obj.ToString()).ToArray();
-        PokerGameControl.Players.SetWinnerList(wList);
+        _pokerControl.Players.SetWinnerList(wList);
     }
 
 
@@ -751,7 +779,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_PokerBetStart(int curplayer)
     {
-        PokerGameControl.Bet.HandleBet(curplayer);
+        _pokerControl.Bet.HandleBet(curplayer);
     }
 
     public void PokerBetProcess(int curPlayer, string betType, int betAmount = 0)
@@ -762,7 +790,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     public void RPC_PokerBetProcess(int curPlayer, string betType, int betAmount = 0)
     {
-        PokerGameControl.Bet.BetProcess(curPlayer, betType, betAmount);
+        _pokerControl.Bet.BetProcess(curPlayer, betType, betAmount);
     }
 
     public void PokerBetEnd()
@@ -773,7 +801,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_PokerBetEnd()
     {
-        PokerGameControl.Bet.CurrentStageBetEnd();
+        _pokerControl.Bet.CurrentStageBetEnd();
     }
 
 
@@ -791,7 +819,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackStartSync()
     {
-        JackGameControl.Control.StartGame();
+        _jackControl.StartGame();
     }
 
     public IEnumerator SyncJackPlayerUID()
@@ -815,7 +843,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackFirstPlayerIndex(int index)
     {
-        JackGameControl.Control.SetFirstPlayer(index);
+        _jackControl.SetFirstPlayer(index);
     }
 
     public IEnumerator StartFirstBetting()
@@ -827,7 +855,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_StartFirstBetting()
     {
-        JackGameControl.Control.StartFirstBet();
+        _jackControl.StartFirstBet();
     }
 
     public void FirstBettingAllPass()
@@ -839,7 +867,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_FirstBettingAllPass()
     {
-        JackGameControl.Control.FirstBetAllPass();
+        _jackControl.FirstBetAllPass();
     }
 
     public IEnumerator JackNextStage(int state = 0)      // 1은 스테이지 세부 사항 카운트 증가
@@ -856,7 +884,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackNextStage(int state = 0)
     {
-        JackGameControl.Control.NextStage(state);
+        _jackControl.NextStage(state);
     }
 
     public IEnumerator JackNoticeBlackJack()
@@ -868,7 +896,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackNoticeBlackJack()
     {
-        JackGameControl.Players.FindPlayerBlackJack();
+        _jackControl.Players.FindPlayerBlackJack();
     }
 
     public IEnumerator JackIsDealerIsA()
@@ -880,7 +908,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackIsDealerIsA()
     {
-        JackGameControl.Control.JudgeDealerIsAOrAbove10();
+        _jackControl.JudgeDealerIsAOrAbove10();
     }
 
     public void JackInsuranceAllPass()
@@ -891,7 +919,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackInsuranceAllPass()
     {
-        JackGameControl.Control.InsuranceAllPass();
+        _jackControl.InsuranceAllPass();
     }
 
     public void JackGameEnd()
@@ -902,7 +930,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackGameEnd()
     {
-        JackGameControl.Control.ClearGame();
+        _jackControl.ClearGame();
     }
 
     public IEnumerator JackNormalBetting(int playerIndex)
@@ -914,7 +942,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackNormalBetting(int playerIndex)
     {
-        JackGameControl.Control.PlayerNormalBetSetting(playerIndex);
+        _jackControl.PlayerNormalBetSetting(playerIndex);
     }
 
     public IEnumerator JackBlackJackPlayerWin(int playerIndex)
@@ -926,7 +954,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackBlackJackPlayerWin(int playerIndex)
     {
-        JackGameControl.Control.BlackJackPlayerWin(playerIndex);
+        _jackControl.BlackJackPlayerWin(playerIndex);
     }
 
     public void JackNormalBetEnd()
@@ -937,7 +965,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackNormalBetEnd()
     {
-        JackGameControl.Control.PlayerNormalBetEnd();
+        _jackControl.PlayerNormalBetEnd();
     }
 
     public void JackRestartBetTimer()
@@ -948,7 +976,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackRestartBetTimer()
     {
-        JackGameControl.Control.RestartBetTimer();
+        _jackControl.RestartBetTimer();
     }
 
     public void JackStopBetTimer()
@@ -959,7 +987,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackStopBetTimer()
     {
-        JackGameControl.Control.BetTimerStop();
+        _jackControl.BetTimerStop();
     }
 
     public IEnumerator SyncJacksplitAnd21()
@@ -971,7 +999,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJacksplitAnd21()
     {
-        JackGameControl.Control.ResetSplitAnd21();
+        _jackControl.ResetSplitAnd21();
     }
 
     public IEnumerator SyncJackDecideWinner(int playerIndex, int splitNum)
@@ -983,7 +1011,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackDecideWinner(int playerIndex, int splitNum)
     {
-        JackGameControl.Control.PlayerWinOrLose(playerIndex, splitNum);
+        _jackControl.PlayerWinOrLose(playerIndex, splitNum);
     }
 
     public IEnumerator JackBeforeProcess()
@@ -995,7 +1023,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackBeforeProcess()
     {
-        JackGameControl.Control.BeforeProcess();
+        _jackControl.BeforeProcess();
     }
 
 
@@ -1006,13 +1034,13 @@ class SyncSystem : MonoBehaviourPun
     public IEnumerator SyncJackDeck()
     {
         yield return null;
-        photonView.RPC("RPC_SyncJackDeck", RpcTarget.All, JackGameControl.Card.GetCardDeck());
+        photonView.RPC("RPC_SyncJackDeck", RpcTarget.All, _jackControl.Card.GetCardDeck());
     }
 
     [PunRPC]
     private void RPC_SyncJackDeck(int[] cardDeck)
     {
-        JackGameControl.Card.SetCardDeck(cardDeck);
+        _jackControl.Card.SetCardDeck(cardDeck);
     }
 
     public void JackAddCard(string toPlayer, int splitNum)
@@ -1023,7 +1051,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackAddCard(string toPlayer, int splitNum)
     {
-        JackGameControl.Card.AddCardToPlayerStarter(toPlayer, splitNum);
+        _jackControl.Card.AddCardToPlayerStarter(toPlayer, splitNum);
     }
 
     public void JackDealerCard()
@@ -1034,7 +1062,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackDealerCard()
     {
-        JackGameControl.Card.AddCardToDealerStarter();
+        _jackControl.Card.AddCardToDealerStarter();
     }
 
     public void SyncJackDealerCard(GameObject cardGO, int index, int cardDetail)
@@ -1046,7 +1074,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackDealerCard(int viewID, int index, int cardDetail)
     {
-        JackGameControl.Card.SetDealerCard(viewID, index, cardDetail);
+        _jackControl.Card.SetDealerCard(viewID, index, cardDetail);
     }
 
     public void JackPlayerCardOrigin(int playerIndex, int splitNum)
@@ -1057,7 +1085,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackPlayerCardOrigin(int playerIndex, int splitNum)
     {
-        JackGameControl.Card.CurTurnPlayerCardOrigin(playerIndex, splitNum);
+        _jackControl.Card.CurTurnPlayerCardOrigin(playerIndex, splitNum);
     }
 
 
@@ -1073,7 +1101,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackPlayerSeedMoney(int index, int amount)
     {
-        JackGameControl.Players.UpdatePlayerSeedMoney(index, amount);
+        _jackControl.Players.UpdatePlayerSeedMoney(index, amount);
     }
 
     public void SyncJackMyBetting(int playerIndex, int splitNum, int amount)
@@ -1084,7 +1112,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackMyBetting(int playerIndex, int splitNum, int amount)
     {
-        JackGameControl.Players.UpdatePlayerBetting(playerIndex, splitNum, amount);
+        _jackControl.Players.UpdatePlayerBetting(playerIndex, splitNum, amount);
     }
 
     public void SyncJackMyBettingReset(int playerIndex, int splitNum)
@@ -1095,7 +1123,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackMyBettingReset(int playerIndex, int splitNum)
     {
-        JackGameControl.Players.UpdatePlayerBetReset(playerIndex, splitNum);
+        _jackControl.Players.UpdatePlayerBetReset(playerIndex, splitNum);
     }
 
     public void SyncJackIsBet(int index, bool val)
@@ -1106,7 +1134,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackIsBet(int index, bool val)
     {
-        JackGameControl.Players.UpdatePlayerIsBet(index, val);
+        _jackControl.Players.UpdatePlayerIsBet(index, val);
     }
 
     public void SyncJackIsGameEnd(int playerIndex, int splitNum, int val)
@@ -1117,7 +1145,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackIsGameEnd(int playerIndex, int splitNum, int val)
     {
-        JackGameControl.Players.UpdatePlayerIsGameEnd(playerIndex, splitNum, val);
+        _jackControl.Players.UpdatePlayerIsGameEnd(playerIndex, splitNum, val);
     }
 
     public void SyncJackPlayerCard(string pUID, GameObject cardGO, int cardDetail)
@@ -1129,7 +1157,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackPlayerCard(string pUID, int cardViewID, int cardDetail)
     {
-        JackGameControl.Card.SetPlayerCard(pUID, cardViewID, cardDetail);
+        _jackControl.Card.SetPlayerCard(pUID, cardViewID, cardDetail);
     }
 
     public void SyncJackIsInsurance(int index, int val)
@@ -1140,7 +1168,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_SyncJackIsInsurance(int index, int val)
     {
-        JackGameControl.Players.UpdatePlayerIsInsurance(index, val);
+        _jackControl.Players.UpdatePlayerIsInsurance(index, val);
     }
 
     public void JackPlayerSplitSetting(int playerIndex, int nowSplitNum)
@@ -1151,7 +1179,7 @@ class SyncSystem : MonoBehaviourPun
     [PunRPC]
     private void RPC_JackPlayerSplitSetting(int playerIndex, int nowSplitNum)
     {
-        JackGameControl.Control.PlayerSplitSetting(playerIndex, nowSplitNum);
+        _jackControl.PlayerSplitSetting(playerIndex, nowSplitNum);
     }
 
 
@@ -1197,35 +1225,5 @@ class SyncSystem : MonoBehaviourPun
     }
 
     #endregion
-
-
-
-    public IEnumerator SyncHoldemResultUI()
-    {
-        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 SyncHoldemResultUI 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
-
-        yield return null;
-        photonView.RPC("RPC_SyncHoldemResultUI", RpcTarget.All);
-    }
-
-    [PunRPC]
-    private void RPC_SyncHoldemResultUI()
-    {
-        Debug.Log($"#{++Define.DEBUG_INDEX} SyncSystem.cs 파일의 RPC_SyncHoldemResultUI 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
-
-        HoldemGameControl.Control.ShowResult();
-    }
-
-    public IEnumerator SyncPokerResultUI()
-    {
-        yield return null;
-        photonView.RPC("RPC_SyncPokerResultUI", RpcTarget.All);
-    }
-
-    [PunRPC]
-    private void RPC_SyncPokerResultUI()
-    {
-        PokerGameControl.Control.ShowResult();
-    }
 
 }

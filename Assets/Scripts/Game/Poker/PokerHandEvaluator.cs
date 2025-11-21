@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class PokerHandEvaluator
 {
+    PokerGameControl _control;
+
     public List<int> idxs;
     private List<Tuple<int, char>> numsAndShapes = new List<Tuple<int, char>>();
     private List<char> shapes = new List<char>();   // idxs 배열을 Card System 쪽에 있는 무늬 판별기에 넣고 무늬를 얻어옴.
@@ -16,6 +18,11 @@ public class PokerHandEvaluator
     private bool is_straight;
     int cardlen;
 
+    public PokerHandEvaluator(PokerGameControl control)
+    {
+        _control = control;
+    }
+
     public Tuple<int, float> EvaluateHand()
     {
         cardlen = idxs.Count;
@@ -25,7 +32,7 @@ public class PokerHandEvaluator
         numsAndShapes.Clear();
         for (int i = 0; i < cardlen; i++)
         {
-            numsAndShapes.Add(Tuple.Create(PokerGameControl.Card.GetCardNum(idxs[i]), PokerGameControl.Card.GetCardShape(idxs[i])));
+            numsAndShapes.Add(Tuple.Create(_control.Card.GetCardNum(idxs[i]), _control.Card.GetCardShape(idxs[i])));
         }
 
         handRank = -1;
