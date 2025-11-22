@@ -52,12 +52,20 @@ public class User
 
     public bool GetIsNotEnough()
     {
-        if (User.NowUser.GetSeedMoney() < Managers.GetCurGameBaseBet())
+        if (IsEnoughMoney())
         {
-            User.NowUser.SetIsNotEnough(true);
+            SetIsNotEnough(true);
         }
 
         return isNotEnoughMoney;
+    }
+
+    public bool IsEnoughMoney()
+    {
+        if (GetSeedMoney() < Managers.GetCurGameBaseBet())
+            return false;
+
+        return true;
     }
 
     public void SetHoldemPlay()
@@ -172,7 +180,7 @@ public class User
         //////////////////////////////// DB와 소통
         seedMoney -= amount;
         Managers.DB.DBUpdateMoney(uid, -amount, "poker");
-        NowGamePlayer.SetBetMoney(NowGamePlayer.BetMoney + amount);
+        NowGamePlayer.SetBetMoney(amount);
         PokerSyncSeedMoney();
     }
 

@@ -40,6 +40,11 @@ public class UI_Poker : UI_Scene
         UI_Player3_BetText,
         UI_Player4_BetText,
         UI_Player5_BetText,
+        UI_Buttons_CallMoney_Text,
+        UI_Buttons_DoubleMoney_Text,
+        UI_Buttons_QuaterMoney_Text,
+        UI_Buttons_HalfMoney_Text,
+        UI_Buttons_AllInMoney_Text,
         UI_Player1_SeedMoneyText,
         UI_Player2_SeedMoneyText,
         UI_Player3_SeedMoneyText,
@@ -81,6 +86,16 @@ public class UI_Poker : UI_Scene
         UI_Player5_Bet,
         UI_Block,
     }
+
+    string[] BetType =
+    {
+        "Die",
+        "Call",
+        "Double",
+        "Quater",
+        "Half",
+        "AllIn"
+    };
 
     Image onTurnPlayer = null;
     PokerGameControl _control;
@@ -199,6 +214,8 @@ public class UI_Poker : UI_Scene
             GetButton(idx).interactable = false;
             GetButton(idx).gameObject.SetActive(isOn);
         }
+        if (isOn)
+            BetMoneyTextUpdate("", 0, false, true);
         GetImage((int)Images.UI_PotMoney_Icon).gameObject.SetActive(isOn);
     }
 
@@ -335,6 +352,26 @@ public class UI_Poker : UI_Scene
 
         GetText((int)Texts.UI_RoomButton_Text).text = "방 이동";
         BindEvent(GetButton((int)Buttons.UI_RoomButton).gameObject, MoveRoomClicked);
+    }
+
+    public void BetMoneyTextUpdate(string betType, int betMoney, bool isOn, bool isFirst = false)
+    {
+        if (isFirst == true)
+        {
+            foreach (string bet in BetType)
+            {
+                if (bet == "Die") continue;
+                GetText((int)Enum.Parse(typeof(Texts), $"UI_Buttons_{bet}Money_Text")).gameObject.SetActive(false);
+            }
+            return;
+        }
+
+        if (betType == "Die") return;
+
+        TextMeshProUGUI text = GetText((int)Enum.Parse(typeof(Texts), $"UI_Buttons_{betType}Money_Text"));
+
+        text.text = betMoney.ToString("N0");
+        text.gameObject.SetActive(isOn);
     }
 
     void IconFriendClicked(PointerEventData data)

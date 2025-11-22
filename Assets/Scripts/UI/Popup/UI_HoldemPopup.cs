@@ -67,11 +67,23 @@ public class UI_HoldemPopup : UI_Popup
 
     void EnterRoomClicked(PointerEventData data)
     {
+        if (User.NowUser.IsEnoughMoney() == false)
+        {
+            Managers.UI.ShowPopupUI<UI_NotEnoughMoneyPopup>();
+            return;
+        }
+
         Managers.Photon.JoinGame(Managers.CurrentDifficulty, Managers.CurrentGameType);
     }
 
     void CreateRoomClicked(PointerEventData data)
     {
+        if (User.NowUser.IsEnoughMoney() == false)
+        {
+            Managers.UI.ShowPopupUI<UI_NotEnoughMoneyPopup>();
+            return;
+        }
+
         Managers.Photon.CreateGame(Managers.CurrentDifficulty, Managers.CurrentGameType);
     }
 

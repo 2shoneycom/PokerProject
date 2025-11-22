@@ -19,7 +19,6 @@ public class PokerPlayerManager
     int[] playerSeedMoney;
     int[] playerBettingMoney;
     bool[] playerIsBet;
-    bool[] playerIsCall;
     bool[] playerIsAlive;
     bool[] playerIsTurn;
     bool[] playerDieReserve;
@@ -46,7 +45,6 @@ public class PokerPlayerManager
         playerSeedMoney = new int[PokerGameControl.MAX_PLAYER_NUM];
         playerBettingMoney = new int[PokerGameControl.MAX_PLAYER_NUM];
         playerIsBet = new bool[PokerGameControl.MAX_PLAYER_NUM];
-        playerIsCall = new bool[PokerGameControl.MAX_PLAYER_NUM];
         playerIsAlive = new bool[PokerGameControl.MAX_PLAYER_NUM];
         playerIsTurn = new bool[PokerGameControl.MAX_PLAYER_NUM];
         playerDieReserve = new bool[PokerGameControl.MAX_PLAYER_NUM];
@@ -67,7 +65,6 @@ public class PokerPlayerManager
         {
             playerBettingMoney[i] = 0;
             playerIsBet[i] = false;
-            playerIsCall[i] = false;
             playerIsAlive[i] = true;
             playerIsTurn[i] = false;
             playerDieReserve[i] = false;
@@ -95,9 +92,11 @@ public class PokerPlayerManager
         for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
             playerIsBet[i] = false;
-            playerIsCall[i] = false;
+            playerBettingMoney[i] = 0;
             playerIsTurn[i] = false;
         }
+
+        User.NowGamePlayer.SetBetMoney(0);
     }
 
     public void UpdatePlayerUID(int seatIdx, string UID)
@@ -156,9 +155,8 @@ public class PokerPlayerManager
 
     public void UpdatePlayerBetting(int index, int amount, bool isCall = false)
     {
-        playerBettingMoney[index] += amount;
+        playerBettingMoney[index] = amount;
         playerIsBet[index] = true;
-        playerIsCall[index] = isCall;
         _control.UpdatePlayerBetMoneyUI();
     }
 
@@ -170,16 +168,6 @@ public class PokerPlayerManager
     public void UpdatePlayerIsBet(int index, bool val)
     {
         playerIsBet[index] = val;
-    }
-
-    public bool GetPlayerIsCall(int index)
-    {
-        return playerIsCall[index];
-    }
-
-    public void UpdatePlayerIsCall(int index, bool val)
-    {
-        playerIsCall[index] = val;
     }
 
     public bool GetPlayerState(int index)
@@ -304,17 +292,9 @@ public class PokerPlayerManager
         cardGO.GetComponent<SpriteRenderer>().sprite = _control.Card.GetRightCardImage(cardDetail);
     }
 
-    public bool FindBetEndTerm()
+    public int GetOriginPlayerMoney(int playerIndex)
     {
-        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
-        {
-            if (GetPlayerUID(i) == "" || GetPlayerState(i) == false)
-                continue;
-
-            if (GetPlayerIsCall(i) == false)
-                return false;
-        }
-        return true;
+        return GetPlayerBet(playerIndex) + GetPlayerSeedMoney(playerIndex);
     }
 
     public List<string> GetWinnerList()

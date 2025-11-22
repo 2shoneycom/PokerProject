@@ -128,8 +128,8 @@ public class Managers : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
             Audio.PlaySFX(Define.SFX.Button);
 
-        if (Input.GetKeyDown(KeyCode.Q))
-            PrintAllObjectsAndScripts();
+        //if (Input.GetKeyDown(KeyCode.Q))
+        //    PrintAllObjectsAndScripts();
     }
 
     void OnDestroy()
@@ -222,44 +222,44 @@ public class Managers : MonoBehaviour
         Audio.Claer();
     }
 
-    public void PrintAllObjectsAndScripts()
-    {
-        Debug.Log("===== 현재 씬 오브젝트 / 스크립트 리스트 출력 시작 =====");
+    //public void PrintAllObjectsAndScripts()
+    //{
+    //    Debug.Log("===== 현재 씬 오브젝트 / 스크립트 리스트 출력 시작 =====");
 
-        // 현재 씬의 루트 오브젝트들 가져오기
-        var roots = SceneManager.GetActiveScene().GetRootGameObjects();
+    //    // 현재 씬의 루트 오브젝트들 가져오기
+    //    var roots = SceneManager.GetActiveScene().GetRootGameObjects();
 
-        foreach (var root in roots)
-        {
-            PrintRecursive(root, "");
-        }
+    //    foreach (var root in roots)
+    //    {
+    //        PrintRecursive(root, "");
+    //    }
 
-        Debug.Log("===== 출력 완료 =====");
-    }
+    //    Debug.Log("===== 출력 완료 =====");
+    //}
 
-    private void PrintRecursive(GameObject obj, string indent)
-    {
-        Debug.Log($"{indent}GameObject: {obj.name}");
+    //private void PrintRecursive(GameObject obj, string indent)
+    //{
+    //    Debug.Log($"{indent}GameObject: {obj.name}");
 
-        // 모든 컴포넌트(스크립트 포함)
-        var components = obj.GetComponents<Component>();
-        foreach (var comp in components)
-        {
-            if (comp == null)
-            {
-                Debug.Log($"{indent}  [Missing Script]");
-            }
-            else
-            {
-                Debug.Log($"{indent}  Component: {comp.GetType().Name}");
-            }
-        }
+    //    // 모든 컴포넌트(스크립트 포함)
+    //    var components = obj.GetComponents<Component>();
+    //    foreach (var comp in components)
+    //    {
+    //        if (comp == null)
+    //        {
+    //            Debug.Log($"{indent}  [Missing Script]");
+    //        }
+    //        else
+    //        {
+    //            Debug.Log($"{indent}  Component: {comp.GetType().Name}");
+    //        }
+    //    }
 
-        // 자식 오브젝트들도 재귀 탐색
-        foreach (Transform child in obj.transform)
-        {
-            PrintRecursive(child.gameObject, indent + "    ");
-        }
-    }
+    //    // 자식 오브젝트들도 재귀 탐색
+    //    foreach (Transform child in obj.transform)
+    //    {
+    //        PrintRecursive(child.gameObject, indent + "    ");
+    //    }
+    //}
 
 }

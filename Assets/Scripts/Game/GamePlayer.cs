@@ -13,8 +13,10 @@ public class GamePlayer
 
     public int SeatIndex { get { return seatedIndex; } }
 
-    public int GameIndex { 
-        get {
+    public int GameIndex
+    {
+        get
+        {
             switch (curGameType)
             {
                 case Define.GameType.Holdem:
@@ -35,7 +37,7 @@ public class GamePlayer
                 default:
                     return 0;
             }
-        } 
+        }
     }
 
     int betMoney;
@@ -79,9 +81,10 @@ public class GamePlayer
     public void SetBetMoney(int amount)
     {
         Debug.Log($"#{++Define.DEBUG_INDEX} GamePlayer.cs 파일의 SetBetMoney 함수 실행"); // 디버깅 추적용 (25.11.12 승헌)
-        
+
         betMoney = amount;
     }
+
 
     public void ClearSetting()
     {
@@ -90,15 +93,15 @@ public class GamePlayer
         betMoney = 0;
         blackJackBaseBetAmount = 0;
 
+        if (User.NowUser.IsEnoughMoney())
+            return;
+
         switch (curGameType)
         {
             case Define.GameType.Holdem:
-                if(User.NowUser.GetSeedMoney() < Managers.GetCurGameBaseBet())
-                {
-                    User.NowUser.SetIsNotEnough(true);
-                    UI_Holdem scene = (UI_Holdem)Managers.UI.SceneUI;
-                    scene.RoomLeave();
-                }
+                User.NowUser.SetIsNotEnough(true);
+                UI_Holdem scene = (UI_Holdem)Managers.UI.SceneUI;
+                scene.RoomLeave();
                 break;
 
             case Define.GameType.Poker:
