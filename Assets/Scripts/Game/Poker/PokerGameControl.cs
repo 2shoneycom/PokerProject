@@ -473,10 +473,17 @@ public class PokerGameControl : MonoBehaviour
 
     public void ClearGame()
     {
+        StartCoroutine(loadingForGameEnd());
+    }
+
+    IEnumerator loadingForGameEnd()
+    {
         isPlaying = false;
 
         // 자신 게임 관련 초기화 (사실 베팅금만 초기화)
         User.NowGamePlayer.ClearSetting();
+
+        yield return new WaitForSeconds(0.3f);
 
         // 플레이어 카드 삭제
         Players.ClearGameSetting();

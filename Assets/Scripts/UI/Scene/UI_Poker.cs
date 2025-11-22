@@ -517,6 +517,11 @@ public class UI_Poker : UI_Scene
 
     private void LeaveRoomClicked(PointerEventData data)
     {
+        RoomLeave();
+    }
+
+    public void RoomLeave()
+    {
         PokerScene pokerScene = (PokerScene)Managers.Scene.CurrentScene;
         pokerScene.RequestLeaveRoom();
     }

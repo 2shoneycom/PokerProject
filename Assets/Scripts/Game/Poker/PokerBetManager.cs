@@ -10,7 +10,7 @@ public class PokerBetManager
     PokerGameControl _control;
 
     bool _isBetting = false;
-    public bool IsBetting {  get { return _isBetting; }}
+    public bool IsBetting { get { return _isBetting; } }
 
     string[] BetType =
 {
@@ -40,6 +40,7 @@ public class PokerBetManager
     {
         _isBetting = false;
         _control = control;
+        CurBetMoney = new Dictionary<string, Tuple<bool, int>>();
     }
 
     public void Init(UI_Poker ui)
@@ -50,7 +51,7 @@ public class PokerBetManager
         AGM = 0;
         IsAnyoneAllIn = false;
         IsBeforeAllIn = false;
-        CurBetMoney = new Dictionary<string, Tuple<bool, int>>();
+        CurBetMoney.Clear();
     }
 
     public void BaseBetting(int playerIndex)
@@ -199,11 +200,11 @@ public class PokerBetManager
                     switch (bet)
                     {
                         case "Call":
-                            CurBetMoney[bet] = Tuple.Create<bool, int>(true, highestBetMoney - curPlayerBetMoney);
+                            CurBetMoney[bet] = Tuple.Create(true, highestBetMoney - curPlayerBetMoney);
                             break;
 
                         default:
-                            CurBetMoney[bet] = Tuple.Create<bool, int>(false, 0);
+                            CurBetMoney[bet] = Tuple.Create(false, 0);
                             break;
                     }
                 }
@@ -216,41 +217,39 @@ public class PokerBetManager
             int curBetAmount = highestBetMoney - curPlayerBetMoney;
             bool isOn = true;
 
-            if (bet == "Die")
+            switch (bet)
             {
-                CurBetMoney[bet] = Tuple.Create(true, 0);
+                case "Die":
+                    isOn = true;
+                    curBetAmount = 0;
+                    break;
+
+                case "Call":
+                    isOn = highestBetMoney <= Math.Min(curPlayerOriginMoney, AGM);
+                    break;
+
+                case "Double":
+                    isOn = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty), highestBetMoney * 2) <= Math.Min(curPlayerOriginMoney, AGM);
+                    curBetAmount = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty), highestBetMoney * 2) - curPlayerBetMoney;
+                    break;
+
+                case "Quater":
+                    curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 4;
+                    isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
+                    curBetAmount -= curPlayerBetMoney;
+                    break;
+
+                case "Half":
+                    curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 2;
+                    isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
+                    curBetAmount -= curPlayerBetMoney;
+                    break;
+
+                case "AllIn":
+                    curBetAmount = AGM - curPlayerBetMoney;
+                    break;
             }
-            else
-            {
-                switch (bet)
-                {
-                    case "Call":
-                        isOn = highestBetMoney <= Math.Min(curPlayerOriginMoney, AGM);
-                        break;
-
-                    case "Double":
-                        isOn = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty), highestBetMoney * 2) <= Math.Min(curPlayerOriginMoney, AGM);
-                        curBetAmount = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty), highestBetMoney * 2) - curPlayerBetMoney;
-                        break;
-
-                    case "Quater":
-                        curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 4;
-                        isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
-                        curBetAmount -= curPlayerBetMoney;
-                        break;
-
-                    case "Half":
-                        curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 2;
-                        isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
-                        curBetAmount -= curPlayerBetMoney;
-                        break;
-
-                    case "AllIn":
-                        curBetAmount = AGM - curPlayerBetMoney;
-                        break;
-                }
-                CurBetMoney[bet] = Tuple.Create(isOn, curBetAmount);
-            }
+            CurBetMoney[bet] = Tuple.Create(isOn, curBetAmount);
         }
     }
 

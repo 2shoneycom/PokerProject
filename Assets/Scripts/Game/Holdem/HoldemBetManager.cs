@@ -44,6 +44,7 @@ public class HoldemBetManager
     {
         _isBetting = false;
         _control = control;
+        CurBetMoney = new Dictionary<string, Tuple<bool, int>>();
     }
 
     public void Init(UI_Holdem ui)
@@ -54,7 +55,7 @@ public class HoldemBetManager
         AGM = 0;
         IsAnyoneAllIn = false;
         IsBeforeAllIn = false;
-        CurBetMoney = new Dictionary<string, Tuple<bool, int>>();
+        CurBetMoney.Clear();
     }
 
     public void BaseBetting(int playerIndex, bool isSB)
@@ -169,8 +170,8 @@ public class HoldemBetManager
             if (sm < new_val)
                 new_val = sm;
         }
-        
-        if(AGM != new_val)
+
+        if (AGM != new_val)
         {
             IsAnyoneAllIn = false;
         }
@@ -186,7 +187,7 @@ public class HoldemBetManager
 
         foreach (string bet in BetType)
         {
-            if(bet == "Die")
+            if (bet == "Die")
             {
                 _holdemUI.BetButtonInteractiveSwitch(bet, true);
             }
@@ -206,7 +207,7 @@ public class HoldemBetManager
         int lowestSeedMoney = _control.Players.GetLowestPlayerSeedMoney();
         int curPlayerOriginMoney = _control.Players.GetOriginPlayerMoney(CurBetPlayer);
 
-        if(IsAnyoneAllIn == true)
+        if (IsAnyoneAllIn == true)
         {
             foreach (string bet in BetType)
             {
@@ -219,11 +220,11 @@ public class HoldemBetManager
                     switch (bet)
                     {
                         case "Call":
-                            CurBetMoney[bet] = Tuple.Create<bool, int>(true, highestBetMoney - curPlayerBetMoney);
+                            CurBetMoney[bet] = Tuple.Create(true, highestBetMoney - curPlayerBetMoney);
                             break;
 
                         default:
-                            CurBetMoney[bet] = Tuple.Create<bool, int>(false, 0);
+                            CurBetMoney[bet] = Tuple.Create(false, 0);
                             break;
                     }
                 }
@@ -236,41 +237,39 @@ public class HoldemBetManager
             int curBetAmount = highestBetMoney - curPlayerBetMoney;
             bool isOn = true;
 
-            if (bet == "Die")
+            switch (bet)
             {
-                CurBetMoney[bet] = Tuple.Create(true, 0);
+                case "Die":
+                    isOn = true;
+                    curBetAmount = 0;
+                    break;
+
+                case "Call":
+                    isOn = highestBetMoney <= Math.Min(curPlayerOriginMoney, AGM);
+                    break;
+
+                case "Double":
+                    isOn = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty, false), highestBetMoney * 2) <= Math.Min(curPlayerOriginMoney, AGM);
+                    curBetAmount = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty, false), highestBetMoney * 2) - curPlayerBetMoney;
+                    break;
+
+                case "Quater":
+                    curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 4;
+                    isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
+                    curBetAmount -= curPlayerBetMoney;
+                    break;
+
+                case "Half":
+                    curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 2;
+                    isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
+                    curBetAmount -= curPlayerBetMoney;
+                    break;
+
+                case "AllIn":
+                    curBetAmount = AGM - curPlayerBetMoney;
+                    break;
             }
-            else
-            {
-                switch (bet)
-                {
-                    case "Call":
-                        isOn = highestBetMoney <= Math.Min(curPlayerOriginMoney, AGM);
-                        break;
-
-                    case "Double":
-                        isOn = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty, false), highestBetMoney * 2) <= Math.Min(curPlayerOriginMoney, AGM);
-                        curBetAmount = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty, false), highestBetMoney * 2) - curPlayerBetMoney;
-                        break;
-
-                    case "Quater":
-                        curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 4;
-                        isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
-                        curBetAmount -= curPlayerBetMoney;
-                        break;
-
-                    case "Half":
-                        curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 2;
-                        isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
-                        curBetAmount -= curPlayerBetMoney;
-                        break;
-
-                    case "AllIn":
-                        curBetAmount = AGM - curPlayerBetMoney;
-                        break;
-                }
-                CurBetMoney[bet] = Tuple.Create(isOn, curBetAmount);
-            }
+            CurBetMoney[bet] = Tuple.Create(isOn, curBetAmount);
         }
     }
 
@@ -286,7 +285,7 @@ public class HoldemBetManager
             return true;
         }
 
-        if(IsBeforeAllIn== true)
+        if (IsBeforeAllIn == true)
         {
             return true;
         }
@@ -363,7 +362,7 @@ public class HoldemBetManager
         BetButtonDisable();
         _holdemUI.UpdateBetMoney();
 
-        if(IsAnyoneAllIn == true)
+        if (IsAnyoneAllIn == true)
             IsBeforeAllIn = true;
 
         // 어차피 이 함수는 모두가 호출하니

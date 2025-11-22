@@ -100,12 +100,15 @@ public class GamePlayer
         {
             case Define.GameType.Holdem:
                 User.NowUser.SetIsNotEnough(true);
-                UI_Holdem scene = (UI_Holdem)Managers.UI.SceneUI;
-                scene.RoomLeave();
+                UI_Holdem holdemscene = (UI_Holdem)Managers.UI.SceneUI;
+                holdemscene.RoomLeave();
                 break;
 
             case Define.GameType.Poker:
-
+                User.NowUser.SetIsNotEnough(true);
+                UI_Poker pokerscene = (UI_Poker)Managers.UI.SceneUI;
+                pokerscene.RoomLeave();
+                break;
 
             case Define.GameType.BlackJack:
 
