@@ -52,7 +52,7 @@ public class User
 
     public bool GetIsNotEnough()
     {
-        if (IsEnoughMoney())
+        if (IsEnoughMoney() == false)
         {
             SetIsNotEnough(true);
         }

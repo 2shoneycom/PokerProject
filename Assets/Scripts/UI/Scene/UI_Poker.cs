@@ -40,6 +40,7 @@ public class UI_Poker : UI_Scene
         UI_Player3_BetText,
         UI_Player4_BetText,
         UI_Player5_BetText,
+        UI_Buttons_Call_Text,
         UI_Buttons_CallMoney_Text,
         UI_Buttons_DoubleMoney_Text,
         UI_Buttons_QuaterMoney_Text,
@@ -372,6 +373,12 @@ public class UI_Poker : UI_Scene
 
         text.text = betMoney.ToString("N0");
         text.gameObject.SetActive(isOn);
+
+        if (betType == "Call")
+        {
+            if (betMoney == 0) GetText((int)Texts.UI_Buttons_Call_Text).text = "체크";
+            else GetText((int)Texts.UI_Buttons_Call_Text).text = "콜";
+        }
     }
 
     void IconFriendClicked(PointerEventData data)

@@ -87,6 +87,7 @@ public class PokerBetManager
 
     public void HandleBet(int curPlayer)
     {
+        Debug.Log("Poker Handel Bet 11111111111111111111111111111111111111");
         // 관전자는 리턴
         if (!_control.IsPlaying)
             return;
@@ -102,6 +103,7 @@ public class PokerBetManager
             CalAGM(true);
             _isBetting = true;
         }
+        Debug.Log("Poker Handel Bet 22222222222222222222222222222222222222");
 
         _pokerUI.SetOnTurnPlayer(_control.ConvertGameToUI(curPlayer) + 1);
 
@@ -129,9 +131,11 @@ public class PokerBetManager
                 return;
             }
         }
+        Debug.Log("Poker Handel Bet 33333333333333333333333333333333333333333");
 
         if (_control.Players.GetPlayerUID(curPlayer) != User.NowUser.GetUid())
             return;
+        Debug.Log("Poker Handel Bet 4444444444444444444444444444444444444");
 
         _control.Sync.SyncPokerIsTurn(CurBetPlayer, true);
         // 알맞은 버튼 키기
@@ -141,7 +145,7 @@ public class PokerBetManager
     void CalAGM(bool isRoundStart = false)
     {
         int new_val = int.MaxValue;
-        for (int i = 0; i < HoldemGameControl.MAX_PLAYER_NUM; i++)
+        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
         {
             if (_control.Players.GetPlayerState(i) == false || _control.Players.GetPlayerUID(i) == "")
                 continue;

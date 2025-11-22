@@ -55,7 +55,12 @@ public class HoldemBetManager
         AGM = 0;
         IsAnyoneAllIn = false;
         IsBeforeAllIn = false;
+
         CurBetMoney.Clear();
+        foreach (string bet in BetType)
+        {
+            CurBetMoney[bet] = Tuple.Create(false, 0);
+        }
     }
 
     public void BaseBetting(int playerIndex, bool isSB)

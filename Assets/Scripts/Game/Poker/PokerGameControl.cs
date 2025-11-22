@@ -491,9 +491,10 @@ public class PokerGameControl : MonoBehaviour
         _pokerUI.UpdateBetMoney();
 
         // 인원수 체크를 하고 2 이상이면 바로 시작
-        if (Managers.Seat.GetOccupiedCount() >= 2 && PhotonNetwork.IsMasterClient)
+        if (Managers.Seat.GetOccupiedCount() >= 2)
         {
-            Sync.PokerStartSync();
+            if (PhotonNetwork.IsMasterClient)
+                Sync.PokerStartSync();
         }
         else
         {
