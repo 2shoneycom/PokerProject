@@ -190,17 +190,22 @@ public class PokerBetManager
         {
             foreach (string bet in BetType)
             {
-                if (bet == "Die") continue;
-
-                switch (bet)
+                if (bet == "Die")
                 {
-                    case "Call":
-                        CurBetMoney[bet] = Tuple.Create<bool, int>(true, highestBetMoney - curPlayerBetMoney);
-                        break;
+                    CurBetMoney[bet] = Tuple.Create(true, 0);
+                }
+                else
+                {
+                    switch (bet)
+                    {
+                        case "Call":
+                            CurBetMoney[bet] = Tuple.Create<bool, int>(true, highestBetMoney - curPlayerBetMoney);
+                            break;
 
-                    default:
-                        CurBetMoney[bet] = Tuple.Create<bool, int>(false, 0);
-                        break;
+                        default:
+                            CurBetMoney[bet] = Tuple.Create<bool, int>(false, 0);
+                            break;
+                    }
                 }
             }
             return;
@@ -211,36 +216,41 @@ public class PokerBetManager
             int curBetAmount = highestBetMoney - curPlayerBetMoney;
             bool isOn = true;
 
-            if (bet == "Die") continue;
-
-            switch (bet)
+            if (bet == "Die")
             {
-                case "Call":
-                    isOn = highestBetMoney <= Math.Min(curPlayerOriginMoney, AGM);
-                    break;
-
-                case "Double":
-                    isOn = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty), highestBetMoney * 2) <= Math.Min(curPlayerOriginMoney, AGM);
-                    curBetAmount = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty), highestBetMoney * 2) - curPlayerBetMoney;
-                    break;
-
-                case "Quater":
-                    curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 4;
-                    isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
-                    curBetAmount -= curPlayerBetMoney;
-                    break;
-
-                case "Half":
-                    curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 2;
-                    isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
-                    curBetAmount -= curPlayerBetMoney;
-                    break;
-
-                case "AllIn":
-                    curBetAmount = AGM - curPlayerBetMoney;
-                    break;
+                CurBetMoney[bet] = Tuple.Create(true, 0);
             }
-            CurBetMoney[bet] = Tuple.Create(isOn, curBetAmount);
+            else
+            {
+                switch (bet)
+                {
+                    case "Call":
+                        isOn = highestBetMoney <= Math.Min(curPlayerOriginMoney, AGM);
+                        break;
+
+                    case "Double":
+                        isOn = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty), highestBetMoney * 2) <= Math.Min(curPlayerOriginMoney, AGM);
+                        curBetAmount = Math.Max(GetBaseBetAmount(Managers.CurrentDifficulty), highestBetMoney * 2) - curPlayerBetMoney;
+                        break;
+
+                    case "Quater":
+                        curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 4;
+                        isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
+                        curBetAmount -= curPlayerBetMoney;
+                        break;
+
+                    case "Half":
+                        curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 2;
+                        isOn = curBetAmount <= Math.Min(curPlayerOriginMoney, AGM);
+                        curBetAmount -= curPlayerBetMoney;
+                        break;
+
+                    case "AllIn":
+                        curBetAmount = AGM - curPlayerBetMoney;
+                        break;
+                }
+                CurBetMoney[bet] = Tuple.Create(isOn, curBetAmount);
+            }
         }
     }
 
@@ -333,73 +343,10 @@ public class PokerBetManager
 
     public void PlayerBetSelected(string betType)
     {
-        int highestBetMoney = _control.Players.FindHighestBet();
-        int curPlayerBetMoney = _control.Players.GetPlayerBet(CurBetPlayer);
-        int curBetAmount = highestBetMoney - curPlayerBetMoney;
-
-        switch (betType)
-        {
-            case "Die":
-                Debug.Log($"Player {CurBetPlayer} Die");
-
-                //// deadplayernum 증가
-                //SyncSystem.Sync.SyncHoldemDeadPlayerNum(HoldemGameControl.Players.GetDeadPlayerNum() + 1);
-                //// isalive false로
-                //SyncSystem.Sync.SyncHoldemPlayerIsAlive(CurBetPlayer, false);
-                break;
-
-            case "Call":
-                // 현재 레이즈 금액 체크, 현재 베팅 금액과 같을시 check
-                if (curBetAmount == 0)
-                {
-                    //Debug.Log($"Player {curPlayer} Checked");
-                }
-                else
-                {
-                    //Debug.Log($"Player {curPlayer} Call");
-                }
-                break;
-
-            case "Double":
-                // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 레이즈 머니 만큼 더 레이즈
-                //Debug.Log($"Player {curPlayer} Double");
-
-                if (curBetAmount == 0)
-                {
-                    curBetAmount = GetBaseBetAmount(Managers.CurrentDifficulty);
-                }
-                else
-                {
-                    curBetAmount *= 2;
-                }
-                break;
-
-            case "Half":
-                // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 팟머니 * 0.5 만큼 더 레이즈
-                // Debug.Log($"Player {curPlayer} Half");
-
-                curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 2;
-                break;
-
-            case "Quater":
-                // 현재 레이즈 금액 체크, 레이즈 머니 배팅 + 팟머니 * 0.25 만큼 더 레이즈
-                //Debug.Log($"Player {curPlayer} Quater");
-
-                curBetAmount = curBetAmount + (_control.PotMoney + curBetAmount) / 4;
-                break;
-
-            case "AllIn":
-                // 올인 / 현재 플레이어 중 최소 금액 찾고, 내 시드 머니가 그거보다 많으면 그거만큼 배팅
-                //Debug.Log($"Player {curPlayer} AllIn");
-
-                curBetAmount = _control.Players.GetLowestPlayerSeedMoney();
-                break;
-        }
-
         if (betType != "Die")
         {
-            User.NowUser.PokerBettingMoney(User.NowUser.GetUid(), curBetAmount);
+            User.NowUser.PokerBettingMoney(User.NowUser.GetUid(), CurBetMoney[betType].Item2);
         }
-        _control.Sync.PokerBetProcess(CurBetPlayer, betType, curBetAmount);
+        _control.Sync.PokerBetProcess(CurBetPlayer, betType, CurBetMoney[betType].Item2);
     }
 }
