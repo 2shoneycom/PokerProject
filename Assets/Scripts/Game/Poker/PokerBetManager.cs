@@ -100,6 +100,9 @@ public class PokerBetManager
         // 배팅 시작 표시
         if (IsBetting == false)
         {
+            _control.Players.ClearBetSetting();
+            _pokerUI.UpdateBetMoney();
+
             CalAGM(true);
             _isBetting = true;
         }

@@ -155,8 +155,8 @@ public class PokerPlayerManager
 
     public void UpdatePlayerBetting(int index, int amount, bool isCall = false)
     {
-        playerBettingMoney[index] = amount;
-        playerIsBet[index] = true;
+        playerBettingMoney[index] += amount;
+        playerIsBet[index] = isCall;
         _control.UpdatePlayerBetMoneyUI();
     }
 
