@@ -259,11 +259,14 @@ public class JackCardManager
         cardGO.transform.SetParent(cardDeckPos);
         UI_Card card = cardGO.GetOrAddComponent<UI_Card>();
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            card.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
-            CardMoveToPosDealer(cardGO, index);
-        }
+        card.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        CardMoveToPosDealer(cardGO, index);
+
+        //if (PhotonNetwork.IsMasterClient)
+        //{
+        //    card.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        //    CardMoveToPosDealer(cardGO, index);
+        //}
 
         dealerCardList[index] = cardGO;
         dealerCardDetail[index] = cardDetail;
@@ -418,13 +421,18 @@ public class JackCardManager
         GameObject cardGO = PhotonView.Find(cardViewID).gameObject;
         cardGO.transform.SetParent(cardDeckPos);
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            UI_Card card = cardGO.GetOrAddComponent<UI_Card>();
+        UI_Card card = cardGO.GetOrAddComponent<UI_Card>();
 
-            card.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
-            CardMoveToPosPlayer(cardGO, pUID);
-        }
+        card.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        CardMoveToPosPlayer(cardGO, pUID);
+
+        //if (PhotonNetwork.IsMasterClient)
+        //{
+        //    UI_Card card = cardGO.GetOrAddComponent<UI_Card>();
+
+        //    card.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        //    CardMoveToPosPlayer(cardGO, pUID);
+        //}
 
         _control.Players.SetPlayerCard(pUID, curPlayerSplitNum, cardViewID, cardDetail);
     }

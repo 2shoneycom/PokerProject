@@ -435,10 +435,12 @@ public class JackPlayerManager
             playerCardScore[playerIndex, gotoSplitNum] = Tuple.Create(cardNum, -1);
         }
 
-        if (cardGO.GetComponent<PhotonView>().IsMine)
-        {
-            _control.Card.SplittedCardMove(playerIndex, gotoSplitNum, cardGO);
-        }
+        _control.Card.SplittedCardMove(playerIndex, gotoSplitNum, cardGO);
+
+        //if (cardGO.GetComponent<PhotonView>().IsMine)
+        //{
+        //    _control.Card.SplittedCardMove(playerIndex, gotoSplitNum, cardGO);
+        //}
 
         playerIsGameEnd[playerIndex, gotoSplitNum] = -1;
     }
