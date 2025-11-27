@@ -233,6 +233,19 @@ public class PokerPlayerManager
         playerCardSels[playerIndex, 1] = cardIndex;
     }
 
+    public bool IsEveryoneSel()
+    {
+        for (int i = 0; i < PokerGameControl.MAX_PLAYER_NUM; i++)
+        {
+            if (GetPlayerState(i) == false || GetPlayerUID(i) == "")
+                continue;
+
+            if (playerCardSels[i, 0] == -1 || playerCardSels[i, 1] == -1)
+                return false;
+        }
+        return true;
+    }
+
     public void ArrangeSelectedCard()
     {
         if (!_control.IsPlaying) return;

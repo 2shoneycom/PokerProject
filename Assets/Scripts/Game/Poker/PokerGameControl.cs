@@ -411,8 +411,16 @@ public class PokerGameControl : MonoBehaviour
     IEnumerator RPCLoadingTime(float time)
     {
         yield return new WaitForSeconds(time);
-        _cardPopup.ClosePopupUI();
-        NextStage();
+
+        if(Players.IsEveryoneSel() == true)
+        {
+            _cardPopup.ClosePopupUI();
+            NextStage();
+        }
+        else
+        {
+            StartCoroutine(RPCLoadingTime(0.2f));
+        }
     }
 
     public void AutoDieTimerSwitch(bool isOn)
